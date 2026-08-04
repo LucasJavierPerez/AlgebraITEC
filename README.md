@@ -1,6 +1,6 @@
-# Matemáticas para Análisis de Datos
+# Álgebra — Tecnicatura en Ciencia de Datos e Inteligencia Artificial
 
-Material de la materia — Tecnicatura en Ciencia de Datos.
+Material de la materia.
 
 **Sitio:** https://lucasjavierperez.github.io/AlgebraITEC/
 
