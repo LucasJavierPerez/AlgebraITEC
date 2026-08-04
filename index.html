@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Matemáticas para Análisis de Datos</title>
+<meta name="description" content="Apuntes y notebooks de la materia Matemáticas para Análisis de Datos — Tecnicatura en Ciencia de Datos.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE4;
+    --paper-2:#E3DFD6;
+    --ink:#161A22;
+    --ink-soft:#4A4F5C;
+    --indigo:#4740E0;
+    --indigo-soft:#E7E5FB;
+    --amber:#E0972E;
+    --amber-soft:#FBEFD9;
+    --sage:#3E8E5F;
+    --sage-soft:#E1F0E5;
+    --line:rgba(22,26,34,0.14);
+    --line-strong:rgba(22,26,34,0.28);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{
+    margin:0;
+    background:var(--paper);
+    color:var(--ink);
+    font-family:'Inter',sans-serif;
+    line-height:1.6;
+    -webkit-font-smoothing:antialiased;
+  }
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:880px;margin:0 auto;padding:0 28px;}
+  a{color:inherit;}
+
+  /* ---------- HERO ---------- */
+  .hero{
+    position:relative;
+    padding:90px 0 64px;
+    background-image:
+      linear-gradient(var(--line) 1px, transparent 1px),
+      linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:36px 36px;
+    border-bottom:1px solid var(--line-strong);
+    overflow:hidden;
+  }
+  .hero::before{
+    content:"";
+    position:absolute;
+    inset:0;
+    background:radial-gradient(circle at 12% 15%, var(--paper) 0%, transparent 45%),
+               radial-gradient(circle at 88% 85%, var(--paper) 0%, transparent 40%);
+    pointer-events:none;
+  }
+  .hero .wrap{position:relative;}
+  .eyebrow{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--indigo);
+    background:var(--indigo-soft);
+    display:inline-block;
+    padding:5px 12px;
+    border-radius:100px;
+    margin-bottom:22px;
+  }
+  .hero h1{font-size:clamp(34px,5.2vw,54px);line-height:1.08;max-width:16ch;}
+  .hero p.lede{
+    font-size:clamp(16px,1.9vw,19px);
+    color:var(--ink-soft);
+    max-width:56ch;
+    margin:20px 0 0;
+  }
+
+  /* ---------- UNIDADES ---------- */
+  main{padding:64px 0 40px;}
+  .seccion-tit{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    letter-spacing:0.14em;
+    text-transform:uppercase;
+    color:var(--ink-soft);
+    margin-bottom:22px;
+  }
+  .unidades{display:grid;gap:18px;}
+  .card{
+    display:block;
+    text-decoration:none;
+    background:var(--paper-2);
+    border:1px solid var(--line);
+    border-radius:14px;
+    padding:26px 28px;
+    transition:border-color .18s ease, transform .18s ease, box-shadow .18s ease;
+  }
+  .card:hover{
+    border-color:var(--indigo);
+    transform:translateY(-2px);
+    box-shadow:0 6px 22px rgba(22,26,34,0.09);
+  }
+  .card-top{display:flex;align-items:baseline;gap:14px;flex-wrap:wrap;margin-bottom:8px;}
+  .num{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12px;
+    letter-spacing:0.1em;
+    color:var(--indigo);
+    background:var(--indigo-soft);
+    padding:4px 10px;
+    border-radius:100px;
+    flex-shrink:0;
+  }
+  .card h2{font-size:clamp(19px,2.4vw,23px);line-height:1.25;}
+  .card p{margin:0;color:var(--ink-soft);font-size:15.5px;max-width:62ch;}
+  .card-links{
+    display:flex;gap:10px;flex-wrap:wrap;
+    margin-top:18px;padding-top:16px;border-top:1px solid var(--line);
+  }
+  .chip{
+    font-family:'JetBrains Mono',monospace;
+    font-size:12.5px;
+    padding:6px 13px;
+    border-radius:100px;
+    border:1px solid var(--line-strong);
+    color:var(--ink);
+    text-decoration:none;
+    background:transparent;
+    transition:background .15s ease, border-color .15s ease;
+  }
+  .chip:hover{background:var(--paper);border-color:var(--ink-soft);}
+  .chip.principal{background:var(--ink);color:var(--paper);border-color:var(--ink);}
+  .chip.principal:hover{background:var(--indigo);border-color:var(--indigo);}
+
+  /* ---------- COMO USAR ---------- */
+  .aparte{
+    margin-top:56px;
+    background:var(--amber-soft);
+    border:1px solid rgba(224,151,46,0.4);
+    border-radius:14px;
+    padding:26px 28px;
+  }
+  .aparte h3{font-size:19px;margin-bottom:10px;}
+  .aparte p{margin:0 0 10px;color:var(--ink-soft);font-size:15.5px;}
+  .aparte p:last-child{margin-bottom:0;}
+  .aparte code{
+    font-family:'JetBrains Mono',monospace;
+    font-size:13px;
+    background:rgba(22,26,34,0.07);
+    padding:2px 6px;
+    border-radius:4px;
+  }
+  .aparte a{color:var(--indigo);text-decoration:underline;text-underline-offset:2px;}
+
+  footer{
+    border-top:1px solid var(--line-strong);
+    margin-top:64px;
+    padding:30px 0 50px;
+    color:var(--ink-soft);
+    font-size:14px;
+  }
+  footer .wrap{display:flex;justify-content:space-between;gap:16px;flex-wrap:wrap;}
+
+  @media (max-width:600px){
+    .hero{padding:64px 0 48px;}
+    main{padding:48px 0 30px;}
+    .card{padding:22px 20px;}
+  }
+</style>
+</head>
+<body>
+
+<header class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Tecnicatura en Ciencia de Datos</span>
+    <h1>Matemáticas para Análisis de Datos</h1>
+    <p class="lede">
+      Apuntes interactivos y notebooks de las cinco unidades de la materia.
+      Cada unidad tiene una página para leer en el navegador y un notebook para
+      correr el código y experimentar.
+    </p>
+  </div>
+</header>
+
+<main class="wrap">
+  <p class="seccion-tit">Unidades</p>
+
+  <div class="unidades">
+
+    <div class="card">
+      <div class="card-top">
+        <span class="num">01</span>
+        <h2>El Fundamento Estructural</h2>
+      </div>
+      <p>Vectores, matrices y tensores. Todo dato que vas a procesar con código
+         termina siendo un array — esta unidad es sobre entender esa idea.</p>
+      <div class="card-links">
+        <a class="chip principal" href="unidades/unidad1.html">Leer la unidad</a>
+        <a class="chip" href="notebooks/unidad1.ipynb" download>Notebook .ipynb</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="num">02</span>
+        <h2>Operaciones Vectorizadas y Álgebra Práctica</h2>
+      </div>
+      <p>Sumar, multiplicar y combinar arrays enteros de una sola vez, sin
+         recorrerlos uno por uno.</p>
+      <div class="card-links">
+        <a class="chip principal" href="unidades/unidad2.html">Leer la unidad</a>
+        <a class="chip" href="notebooks/unidad2.ipynb" download>Notebook .ipynb</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="num">03</span>
+        <h2>Funciones, Visualización y Tasas de Cambio</h2>
+      </div>
+      <p>Entrenar un modelo es buscar el punto más bajo de una curva de error.
+         La derivada es lo que te dice hacia dónde moverte para llegar ahí.</p>
+      <div class="card-links">
+        <a class="chip principal" href="unidades/unidad3.html">Leer la unidad</a>
+        <a class="chip" href="notebooks/unidad3.ipynb" download>Notebook .ipynb</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="num">04</span>
+        <h2>Optimización: Descenso de Gradiente</h2>
+      </div>
+      <p>Bajar una montaña con niebla: no ves el fondo, pero sentís la
+         inclinación bajo tus pies y vas para el lado contrario a donde sube.</p>
+      <div class="card-links">
+        <a class="chip principal" href="unidades/unidad4.html">Leer la unidad</a>
+        <a class="chip" href="notebooks/unidad4.ipynb" download>Notebook .ipynb</a>
+      </div>
+    </div>
+
+    <div class="card">
+      <div class="card-top">
+        <span class="num">05</span>
+        <h2>Geometría de los Datos y Dimensionalidad</h2>
+      </div>
+      <p>Cada dato es un punto en el espacio. Qué tan lejos están dos puntos —
+         y por qué esa distancia puede engañarte si no la calculás bien.</p>
+      <div class="card-links">
+        <a class="chip principal" href="unidades/unidad5.html">Leer la unidad</a>
+        <a class="chip" href="notebooks/unidad5.ipynb" download>Notebook .ipynb</a>
+      </div>
+    </div>
+
+  </div>
+
+  <section class="aparte">
+    <h3>Cómo usar los notebooks</h3>
+    <p>Los archivos <code>.ipynb</code> se descargan y se abren con Jupyter,
+       VS Code o Google Colab. Necesitás <code>numpy</code> y
+       <code>matplotlib</code> instalados.</p>
+    <p>Si no querés instalar nada, subilos a
+       <a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a>
+       y se ejecutan en el navegador.</p>
+  </section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Matemáticas para Análisis de Datos</span>
+    <span class="mono">Tecnicatura en Ciencia de Datos</span>
+  </div>
+</footer>
+
+</body>
+</html>

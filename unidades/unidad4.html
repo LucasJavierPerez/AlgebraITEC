@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 4 — Optimización Computacional: Descenso de Gradiente</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE4;--paper-2:#E3DFD6;--ink:#161A22;--ink-soft:#4A4F5C;
+    --indigo:#4740E0;--indigo-soft:#E7E5FB;
+    --amber:#E0972E;--amber-soft:#FBEFD9;
+    --sage:#3E8E5F;--sage-soft:#E1F0E5;
+    --rose:#C0456B;--rose-soft:#F7E3E9;
+    --line:rgba(22,26,34,0.14);--line-strong:rgba(22,26,34,0.28);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px;}
+
+  .hero{position:relative;padding:90px 0 60px;background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);background-size:36px 36px;border-bottom:1px solid var(--line-strong);overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 15%, var(--paper) 0%, transparent 45%),radial-gradient(circle at 88% 85%, var(--paper) 0%, transparent 40%);pointer-events:none;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--indigo);background:var(--indigo-soft);display:inline-block;padding:5px 12px;border-radius:100px;margin-bottom:22px;}
+  .hero h1{font-size:clamp(32px,5vw,50px);line-height:1.1;max-width:16ch;}
+  .hero p.lede{margin-top:18px;max-width:60ch;font-size:18px;color:var(--ink-soft);}
+
+  section{padding:60px 0;border-bottom:1px solid var(--line);}
+  section.no-border{border-bottom:none;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  section h2{font-size:clamp(23px,3.2vw,30px);max-width:24ch;}
+  .section-lede{margin-top:14px;font-size:16.5px;color:var(--ink-soft);max-width:64ch;}
+
+  .card{background:#fff;border:1px solid var(--line-strong);border-radius:12px;padding:24px 26px;}
+  .note{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;font-size:14px;color:#6B4A11;margin-top:16px;}
+  .note b{color:#3E2C05;}
+  .formula-box{text-align:center;font-size:17px;color:var(--indigo);margin:6px 0;}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+  .btn{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink);transition:all .15s ease;}
+  .btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .btn.reset{color:var(--ink-soft);}
+  .btn.b-good{border-color:var(--sage);color:#215C39;}
+  .btn.b-small{border-color:var(--amber);color:#6B4A11;}
+  .btn.b-large{border-color:var(--rose);color:#8C2F49;}
+
+  /* GD demo */
+  .gd-demo{background:#fff;border:1px solid var(--line-strong);border-radius:14px;margin-top:44px;box-shadow:0 1px 0 var(--line-strong), 0 20px 40px -28px rgba(22,26,34,0.35);padding:30px;}
+  .gd-panels{display:grid;grid-template-columns:1.3fr 1fr;gap:24px;align-items:start;}
+  @media (max-width:760px){.gd-panels{grid-template-columns:1fr;}}
+  .gd-panel-label{font-family:'JetBrains Mono',monospace;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);text-align:center;margin-bottom:6px;}
+  .gd-status{text-align:center;margin-top:14px;font-size:14.5px;font-weight:600;padding:10px;border-radius:9px;min-height:20px;}
+  .gd-status.sage{background:var(--sage-soft);color:#215C39;}
+  .gd-status.amber{background:var(--amber-soft);color:#6B4A11;}
+  .gd-status.rose{background:var(--rose-soft);color:#8C2F49;}
+  .gd-status.neutral{background:var(--paper-2);color:var(--ink-soft);}
+
+  /* attribute-style cards */
+  .compare{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+  @media (max-width:760px){.compare{grid-template-columns:1fr;}}
+  .compare .card h3{font-size:15px;margin-bottom:8px;}
+  .compare .card p{font-size:13.5px;color:var(--ink-soft);margin:0;}
+  .compare .card.good{border-color:var(--sage);background:var(--sage-soft);}
+  .compare .card.small{border-color:var(--amber);background:var(--amber-soft);}
+  .compare .card.large{border-color:var(--rose);background:var(--rose-soft);}
+
+  table.summary{border-collapse:collapse;width:100%;font-size:14px;}
+  table.summary th{text-align:left;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);padding:10px 12px;border-bottom:1px solid var(--line-strong);}
+  table.summary td{padding:12px 12px;border-bottom:1px solid var(--line);}
+  table.summary td:first-child{font-weight:600;}
+  table.summary td.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+
+  .steps{counter-reset:step;list-style:none;margin:20px 0 0;padding:0;}
+  .steps li{position:relative;padding:12px 0 12px 44px;border-bottom:1px solid var(--line);font-size:15px;}
+  .steps li:last-child{border-bottom:none;}
+  .steps li::before{counter-increment:step;content:counter(step);position:absolute;left:0;top:10px;width:26px;height:26px;background:var(--indigo-soft);color:var(--indigo);border-radius:50%;font-family:'JetBrains Mono',monospace;font-size:12.5px;font-weight:700;display:flex;align-items:center;justify-content:center;}
+  .steps .mono{color:var(--indigo);}
+
+  .diag-list{list-style:none;margin:18px 0 0;padding:0;}
+  .diag-list li{display:flex;gap:12px;padding:10px 0;border-bottom:1px solid var(--line);font-size:14.5px;}
+  .diag-list li:last-child{border-bottom:none;}
+  .diag-dot{width:10px;height:10px;border-radius:50%;flex:none;margin-top:6px;}
+
+  .analogy{background:var(--ink);color:var(--paper);border-radius:16px;padding:38px 34px;}
+  .analogy .kicker{color:#B9BCC9;}
+  .analogy h2{color:#fff;}
+  .analogy p{color:#D6D8E0;font-size:15px;margin-top:14px;max-width:70ch;}
+
+  footer{padding:34px 0 60px;text-align:center;color:var(--ink-soft);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Ciencia de Datos · Unidad 4</span>
+    <h1>Optimización computacional: descenso de gradiente</h1>
+    <p class="lede">Imaginate parado en una montaña con niebla, tratando de bajar al valle. No ves el fondo, pero sentís la inclinación bajo tus pies — y vas para el lado contrario a donde sube. Elegí un tamaño de paso y mirá qué pasa.</p>
+
+    <div class="gd-demo">
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn b-small" onclick="runGD(0.05,'small')">Learning rate chico</button>
+        <button class="btn b-good" onclick="runGD(0.3,'good')">Learning rate adecuado</button>
+        <button class="btn b-large" onclick="runGD(1.05,'large')">Learning rate grande</button>
+        <button class="btn reset" onclick="resetGD()">Reiniciar</button>
+      </div>
+      <div class="gd-panels" style="margin-top:22px;">
+        <div>
+          <div class="gd-panel-label">Recorrido sobre la curva de costo</div>
+          <svg id="gd-svg" viewBox="0 0 480 260" width="100%">
+            <line x1="40" y1="220" x2="450" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <line x1="40" y1="20" x2="40" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="452" y="224" font-size="11" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace">θ</text>
+            <text x="14" y="24" font-size="11" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace">Costo</text>
+            <polyline id="gd-curve" fill="none" stroke="var(--indigo)" stroke-width="2" opacity="0.5" points=""/>
+            <polyline id="gd-path" fill="none" stroke="var(--ink)" stroke-width="2" stroke-dasharray="4 3" points=""/>
+            <circle id="gd-point" r="7" fill="var(--amber)" stroke="#fff" stroke-width="2"/>
+          </svg>
+        </div>
+        <div>
+          <div class="gd-panel-label">Curva de aprendizaje (MSE por iteración)</div>
+          <svg id="loss-svg" viewBox="0 0 300 260" width="100%">
+            <line x1="34" y1="220" x2="284" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <line x1="34" y1="20" x2="34" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+            <text x="252" y="234" font-size="10" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace">iteración</text>
+            <text x="8" y="24" font-size="10" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace">MSE</text>
+            <polyline id="loss-path" fill="none" stroke="var(--rose)" stroke-width="2.5" points=""/>
+          </svg>
+        </div>
+      </div>
+      <div class="gd-status neutral" id="gd-status">Elegí un learning rate para empezar el descenso.</div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">El problema central</div>
+    <h2>Por qué no calculamos el mínimo directo</h2>
+    <p class="section-lede">La Ecuación Normal (Unidad 2) encuentra el mínimo exacto en un solo paso, pero necesita invertir una matriz — y esa cuenta se vuelve carísima cuando el dataset crece: si el dataset crece, el tiempo de cálculo crece muchísimo más rápido. Los modelos de Deep Learning tienen millones de parámetros; invertir esas matrices, directamente, no es viable.</p>
+    <p class="section-lede">La solución es otra: en vez de calcular el mínimo de una sola vez, <b>movernos hacia él de a poco</b>, paso a paso. Eso es el Descenso de Gradiente — y es exactamente lo que acabás de ver en el demo de arriba.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Derivadas parciales</div>
+    <h2>Cuando hay más de un parámetro para mover</h2>
+    <p class="section-lede">En la Unidad 3 vimos la derivada de funciones con un solo parámetro. Los modelos reales tienen varios. La <b>derivada parcial</b> mide cuánto cambia el resultado si movés <i>un solo</i> parámetro, dejando los demás quietos. Se anota con <span class="mono">∂</span> en lugar de <span class="mono">d</span>, justamente para marcar esa diferencia.</p>
+    <div class="card" style="margin-top:20px;">
+      <p class="mono" style="font-size:13px;color:var(--ink-soft);margin:0 0 10px;">MSE con dos parámetros: θ₀ (el punto de partida) y θ₁ (la pendiente)</p>
+      <div class="formula-box mono">∂MSE/∂θ₀ → cuánto cambia el error si muevo θ₀</div>
+      <div class="formula-box mono">∂MSE/∂θ₁ → cuánto cambia el error si muevo θ₁</div>
+    </div>
+    <p class="section-lede" style="margin-top:16px;">Cada derivada parcial responde la misma pregunta que ya conocés de la Unidad 3 — "¿para qué lado me muevo?" — pero una vez por cada parámetro del modelo.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">El gradiente</div>
+    <h2>Todas las derivadas parciales, juntas en un vector</h2>
+    <p class="section-lede">El gradiente junta todas las derivadas parciales en un solo vector. Su propiedad clave: <b>apunta en la dirección donde la función crece más rápido</b>. Como el objetivo es minimizar el error, el algoritmo hace exactamente lo contrario — se mueve en la dirección opuesta al gradiente.</p>
+    <div class="card" style="margin-top:20px;">
+      <div style="display:flex;justify-content:center;">
+        <svg viewBox="0 0 220 180" width="100%" style="max-width:260px;">
+          <circle cx="110" cy="90" r="78" fill="var(--indigo-soft)" opacity="0.45"/>
+          <circle cx="110" cy="90" r="55" fill="var(--indigo-soft)" opacity="0.6"/>
+          <circle cx="110" cy="90" r="32" fill="var(--indigo-soft)" opacity="0.8"/>
+          <circle cx="110" cy="90" r="5" fill="var(--sage)"/>
+          <line x1="160" y1="50" x2="185" y2="28" stroke="var(--amber)" stroke-width="2.5" marker-end="url(#arrow-amber)"/>
+          <line x1="160" y1="50" x2="132" y2="76" stroke="var(--sage)" stroke-width="2.5" marker-end="url(#arrow-sage)"/>
+          <circle cx="160" cy="50" r="4" fill="var(--ink)"/>
+          <text x="188" y="24" font-size="11" fill="var(--amber)" font-family="JetBrains Mono, monospace" font-weight="700">∇f (sube)</text>
+          <text x="96" y="72" font-size="11" fill="var(--sage)" font-family="JetBrains Mono, monospace" font-weight="700">−∇f (bajamos)</text>
+          <defs>
+            <marker id="arrow-amber" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--amber)"/></marker>
+            <marker id="arrow-sage" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--sage)"/></marker>
+          </defs>
+        </svg>
+      </div>
+      <p style="text-align:center;font-size:14px;color:var(--ink-soft);margin-top:8px;">Desde cualquier punto de la ladera, el gradiente marca el camino más empinado hacia arriba. El algoritmo toma el camino contrario, hacia el centro — el mínimo.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">El algoritmo, paso a paso</div>
+    <h2>Repetir hasta que el error deje de mejorar</h2>
+    <ol class="steps">
+      <li>Inicializar los parámetros <span class="mono">θ</span> (en cero, o al azar)</li>
+      <li>Calcular las predicciones: <span class="mono">ŷ = X @ θ</span></li>
+      <li>Calcular el error actual: <span class="mono">MSE(θ)</span></li>
+      <li>Calcular el gradiente: <span class="mono">∇MSE(θ)</span></li>
+      <li>Actualizar los parámetros: <span class="mono">θ = θ − α · ∇MSE(θ)</span></li>
+      <li>Volver al paso 2</li>
+    </ol>
+    <div class="card" style="margin-top:20px;">
+      <p style="margin:0 0 10px;font-size:14px;color:var(--ink-soft);">El paso 5 es la línea que realmente importa. En código:</p>
+      <pre class="mono" style="margin:0;font-size:14px;">theta -= learning_rate * gradient</pre>
+    </div>
+    <p class="section-lede" style="margin-top:16px;">El gradiente apunta hacia donde el error crece; el signo negativo invierte esa dirección, y <span class="mono">α</span> (el learning rate) controla qué tan grande es cada paso. Una sola línea — y es, literalmente, el corazón de cómo aprenden las máquinas.</p>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">La tasa de aprendizaje</div>
+    <h2>El hiperparámetro que más rompe cosas</h2>
+    <p class="section-lede">Ya lo viste en el demo del principio: el tamaño del paso decide si el algoritmo llega bien al mínimo, si tarda una eternidad, o si directamente se descontrola. Valores típicos van de <span class="mono">0.001</span> a <span class="mono">0.1</span>, y en la práctica se ajustan probando.</p>
+    <div class="compare" style="margin-top:20px;">
+      <div class="card small">
+        <h3>Muy chico</h3>
+        <p>El algoritmo converge, pero necesita muchísimas más iteraciones. En Deep Learning eso puede significar días de entrenamiento de más.</p>
+      </div>
+      <div class="card good">
+        <h3>Adecuado</h3>
+        <p>Convergencia estable y razonablemente rápida — el escenario que se busca en la práctica.</p>
+      </div>
+      <div class="card large">
+        <h3>Muy grande</h3>
+        <p>El paso es tan grande que se pasa de largo el mínimo una y otra vez. En vez de bajar, el error oscila o directamente explota.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Variantes del Descenso de Gradiente</div>
+    <h2>Cuántos datos mirar en cada paso</h2>
+    <div class="card" style="margin-top:20px;overflow-x:auto;">
+      <table class="summary">
+        <thead><tr><th>Variante</th><th>Datos usados por iteración</th><th>Características</th></tr></thead>
+        <tbody>
+          <tr><td>Batch GD</td><td>Todo el dataset</td><td>Estable, pero lento en datasets grandes</td></tr>
+          <tr><td>Stochastic GD (SGD)</td><td>1 muestra al azar</td><td>Rápido y ruidoso — puede escapar de mínimos locales</td></tr>
+          <tr><td>Mini-batch GD</td><td>Un subconjunto (32–256 muestras)</td><td>El equilibrio entre los dos anteriores — el más usado en Deep Learning</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="kicker">Leer la curva de aprendizaje</div>
+    <h2>Lo que la forma de la curva te está diciendo</h2>
+    <p class="section-lede">El panel derecho del demo del principio es la curva de aprendizaje: el MSE graficado a lo largo de las iteraciones. Con solo mirar su forma, se puede diagnosticar qué está pasando:</p>
+    <ul class="diag-list">
+      <li><span class="diag-dot" style="background:var(--sage);"></span> Si baja suavemente y se aplana: el entrenamiento converge correctamente.</li>
+      <li><span class="diag-dot" style="background:var(--rose);"></span> Si oscila o crece: el learning rate es demasiado alto.</li>
+      <li><span class="diag-dot" style="background:var(--amber);"></span> Si baja, pero muy despacio: el learning rate es demasiado bajo.</li>
+      <li><span class="diag-dot" style="background:var(--ink-soft);"></span> Si no baja en absoluto: probablemente hay un error de signo en el gradiente.</li>
+    </ul>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="analogy">
+      <div class="kicker">Conexión con Deep Learning</div>
+      <h2>El mismo algoritmo, a otra escala</h2>
+      <p>El Descenso de Gradiente que armamos acá es, literalmente, el mismo algoritmo que usan PyTorch o TensorFlow — aplicado a millones de parámetros en lugar de uno o dos. La diferencia está en cómo se calcula el gradiente de una red con muchas capas encadenadas: eso lo resuelve un algoritmo llamado backpropagation, que vas a ver más adelante en la materia, y que en el fondo aplica la misma regla de la cadena que ya mencionamos en la Unidad 3. Al implementar este algoritmo desde cero, estás escribiendo la versión simplificada del motor de entrenamiento de cualquier red neuronal del mundo.</p>
+    </div>
+  </div>
+</section>
+
+<footer>Unidad 4 — Optimización Computacional: Descenso de Gradiente · Ciencia de Datos</footer>
+
+<script>
+  // shared cost curve: Costo(θ) = (θ-3)^2 + 1, domain θ ∈ [0,6]
+  const plotX0 = 40, plotX1 = 450, plotY0 = 20, plotY1 = 220;
+  const thetaMax = 6, costMax = 11;
+  function toSvgX(theta){ return plotX0 + (theta/thetaMax) * (plotX1-plotX0); }
+  function toSvgY(cost){ return plotY1 - (cost/costMax) * (plotY1-plotY0); }
+  function costOf(theta){ return Math.pow(theta-3,2) + 1; }
+  function slopeOf(theta){ return 2*(theta-3); }
+
+  function drawBaseCurve(){
+    let pts = [];
+    for(let t=0; t<=6.001; t+=0.1){ pts.push(toSvgX(t) + ',' + toSvgY(costOf(t))); }
+    document.getElementById('gd-curve').setAttribute('points', pts.join(' '));
+  }
+  drawBaseCurve();
+
+  // loss chart scaling
+  const lossX0 = 34, lossX1 = 280, lossY0 = 20, lossY1 = 220;
+  const maxIters = 9, lossCap = 14; // valores por encima de esto se consideran "fuera de escala"
+  function toLossX(i){ return lossX0 + (i/maxIters) * (lossX1-lossX0); }
+  function toLossY(cost){ const c = Math.min(cost, lossCap); return lossY1 - (c/lossCap) * (lossY1-lossY0); }
+
+  let gdTimer = null;
+
+  function resetGD(){
+    if(gdTimer) clearInterval(gdTimer);
+    document.getElementById('gd-path').setAttribute('points','');
+    document.getElementById('loss-path').setAttribute('points','');
+    document.getElementById('gd-point').setAttribute('cx', toSvgX(0.5));
+    document.getElementById('gd-point').setAttribute('cy', toSvgY(costOf(0.5)));
+    document.getElementById('gd-point').setAttribute('fill','var(--amber)');
+    const status = document.getElementById('gd-status');
+    status.textContent = 'Elegí un learning rate para empezar el descenso.';
+    status.className = 'gd-status neutral';
+  }
+  resetGD();
+
+  function runGD(alpha, kind){
+    if(gdTimer) clearInterval(gdTimer);
+    let theta = 0.5;
+    let pathPts = [];
+    let lossPts = [];
+    let i = 0;
+    document.getElementById('gd-path').setAttribute('points','');
+    document.getElementById('loss-path').setAttribute('points','');
+    const status = document.getElementById('gd-status');
+    status.textContent = 'Descendiendo…';
+    status.className = 'gd-status neutral';
+
+    gdTimer = setInterval(() => {
+      const cost = costOf(theta);
+      const slope = slopeOf(theta);
+
+      pathPts.push(toSvgX(theta) + ',' + toSvgY(Math.min(cost, costMax)));
+      document.getElementById('gd-path').setAttribute('points', pathPts.join(' '));
+      document.getElementById('gd-point').setAttribute('cx', toSvgX(theta));
+      document.getElementById('gd-point').setAttribute('cy', toSvgY(Math.min(cost, costMax)));
+
+      lossPts.push(toLossX(i) + ',' + toLossY(cost));
+      document.getElementById('loss-path').setAttribute('points', lossPts.join(' '));
+
+      theta = theta - alpha * slope;
+      i++;
+
+      const diverging = Math.abs(theta - 3) > 8;
+      if(diverging || i > maxIters){
+        clearInterval(gdTimer);
+        if(kind === 'large' || diverging){
+          status.textContent = '⚠ El error explota: el paso era demasiado grande y se pasó de largo del mínimo, una y otra vez.';
+          status.className = 'gd-status rose';
+          document.getElementById('gd-point').setAttribute('fill','var(--rose)');
+        } else if(kind === 'small'){
+          status.textContent = 'Converge, pero muy despacio — con 9 iteraciones todavía está lejos del mínimo. Necesitaría muchas más.';
+          status.className = 'gd-status amber';
+        } else {
+          status.textContent = '✓ Convergencia estable: en pocas iteraciones θ ya está prácticamente en el mínimo.';
+          status.className = 'gd-status sage';
+          document.getElementById('gd-point').setAttribute('fill','var(--sage)');
+        }
+      }
+    }, 550);
+  }
+</script>
+
+</body>
+</html>

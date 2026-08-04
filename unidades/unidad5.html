@@ -1,0 +1,445 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 5 — Geometría de los Datos y Dimensionalidad</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE4;--paper-2:#E3DFD6;--ink:#161A22;--ink-soft:#4A4F5C;
+    --indigo:#4740E0;--indigo-soft:#E7E5FB;
+    --amber:#E0972E;--amber-soft:#FBEFD9;
+    --sage:#3E8E5F;--sage-soft:#E1F0E5;
+    --rose:#C0456B;--rose-soft:#F7E3E9;
+    --line:rgba(22,26,34,0.14);--line-strong:rgba(22,26,34,0.28);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:920px;margin:0 auto;padding:0 28px;}
+
+  .hero{position:relative;padding:90px 0 60px;background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);background-size:36px 36px;border-bottom:1px solid var(--line-strong);overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 15%, var(--paper) 0%, transparent 45%),radial-gradient(circle at 88% 85%, var(--paper) 0%, transparent 40%);pointer-events:none;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--indigo);background:var(--indigo-soft);display:inline-block;padding:5px 12px;border-radius:100px;margin-bottom:22px;}
+  .hero h1{font-size:clamp(32px,5vw,50px);line-height:1.1;max-width:16ch;}
+  .hero p.lede{margin-top:18px;max-width:60ch;font-size:18px;color:var(--ink-soft);}
+
+  section{padding:60px 0;border-bottom:1px solid var(--line);}
+  section.no-border{border-bottom:none;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  section h2{font-size:clamp(23px,3.2vw,30px);max-width:24ch;}
+  .section-lede{margin-top:14px;font-size:16.5px;color:var(--ink-soft);max-width:64ch;}
+
+  .card{background:#fff;border:1px solid var(--line-strong);border-radius:12px;padding:24px 26px;}
+  .note{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;font-size:14px;color:#6B4A11;margin-top:16px;}
+  .note b{color:#3E2C05;}
+  .formula-box{text-align:center;font-size:17px;color:var(--indigo);margin:6px 0;}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+  .btn{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink);transition:all .15s ease;}
+  .btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .btn.active{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .btn.reset{color:var(--ink-soft);}
+
+  .demo-caption{font-size:14.5px;color:var(--ink-soft);margin-top:16px;text-align:center;}
+  .demo-caption b{color:var(--ink);}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--paper-2);border:1px solid var(--line-strong);padding:5px 10px;border-radius:7px;margin:4px 6px 0 0;}
+  .chip b{color:var(--indigo);}
+  .chip.rose{background:var(--rose-soft);border-color:var(--rose);}
+  .chip.rose b{color:var(--rose);}
+  .chip.sage{background:var(--sage-soft);border-color:var(--sage);}
+  .chip.sage b{color:#215C39;}
+
+  /* hero scatter demo */
+  .scatter-demo{background:#fff;border:1px solid var(--line-strong);border-radius:14px;margin-top:44px;box-shadow:0 1px 0 var(--line-strong), 0 20px 40px -28px rgba(22,26,34,0.35);padding:30px;}
+  .house-pt{cursor:pointer;transition:all .15s ease;}
+  .house-pt:hover circle{stroke-width:3;}
+  .house-pt.selected circle{fill:var(--amber);stroke:var(--ink);}
+
+  .readout-row{display:flex;justify-content:center;gap:10px;flex-wrap:wrap;margin-top:16px;}
+
+  table.summary{border-collapse:collapse;width:100%;font-size:14px;}
+  table.summary th{text-align:left;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);padding:10px 12px;border-bottom:1px solid var(--line-strong);}
+  table.summary td{padding:12px 12px;border-bottom:1px solid var(--line);}
+  table.summary td:first-child{font-weight:600;}
+  table.summary td.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:22px;}
+  @media (max-width:700px){.two-col{grid-template-columns:1fr;}}
+
+  .slider-wrap{max-width:420px;margin:18px auto 0;}
+  input[type="range"]{width:100%;accent-color:var(--indigo);}
+
+  .analogy{background:var(--ink);color:var(--paper);border-radius:16px;padding:38px 34px;}
+  .analogy .kicker{color:#B9BCC9;}
+  .analogy h2{color:#fff;}
+  .analogy p{color:#D6D8E0;font-size:15px;margin-top:14px;max-width:70ch;}
+
+  footer{padding:34px 0 60px;text-align:center;color:var(--ink-soft);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Ciencia de Datos · Unidad 5</span>
+    <h1>Geometría de los datos y dimensionalidad</h1>
+    <p class="lede">Cada casa del dataset es un punto en el espacio. Tocá dos casas y mirá qué tan lejos están una de la otra — y por qué esa distancia puede engañarte si no la calculás bien.</p>
+
+    <div class="scatter-demo">
+      <svg id="scatter-svg" viewBox="0 0 460 260" width="100%">
+        <line x1="40" y1="220" x2="440" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <line x1="40" y1="20" x2="40" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+        <text x="400" y="240" font-size="11" fill="var(--ink-soft)" font-family="Inter, sans-serif">m² →</text>
+        <text x="6" y="18" font-size="11" fill="var(--ink-soft)" font-family="Inter, sans-serif">precio →</text>
+        <g id="scatter-points"></g>
+        <line id="scatter-connector" x1="0" y1="0" x2="0" y2="0" stroke="var(--indigo)" stroke-width="2" stroke-dasharray="5 4" opacity="0"/>
+      </svg>
+      <p class="demo-caption">Tocá dos casas para medir la distancia entre ellas <i>(simplificado a 2 de las 4 dimensiones, para poder dibujarlo)</i>.</p>
+      <div class="readout-row" id="scatter-readout"></div>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn reset" onclick="resetScatter()">Reiniciar selección</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Espacio de features</div>
+    <h2>Cada feature es una dimensión</h2>
+    <p class="section-lede">El espacio de features es, ni más ni menos, el lugar matemático donde "viven" los datos. Con 4 features, cada casa es un punto en un espacio de 4 dimensiones — no se puede dibujar tal cual, pero se puede seguir razonando geométricamente sobre él.</p>
+    <div class="note"><b>La maldición de la dimensionalidad:</b> a medida que se agregan más features, los puntos se van "esparciendo" y la noción de cercanía deja de ser tan clara — con muchas dimensiones, casi todos los puntos terminan pareciendo igual de lejanos entre sí. Una imagen chiquita de 28×28 píxeles ya tiene 784 dimensiones; por eso hacen falta técnicas para reducirlas, como PCA, más abajo en esta unidad.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Normas vectoriales</div>
+    <h2>Dos formas distintas de medir una distancia</h2>
+    <p class="section-lede">La norma L2 (euclidiana) es la distancia "en línea recta" entre dos puntos. La norma L1 (Manhattan) es la distancia si solo pudieras moverte en línea recta sobre una grilla, como contar cuadras en una ciudad. Mismo par de puntos, dos números distintos.</p>
+    <div class="card" style="margin-top:20px;">
+      <svg id="norm-svg" viewBox="0 0 260 220" width="100%" style="max-width:280px;display:block;margin:0 auto;">
+        <g id="norm-grid"></g>
+        <path id="norm-path" fill="none" stroke="var(--indigo)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"/>
+        <circle cx="60" cy="160" r="6" fill="var(--rose)"/>
+        <circle cx="220" cy="40" r="6" fill="var(--sage)"/>
+      </svg>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn active" id="btn-l2" onclick="setNorm('l2')">L2 — Euclidiana</button>
+        <button class="btn" id="btn-l1" onclick="setNorm('l1')">L1 — Manhattan</button>
+      </div>
+      <p class="demo-caption" id="norm-caption"><b>||v||₂ = 5</b> — la línea recta entre los dos puntos.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Similitud del coseno</div>
+    <h2>Cuando lo que importa es la dirección, no el tamaño</h2>
+    <p class="section-lede">La similitud del coseno mide el ángulo entre dos vectores, ignorando su magnitud. Es la herramienta correcta cuando dos cosas "apuntan igual" aunque una sea mucho más grande que la otra — como alguien que menciona "acción" una vez, contra alguien que escribe "acción, acción, acción, acción".</p>
+    <div class="card" style="margin-top:20px;">
+      <svg id="cos-svg" viewBox="0 0 240 200" width="100%" style="max-width:260px;display:block;margin:0 auto;">
+        <line x1="30" y1="180" x2="230" y2="180" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="30" y1="180" x2="30" y2="10" stroke="var(--line-strong)" stroke-width="1"/>
+        <line id="cos-a" x1="30" y1="180" x2="0" y2="0" stroke="var(--indigo)" stroke-width="3" marker-end="url(#arrow-indigo)"/>
+        <line id="cos-b" x1="30" y1="180" x2="0" y2="0" stroke="var(--rose)" stroke-width="3" marker-end="url(#arrow-rose)"/>
+        <defs>
+          <marker id="arrow-indigo" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--indigo)"/></marker>
+          <marker id="arrow-rose" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--rose)"/></marker>
+        </defs>
+      </svg>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="setCos('small')">Mismo gusto, poca data</button>
+        <button class="btn" onclick="setCos('large')">Mismo gusto, mucha data</button>
+        <button class="btn" onclick="setCos('diff')">Gusto distinto</button>
+      </div>
+      <div class="readout-row" id="cos-readout"></div>
+      <p class="demo-caption" id="cos-caption">Elegí una opción para comparar el vector rosa contra el azul (fijo).</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Autovalores y autovectores</div>
+    <h2>Las direcciones que no rotan, solo se estiran</h2>
+    <p class="section-lede">Una transformación lineal, en general, rota y estira los vectores. Un autovector es la excepción: al aplicarle la transformación, no cambia de dirección — solo se hace más largo o más corto. Ese factor de cambio de tamaño es el autovalor.</p>
+    <div class="card" style="margin-top:20px;">
+      <p class="mono" style="text-align:center;font-size:13px;color:var(--ink-soft);margin:0 0 10px;">Transformación: estira el eje x al doble, comprime el eje y a la mitad</p>
+      <svg id="eigen-svg" viewBox="0 0 240 200" width="100%" style="max-width:260px;display:block;margin:0 auto;">
+        <line x1="30" y1="100" x2="230" y2="100" stroke="var(--line-strong)" stroke-width="1"/>
+        <line x1="30" y1="10" x2="30" y2="190" stroke="var(--line-strong)" stroke-width="1"/>
+        <line id="eigen-before" x1="30" y1="100" x2="30" y2="100" stroke="var(--ink-soft)" stroke-width="2.5" stroke-dasharray="4 3" marker-end="url(#arrow-gray)"/>
+        <line id="eigen-after" x1="30" y1="100" x2="30" y2="100" stroke="var(--indigo)" stroke-width="3" marker-end="url(#arrow-indigo2)"/>
+        <defs>
+          <marker id="arrow-gray" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--ink-soft)"/></marker>
+          <marker id="arrow-indigo2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="var(--indigo)"/></marker>
+        </defs>
+      </svg>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="setEigen('generic')">Vector cualquiera (1,1)</button>
+        <button class="btn" onclick="setEigen('eigen')">Autovector (1,0)</button>
+      </div>
+      <p class="demo-caption" id="eigen-caption">Elegí un vector para ver cómo lo afecta la transformación.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">PCA — Análisis de Componentes Principales</div>
+    <h2>Buscando el ángulo que más información conserva</h2>
+    <p class="section-lede">PCA busca la dirección en la que los datos varían más. Esa dirección es la primera componente principal — la que conserva más información al proyectar los datos sobre ella. Girá la línea y mirá cómo cambia la varianza que "capta".</p>
+    <div class="card" style="margin-top:20px;">
+      <svg id="pca-svg" viewBox="0 0 300 300" width="100%" style="max-width:320px;display:block;margin:0 auto;">
+        <line x1="150" y1="10" x2="150" y2="290" stroke="var(--line)" stroke-width="1"/>
+        <line x1="10" y1="150" x2="290" y2="150" stroke="var(--line)" stroke-width="1"/>
+        <line id="pca-line" x1="0" y1="0" x2="0" y2="0" stroke="var(--rose)" stroke-width="2.5" opacity="0.85"/>
+        <g id="pca-points"></g>
+      </svg>
+      <div class="slider-wrap">
+        <input type="range" id="pca-slider" min="0" max="179" value="10" oninput="updatePca(this.value)">
+      </div>
+      <div class="readout-row">
+        <span class="chip">ángulo → <b id="pca-angle">10°</b></span>
+        <span class="chip rose">varianza capturada → <b id="pca-var">—</b></span>
+      </div>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="revealBestAngle()">Revelar el mejor ángulo</button>
+      </div>
+      <p class="demo-caption" id="pca-caption">Ese ángulo óptimo es, exactamente, la primera componente principal del PCA.</p>
+    </div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="kicker">Conexión con algoritmos de ML</div>
+    <h2>La misma geometría, en todos lados</h2>
+    <div class="card" style="margin-top:20px;overflow-x:auto;">
+      <table class="summary">
+        <thead><tr><th>Concepto</th><th>Dónde aparece</th></tr></thead>
+        <tbody>
+          <tr><td>Distancia euclidiana</td><td>K-Nearest Neighbors, K-Means</td></tr>
+          <tr><td>Similitud del coseno</td><td>Recomendadores, procesamiento de texto, búsqueda semántica</td></tr>
+          <tr><td>Norma L1 / L2</td><td>Regularización (Lasso / Ridge) — un tema que se ve más adelante</td></tr>
+          <tr><td>Autovectores / PCA</td><td>Reducción de dimensionalidad, compresión de datos</td></tr>
+          <tr><td>Espacio vectorial</td><td>Embeddings en procesamiento de lenguaje y visión por computadora</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="analogy">
+      <div class="kicker">Para cerrar el recorrido</div>
+      <h2>Todo esto también es cómo "entienden" los modelos de lenguaje</h2>
+      <p>Allá en la Unidad 1 mencionamos de pasada un algoritmo, K-Nearest Neighbors, que compara casas por qué tan cerca están unas de otras. Ahora ya sabés exactamente qué significa esa cercanía: distancia entre puntos en un espacio. Los word embeddings —la forma en que modelos como ChatGPT representan las palabras internamente— son exactamente eso: vectores en un espacio de muchísimas dimensiones, donde "rey" y "reina" apuntan casi en la misma dirección, y "perro" y "gato" están geométricamente cerca. No hay ninguna magia adicional ahí — es la misma geometría vectorial que se trabajó en esta unidad, aplicada a una escala enorme.</p>
+    </div>
+  </div>
+</section>
+
+<footer>Unidad 5 — Geometría de los Datos y Dimensionalidad · Ciencia de Datos</footer>
+
+<script>
+  // ---------- hero scatter ----------
+  const houses = [
+    {name:'casa 1', m2:120, precio:180000},
+    {name:'casa 2', m2:85,  precio:150000},
+    {name:'casa 3', m2:200, precio:250000},
+    {name:'casa 4', m2:60,  precio:120000},
+    {name:'casa 5', m2:150, precio:210000}
+  ];
+  const m2min = Math.min(...houses.map(h=>h.m2)), m2max = Math.max(...houses.map(h=>h.m2));
+  const pmin = Math.min(...houses.map(h=>h.precio)), pmax = Math.max(...houses.map(h=>h.precio));
+  houses.forEach(h => {
+    h.normM2 = (h.m2 - m2min) / (m2max - m2min);
+    h.normP = (h.precio - pmin) / (pmax - pmin);
+    h.svgX = 55 + h.normM2 * 360;
+    h.svgY = 205 - h.normP * 165;
+  });
+
+  const scatterG = document.getElementById('scatter-points');
+  houses.forEach((h,i) => {
+    const g = document.createElementNS('http://www.w3.org/2000/svg','g');
+    g.setAttribute('class','house-pt');
+    g.setAttribute('data-i', i);
+    g.onclick = () => selectHouse(i);
+    g.innerHTML = `<circle cx="${h.svgX}" cy="${h.svgY}" r="8" fill="var(--indigo)" stroke="#fff" stroke-width="2"/>
+      <text x="${h.svgX}" y="${h.svgY-13}" font-size="10" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace" text-anchor="middle">${h.name}</text>`;
+    scatterG.appendChild(g);
+  });
+
+  let selected = [];
+  function selectHouse(i){
+    const idx = selected.indexOf(i);
+    if(idx > -1){ selected.splice(idx,1); }
+    else {
+      selected.push(i);
+      if(selected.length > 2) selected.shift();
+    }
+    renderScatterSelection();
+  }
+  function resetScatter(){ selected = []; renderScatterSelection(); }
+
+  function renderScatterSelection(){
+    document.querySelectorAll('.house-pt').forEach(el => el.classList.remove('selected'));
+    const connector = document.getElementById('scatter-connector');
+    const readout = document.getElementById('scatter-readout');
+    selected.forEach(i => document.querySelector('.house-pt[data-i="'+i+'"]').classList.add('selected'));
+
+    if(selected.length === 2){
+      const a = houses[selected[0]], b = houses[selected[1]];
+      connector.setAttribute('x1', a.svgX); connector.setAttribute('y1', a.svgY);
+      connector.setAttribute('x2', b.svgX); connector.setAttribute('y2', b.svgY);
+      connector.setAttribute('opacity', 1);
+
+      const rawDist = Math.sqrt(Math.pow(a.m2-b.m2,2) + Math.pow(a.precio-b.precio,2));
+      const normDist = Math.sqrt(Math.pow(a.normM2-b.normM2,2) + Math.pow(a.normP-b.normP,2));
+
+      readout.innerHTML = `
+        <span class="chip rose">sin normalizar → <b>${rawDist.toLocaleString('es-AR',{maximumFractionDigits:0})}</b></span>
+        <span class="chip sage">normalizada → <b>${normDist.toFixed(3)}</b></span>`;
+    } else {
+      connector.setAttribute('opacity', 0);
+      readout.innerHTML = '<span class="chip">Seleccioná dos casas para medir la distancia</span>';
+    }
+  }
+  resetScatter();
+
+  // ---------- L1 vs L2 grid ----------
+  const normGridG = document.getElementById('norm-grid');
+  for(let gx=20; gx<=240; gx+=40){ normGridG.innerHTML += `<line x1="${gx}" y1="20" x2="${gx}" y2="200" stroke="var(--line)" stroke-width="1"/>`; }
+  for(let gy=20; gy<=200; gy+=40){ normGridG.innerHTML += `<line x1="20" y1="${gy}" x2="240" y2="${gy}" stroke="var(--line)" stroke-width="1"/>`; }
+
+  function setNorm(kind){
+    document.getElementById('btn-l2').classList.toggle('active', kind==='l2');
+    document.getElementById('btn-l1').classList.toggle('active', kind==='l1');
+    const path = document.getElementById('norm-path');
+    const cap = document.getElementById('norm-caption');
+    if(kind === 'l2'){
+      path.setAttribute('d','M60,160 L220,40');
+      cap.innerHTML = '<b>||v||₂ = 5</b> — la línea recta entre los dos puntos (dx=4, dy=3 → √(16+9)).';
+    } else {
+      path.setAttribute('d','M60,160 L220,160 L220,40');
+      cap.innerHTML = '<b>||v||₁ = 7</b> — la suma de los tramos horizontal y vertical (4 + 3), como contar cuadras.';
+    }
+  }
+  setNorm('l2');
+
+  // ---------- cosine similarity ----------
+  function toCosSvg(x,y){ return { x: 30 + x*18, y: 180 - y*35 }; }
+  const vecA = {x:3, y:1};
+  function setCos(kind){
+    let vecB;
+    if(kind === 'small') vecB = {x:1.5, y:0.5};
+    else if(kind === 'large') vecB = {x:9, y:3};
+    else vecB = {x:1, y:3};
+
+    const pA = toCosSvg(vecA.x, vecA.y), pB = toCosSvg(vecB.x, vecB.y);
+    document.getElementById('cos-a').setAttribute('x2', pA.x); document.getElementById('cos-a').setAttribute('y2', pA.y);
+    document.getElementById('cos-b').setAttribute('x2', pB.x); document.getElementById('cos-b').setAttribute('y2', pB.y);
+
+    const dot = vecA.x*vecB.x + vecA.y*vecB.y;
+    const magA = Math.sqrt(vecA.x**2+vecA.y**2), magB = Math.sqrt(vecB.x**2+vecB.y**2);
+    const cos = dot/(magA*magB);
+    const dist = Math.sqrt((vecA.x-vecB.x)**2 + (vecA.y-vecB.y)**2);
+
+    document.getElementById('cos-readout').innerHTML = `
+      <span class="chip sage">coseno → <b>${cos.toFixed(2)}</b></span>
+      <span class="chip rose">distancia euclidiana → <b>${dist.toFixed(2)}</b></span>`;
+
+    const captions = {
+      small: 'Mismo ángulo que el vector azul, apenas más chico: el coseno da prácticamente 1, aunque la distancia euclidiana ya no sea cero.',
+      large: 'Mismo ángulo, pero mucho más grande: el coseno sigue siendo el mismo, aunque ahora la distancia euclidiana es enorme.',
+      diff: 'Acá el ángulo cambia de verdad: el coseno baja, aunque la distancia euclidiana no sea la más alta de las tres.'
+    };
+    document.getElementById('cos-caption').innerHTML = captions[kind];
+  }
+  setCos('small');
+
+  // ---------- eigenvectors ----------
+  function toEigenSvg(x,y){ return { x: 30 + x*70, y: 100 - y*70 }; }
+  function setEigen(kind){
+    let before, after, caption;
+    if(kind === 'generic'){
+      before = {x:1, y:1}; after = {x:2, y:0.5};
+      caption = 'El vector (1,1) se transforma en (2, 0.5): cambia de dirección — rota. No es un autovector.';
+    } else {
+      before = {x:1, y:0}; after = {x:2, y:0};
+      caption = 'El vector (1,0) se transforma en (2,0): misma dirección, solo se estiró al doble. Es un autovector, y 2 es su autovalor.';
+    }
+    const pb = toEigenSvg(before.x, before.y), pa = toEigenSvg(after.x, after.y);
+    document.getElementById('eigen-before').setAttribute('x2', pb.x);
+    document.getElementById('eigen-before').setAttribute('y2', pb.y);
+    document.getElementById('eigen-after').setAttribute('x2', pa.x);
+    document.getElementById('eigen-after').setAttribute('y2', pa.y);
+    document.getElementById('eigen-caption').textContent = caption;
+  }
+  setEigen('generic');
+
+  // ---------- PCA rotating line ----------
+  const pcaPoints = [
+    {x:-4,y:-3},{x:-3,y:-2},{x:-2,y:-2.5},{x:-1,y:-1},{x:0,y:0},
+    {x:1,y:0.5},{x:1,y:1.5},{x:2,y:1},{x:3,y:2.5},{x:4,y:3}
+  ];
+  const pcaMeanX = pcaPoints.reduce((s,p)=>s+p.x,0)/pcaPoints.length;
+  const pcaMeanY = pcaPoints.reduce((s,p)=>s+p.y,0)/pcaPoints.length;
+  const pcaCentered = pcaPoints.map(p => ({x:p.x-pcaMeanX, y:p.y-pcaMeanY}));
+
+  const pcaG = document.getElementById('pca-points');
+  pcaCentered.forEach(p => {
+    const sx = 150 + p.x*22, sy = 150 - p.y*22;
+    pcaG.innerHTML += `<circle cx="${sx}" cy="${sy}" r="5" fill="var(--indigo)" opacity="0.8"/>`;
+  });
+
+  function projectedVariance(angleDeg){
+    const rad = angleDeg * Math.PI/180;
+    const ux = Math.cos(rad), uy = Math.sin(rad);
+    const projections = pcaCentered.map(p => p.x*ux + p.y*uy);
+    const mean = projections.reduce((s,v)=>s+v,0)/projections.length;
+    const variance = projections.reduce((s,v)=>s+Math.pow(v-mean,2),0)/projections.length;
+    return variance;
+  }
+
+  function updatePca(angleDeg){
+    angleDeg = Number(angleDeg);
+    document.getElementById('pca-angle').textContent = angleDeg + '°';
+    const variance = projectedVariance(angleDeg);
+    document.getElementById('pca-var').textContent = variance.toFixed(2);
+
+    const rad = angleDeg * Math.PI/180;
+    const L = 130;
+    const x1 = 150 - L*Math.cos(rad), y1 = 150 + L*Math.sin(rad);
+    const x2 = 150 + L*Math.cos(rad), y2 = 150 - L*Math.sin(rad);
+    const line = document.getElementById('pca-line');
+    line.setAttribute('x1', x1); line.setAttribute('y1', y1);
+    line.setAttribute('x2', x2); line.setAttribute('y2', y2);
+  }
+  updatePca(10);
+
+  function revealBestAngle(){
+    let cxx=0, cyy=0, cxy=0;
+    pcaCentered.forEach(p => { cxx += p.x*p.x; cyy += p.y*p.y; cxy += p.x*p.y; });
+    cxx /= pcaCentered.length; cyy /= pcaCentered.length; cxy /= pcaCentered.length;
+    let angleRad = 0.5 * Math.atan2(2*cxy, cxx-cyy);
+    let angleDeg = angleRad * 180/Math.PI;
+    if(angleDeg < 0) angleDeg += 180;
+    angleDeg = Math.round(angleDeg);
+    document.getElementById('pca-slider').value = angleDeg;
+    updatePca(angleDeg);
+    document.getElementById('pca-caption').innerHTML = '<b>Este es el ángulo de máxima varianza</b> — la primera componente principal que encontraría PCA automáticamente.';
+  }
+</script>
+
+</body>
+</html>

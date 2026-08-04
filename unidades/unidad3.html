@@ -1,0 +1,392 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 3 — Funciones, Visualización y Tasas de Cambio</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE4;--paper-2:#E3DFD6;--ink:#161A22;--ink-soft:#4A4F5C;
+    --indigo:#4740E0;--indigo-soft:#E7E5FB;
+    --amber:#E0972E;--amber-soft:#FBEFD9;
+    --sage:#3E8E5F;--sage-soft:#E1F0E5;
+    --rose:#C0456B;--rose-soft:#F7E3E9;
+    --line:rgba(22,26,34,0.14);--line-strong:rgba(22,26,34,0.28);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 28px;}
+
+  .hero{position:relative;padding:90px 0 60px;background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);background-size:36px 36px;border-bottom:1px solid var(--line-strong);overflow:hidden;}
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 15%, var(--paper) 0%, transparent 45%),radial-gradient(circle at 88% 85%, var(--paper) 0%, transparent 40%);pointer-events:none;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--indigo);background:var(--indigo-soft);display:inline-block;padding:5px 12px;border-radius:100px;margin-bottom:22px;}
+  .hero h1{font-size:clamp(32px,5vw,50px);line-height:1.1;max-width:15ch;}
+  .hero p.lede{margin-top:18px;max-width:58ch;font-size:18px;color:var(--ink-soft);}
+
+  section{padding:60px 0;border-bottom:1px solid var(--line);}
+  section.no-border{border-bottom:none;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  section h2{font-size:clamp(23px,3.2vw,30px);max-width:24ch;}
+  .section-lede{margin-top:14px;font-size:16.5px;color:var(--ink-soft);max-width:64ch;}
+
+  .card{background:#fff;border:1px solid var(--line-strong);border-radius:12px;padding:24px 26px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--paper-2);border:1px solid var(--line-strong);padding:5px 10px;border-radius:7px;margin:4px 6px 0 0;}
+  .chip b{color:var(--indigo);}
+  .note{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;font-size:14px;color:#6B4A11;margin-top:16px;}
+  .note b{color:#3E2C05;}
+  .formula-box{text-align:center;font-size:18px;color:var(--indigo);margin:6px 0;}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+  .btn{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink);transition:all .15s ease;}
+  .btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .btn.reset{color:var(--ink-soft);}
+
+  .cell{font-family:'JetBrains Mono',monospace;font-size:13.5px;background:var(--indigo-soft);border:1px solid var(--indigo);color:var(--indigo);border-radius:6px;padding:10px 4px;width:78px;text-align:center;font-weight:600;transition:all .3s ease;}
+  .grid-row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+
+  /* theta / derivative demo */
+  .theta-demo{background:#fff;border:1px solid var(--line-strong);border-radius:14px;margin-top:44px;box-shadow:0 1px 0 var(--line-strong), 0 20px 40px -28px rgba(22,26,34,0.35);padding:30px 30px 26px;}
+  .theta-svg-wrap{display:flex;justify-content:center;}
+  .theta-slider{width:100%;max-width:420px;display:block;margin:18px auto 0;accent-color:var(--indigo);}
+  .theta-readout{display:flex;justify-content:center;gap:24px;flex-wrap:wrap;margin-top:16px;font-family:'JetBrains Mono',monospace;font-size:13.5px;color:var(--ink-soft);}
+  .theta-readout b{color:var(--ink);}
+  .theta-guidance{margin-top:16px;text-align:center;font-size:15px;font-weight:600;padding:12px;border-radius:10px;transition:all .2s ease;}
+  .theta-guidance.amber{background:var(--amber-soft);color:#6B4A11;}
+  .theta-guidance.sage{background:var(--sage-soft);color:#215C39;}
+
+  /* valley compare */
+  .valley-compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;margin-top:22px;}
+  @media (max-width:620px){.valley-compare{grid-template-columns:1fr;}}
+  .valley-compare .card{text-align:center;}
+  .valley-compare h3{font-size:15px;margin-bottom:12px;}
+  .valley-compare p{font-size:13.5px;color:var(--ink-soft);margin-top:10px;}
+
+  /* limit demo */
+  .limit-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:14px;margin-top:16px;}
+  .limit-table th{text-align:left;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line-strong);}
+  .limit-table td{padding:9px 10px;border-bottom:1px solid var(--line);opacity:0;transform:translateY(4px);transition:opacity .3s ease, transform .3s ease;}
+  .limit-table tr.show td{opacity:1;transform:translateY(0);}
+  .limit-table td.approx{color:var(--sage);font-weight:700;}
+
+  /* mse calc */
+  table.mse-table{width:100%;border-collapse:collapse;font-family:'JetBrains Mono',monospace;font-size:13.5px;margin-top:16px;}
+  table.mse-table th{text-align:left;font-size:11px;letter-spacing:0.05em;text-transform:uppercase;color:var(--ink-soft);padding:8px 10px;border-bottom:1px solid var(--line-strong);}
+  table.mse-table td{padding:9px 10px;border-bottom:1px solid var(--line);}
+  table.mse-table tr.mse-row td{opacity:0;transition:opacity .3s ease;}
+  table.mse-table tr.mse-row.show td{opacity:1;}
+  .mse-total{text-align:center;margin-top:18px;font-family:'JetBrains Mono',monospace;font-size:15px;}
+  .mse-total .val{font-size:26px;font-weight:700;color:var(--rose);}
+
+  /* compare cards */
+  .compare{display:grid;grid-template-columns:1fr 1fr;gap:18px;}
+  @media (max-width:600px){.compare{grid-template-columns:1fr;}}
+  .compare .card h3{font-size:16px;margin-bottom:12px;}
+  .compare ul{margin:0;padding-left:18px;font-size:14.5px;}
+  .compare li{margin-bottom:8px;}
+
+  table.summary{border-collapse:collapse;width:100%;font-size:14px;}
+  table.summary th{text-align:left;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);padding:10px 12px;border-bottom:1px solid var(--line-strong);}
+  table.summary td{padding:12px 12px;border-bottom:1px solid var(--line);}
+  table.summary td:first-child{font-weight:600;}
+  table.summary td.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+
+  .analogy{background:var(--ink);color:var(--paper);border-radius:16px;padding:38px 34px;}
+  .analogy .kicker{color:#B9BCC9;}
+  .analogy h2{color:#fff;}
+  .analogy p{color:#D6D8E0;font-size:15px;margin-top:14px;max-width:70ch;}
+
+  footer{padding:34px 0 60px;text-align:center;color:var(--ink-soft);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Ciencia de Datos · Unidad 3</span>
+    <h1>Funciones, visualización y tasas de cambio</h1>
+    <p class="lede">Entrenar un modelo es, en el fondo, buscar el punto más bajo de una curva de error. La derivada es lo que te dice hacia dónde moverte para llegar ahí. Movete por la curva de abajo y mirá cómo cambia.</p>
+
+    <div class="theta-demo">
+      <div class="theta-svg-wrap">
+        <svg id="theta-svg" viewBox="0 0 480 260" width="100%" style="max-width:480px;">
+          <line x1="40" y1="220" x2="450" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+          <line x1="40" y1="20" x2="40" y2="220" stroke="var(--line-strong)" stroke-width="1.5"/>
+          <text x="452" y="224" font-size="11" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace">θ</text>
+          <text x="14" y="24" font-size="11" fill="var(--ink-soft)" font-family="JetBrains Mono, monospace">Costo</text>
+          <polyline id="theta-curve" fill="none" stroke="var(--indigo)" stroke-width="2.5" points=""/>
+          <line id="theta-tangent" stroke="var(--rose)" stroke-width="2.5" x1="0" y1="0" x2="0" y2="0"/>
+          <circle id="theta-point" r="7" fill="var(--amber)" stroke="#fff" stroke-width="2"/>
+        </svg>
+      </div>
+      <input type="range" id="theta-slider" class="theta-slider" min="0" max="60" value="8" oninput="updateTheta(this.value)">
+      <div class="theta-readout">
+        <span>θ = <b id="theta-val">0.8</b></span>
+        <span>Costo(θ) = <b id="theta-cost">5.84</b></span>
+        <span>pendiente = <b id="theta-slope">-4.40</b></span>
+      </div>
+      <div class="theta-guidance amber" id="theta-guidance">La pendiente es negativa: si aumentás θ, el costo baja → conviene aumentar θ.</div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">La función de costo</div>
+    <h2>Una función que mide qué tan mal está el modelo</h2>
+    <p class="section-lede">Entrenar un modelo no es más que buscar los parámetros que hacen que esta función dé el valor más bajo posible. El <span class="mono">MSE</span> (error cuadrático medio) compara cada predicción con el valor real, eleva la diferencia al cuadrado —para que los errores no se cancelen entre sí y los grandes pesen más— y promedia todo.</p>
+    <div class="formula-box mono">MSE(θ) = (1/n) Σ (y_pred − y_real)²</div>
+
+    <div class="card" style="margin-top:20px;">
+      <p style="margin:0 0 4px;font-size:14px;color:var(--ink-soft);">Predicción vs. realidad, casa por casa:</p>
+      <table class="mse-table" id="mse-table">
+        <thead><tr><th></th><th>real</th><th>predicho</th><th>error²</th></tr></thead>
+        <tbody>
+          <tr class="mse-row"><td>casa 1</td><td>180.000</td><td>170.000</td><td class="mono">100.000.000</td></tr>
+          <tr class="mse-row"><td>casa 2</td><td>150.000</td><td>155.000</td><td class="mono">25.000.000</td></tr>
+          <tr class="mse-row"><td>casa 3</td><td>250.000</td><td>230.000</td><td class="mono">400.000.000</td></tr>
+          <tr class="mse-row"><td>casa 4</td><td>120.000</td><td>130.000</td><td class="mono">100.000.000</td></tr>
+          <tr class="mse-row"><td>casa 5</td><td>210.000</td><td>205.000</td><td class="mono">25.000.000</td></tr>
+        </tbody>
+      </table>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="runMse()">Calcular MSE</button>
+        <button class="btn reset" onclick="resetMse()">Reiniciar</button>
+      </div>
+      <div class="mse-total">MSE = <span class="val" id="mse-total">—</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Visualizar la forma del problema</div>
+    <h2>Un valle fácil, y un terreno con varios valles</h2>
+    <p class="section-lede">Con un solo parámetro, el costo dibuja la curva en forma de "U" que manejaste arriba. Con dos parámetros, esa curva se convierte en una superficie con forma de valle. Mirado desde arriba, cada anillo representa un nivel de costo, y el centro es el mínimo.</p>
+    <div class="valley-compare">
+      <div class="card">
+        <h3>Un solo valle — fácil de optimizar</h3>
+        <svg viewBox="0 0 200 160" width="100%" style="max-width:220px;">
+          <circle cx="100" cy="80" r="70" fill="var(--indigo-soft)" opacity="0.5"/>
+          <circle cx="100" cy="80" r="50" fill="var(--indigo-soft)" opacity="0.6"/>
+          <circle cx="100" cy="80" r="30" fill="var(--indigo-soft)" opacity="0.8"/>
+          <circle cx="100" cy="80" r="12" fill="var(--indigo)" opacity="0.9"/>
+          <circle cx="100" cy="80" r="4" fill="var(--sage)"/>
+        </svg>
+        <p>Sin importar desde dónde arranques, siempre hay un único camino hacia abajo. Así es la regresión lineal.</p>
+      </div>
+      <div class="card">
+        <h3>Varios valles — difícil de optimizar</h3>
+        <svg viewBox="0 0 200 160" width="100%" style="max-width:220px;">
+          <circle cx="65" cy="55" r="40" fill="var(--rose-soft)" opacity="0.6"/>
+          <circle cx="65" cy="55" r="24" fill="var(--rose-soft)" opacity="0.8"/>
+          <circle cx="65" cy="55" r="8" fill="var(--rose)"/>
+          <circle cx="140" cy="105" r="46" fill="var(--indigo-soft)" opacity="0.5"/>
+          <circle cx="140" cy="105" r="28" fill="var(--indigo-soft)" opacity="0.7"/>
+          <circle cx="140" cy="105" r="10" fill="var(--indigo)" opacity="0.9"/>
+          <circle cx="140" cy="105" r="4" fill="var(--sage)"/>
+        </svg>
+        <p>Según por dónde arranques, podés quedar atrapado en un valle que no es el más profundo. Pasa en redes neuronales.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Límites</div>
+    <h2>Acercarse, sin necesidad de llegar</h2>
+    <p class="section-lede">Un límite describe hacia dónde se dirige una función a medida que la entrada se acerca a un punto — sin que necesariamente llegue a tocarlo. Es la idea que hace posible definir la derivada: calculamos la pendiente entre dos puntos cada vez más cercanos, y miramos a qué valor se acerca esa pendiente.</p>
+    <div class="card" style="margin-top:20px;">
+      <p class="mono" style="font-size:12.5px;color:var(--ink-soft);margin:0 0 6px;">f(x) = x², calculando la pendiente en x = 1 con valores de h cada vez más chicos</p>
+      <table class="limit-table" id="limit-table">
+        <thead><tr><th>h</th><th>(f(1+h) − f(1)) / h</th></tr></thead>
+        <tbody>
+          <tr><td>0.1</td><td class="approx">2.1</td></tr>
+          <tr><td>0.01</td><td class="approx">2.01</td></tr>
+          <tr><td>0.001</td><td class="approx">2.001</td></tr>
+          <tr><td>0.0001</td><td class="approx">2.0001</td></tr>
+        </tbody>
+      </table>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="runLimit()">Achicar h paso a paso</button>
+        <button class="btn reset" onclick="resetLimit()">Reiniciar</button>
+      </div>
+      <p class="demo-caption" id="limit-caption" style="text-align:center;margin-top:12px;font-size:14px;color:var(--ink-soft);">A medida que h se achica, el resultado se acerca cada vez más a <b>2</b> — que es, justamente, la derivada de x² en x = 1.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">La derivada</div>
+    <h2>La pendiente, convertida en instrucción</h2>
+    <p class="section-lede">La derivada de una función en un punto es su tasa de cambio instantánea ahí — geométricamente, la pendiente de la recta tangente. En Machine Learning es la brújula: si la derivada del costo respecto a θ es positiva, aumentar θ empeora las cosas, así que hay que bajarlo. Si es negativa, hay que subirlo. Es exactamente lo que probaste en el gráfico del principio.</p>
+    <div class="formula-box mono">f'(x) = lim<sub>h→0</sub> [f(x+h) − f(x)] / h</div>
+    <div class="note"><b>No hace falta resolver este límite a mano.</b> Lo que importa retener es la idea: la derivada es el resultado de acercar cada vez más dos puntos de la curva, hasta que la pendiente entre ellos se estabiliza en un solo número.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Derivada numérica vs. simbólica</div>
+    <h2>Dos formas de llegar al mismo número</h2>
+    <div class="compare" style="margin-top:20px;">
+      <div class="card">
+        <h3>Numérica</h3>
+        <ul>
+          <li>Calcula <span class="mono">(f(x+h) − f(x)) / h</span> con un <span class="mono">h</span> muy chico.</li>
+          <li>Da un resultado aproximado, no exacto.</li>
+          <li>Es la que se usa durante el entrenamiento de modelos, con NumPy.</li>
+        </ul>
+      </div>
+      <div class="card">
+        <h3>Simbólica</h3>
+        <ul>
+          <li>Aplica reglas algebraicas exactas, como en el pizarrón.</li>
+          <li>Da la fórmula exacta de la derivada, no una aproximación.</li>
+          <li>Se calcula en Python con <span class="mono">SymPy</span>, y se usa para el análisis teórico.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">SymPy</div>
+    <h2>Cálculo simbólico en Python</h2>
+    <p class="section-lede">SymPy trata las variables como símbolos matemáticos, no como números — por eso puede devolver la fórmula exacta de una derivada, en vez de una aproximación.</p>
+    <div class="card" style="margin-top:20px;">
+      <pre class="mono" style="margin:0;font-size:13.5px;line-height:1.7;overflow-x:auto;">import sympy as sp
+
+x = sp.Symbol('x')
+f = x**2 + 3*x + 2
+df = sp.diff(f, x)   # → 2x + 3 (derivada exacta)</pre>
+    </div>
+    <p class="section-lede" style="margin-top:18px;">La aplicación práctica: pedirle a SymPy la derivada del MSE respecto a un parámetro, y obtener la fórmula exacta del gradiente. Esa fórmula es la que después se implementa numéricamente con NumPy, en la Unidad 4.</p>
+
+    <div class="card" style="margin-top:20px;overflow-x:auto;">
+      <table class="summary">
+        <thead><tr><th>Función</th><th>Derivada</th></tr></thead>
+        <tbody>
+          <tr><td class="mono">x²</td><td class="mono">2x</td></tr>
+          <tr><td class="mono">(ax + b − y)²</td><td class="mono">2a(ax + b − y)</td></tr>
+          <tr><td class="mono">MSE = (1/n)Σ(θx − y)²</td><td class="mono">(2/n)Σx(θx − y)</td></tr>
+        </tbody>
+      </table>
+    </div>
+    <div class="note" style="margin-top:16px;"><b>Un dato para llevarse, sin necesidad de resolverlo ahora:</b> cuando una función está compuesta por otras funciones —como pasa en las redes neuronales, con muchas capas encadenadas— hay una regla que permite calcular la derivada de todo el conjunto a partir de las derivadas de cada parte. Esa regla es la base de un algoritmo que van a ver más adelante en la materia, llamado backpropagation.</div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="analogy">
+      <div class="kicker">Conexión con lo que viene</div>
+      <h2>De la pendiente a la brújula del entrenamiento</h2>
+      <p>Ya sabés leer una pendiente y saber para dónde moverte. El Descenso de Gradiente (Unidad 4) no es más que repetir esa misma pregunta miles de veces, dando pasos cada vez más chicos, hasta llegar al fondo del valle.</p>
+    </div>
+  </div>
+</section>
+
+<footer>Unidad 3 — Funciones, Visualización y Tasas de Cambio · Ciencia de Datos</footer>
+
+<script>
+  // theta / derivative demo — Costo(θ) = (θ-3)^2 + 1, dominio θ ∈ [0,6]
+  const plotX0 = 40, plotX1 = 450, plotY0 = 20, plotY1 = 220;
+  const thetaMin = 0, thetaMax = 6, costMax = 11;
+
+  function toSvgX(theta){ return plotX0 + (theta/thetaMax) * (plotX1-plotX0); }
+  function toSvgY(cost){ return plotY1 - (cost/costMax) * (plotY1-plotY0); }
+  function costOf(theta){ return Math.pow(theta-3,2) + 1; }
+  function slopeOf(theta){ return 2*(theta-3); }
+
+  function drawCurve(){
+    let pts = [];
+    for(let t=0; t<=6.001; t+=0.1){
+      pts.push(toSvgX(t) + ',' + toSvgY(costOf(t)));
+    }
+    document.getElementById('theta-curve').setAttribute('points', pts.join(' '));
+  }
+  drawCurve();
+
+  function updateTheta(rawVal){
+    const theta = rawVal/10;
+    const cost = costOf(theta);
+    const slope = slopeOf(theta);
+
+    document.getElementById('theta-val').textContent = theta.toFixed(1);
+    document.getElementById('theta-cost').textContent = cost.toFixed(2);
+    document.getElementById('theta-slope').textContent = slope.toFixed(2);
+
+    const px = toSvgX(theta), py = toSvgY(cost);
+    document.getElementById('theta-point').setAttribute('cx', px);
+    document.getElementById('theta-point').setAttribute('cy', py);
+
+    const dt = 1.0;
+    const x1 = theta - dt, y1 = cost - slope*dt;
+    const x2 = theta + dt, y2 = cost + slope*dt;
+    const tangent = document.getElementById('theta-tangent');
+    tangent.setAttribute('x1', toSvgX(x1)); tangent.setAttribute('y1', toSvgY(y1));
+    tangent.setAttribute('x2', toSvgX(x2)); tangent.setAttribute('y2', toSvgY(y2));
+
+    const guidance = document.getElementById('theta-guidance');
+    const point = document.getElementById('theta-point');
+    if(Math.abs(slope) < 0.3){
+      guidance.textContent = 'La pendiente es casi cero: estás muy cerca del mínimo.';
+      guidance.className = 'theta-guidance sage';
+      point.setAttribute('fill', 'var(--sage)');
+    } else if(slope > 0){
+      guidance.textContent = 'La pendiente es positiva: si aumentás θ, el costo crece → conviene disminuir θ.';
+      guidance.className = 'theta-guidance amber';
+      point.setAttribute('fill', 'var(--amber)');
+    } else {
+      guidance.textContent = 'La pendiente es negativa: si aumentás θ, el costo baja → conviene aumentar θ.';
+      guidance.className = 'theta-guidance amber';
+      point.setAttribute('fill', 'var(--amber)');
+    }
+  }
+  updateTheta(8);
+
+  // MSE calculator
+  function runMse(){
+    const rows = document.querySelectorAll('#mse-table .mse-row');
+    const errors = [100000000,25000000,400000000,100000000,25000000];
+    rows.forEach(r => r.classList.remove('show'));
+    document.getElementById('mse-total').textContent = '—';
+    let sum = 0;
+    rows.forEach((r,i) => {
+      setTimeout(() => {
+        r.classList.add('show');
+        sum += errors[i];
+        if(i === rows.length-1){
+          const mse = sum/rows.length;
+          document.getElementById('mse-total').textContent = mse.toLocaleString('es-AR');
+        }
+      }, i*400);
+    });
+  }
+  function resetMse(){
+    document.querySelectorAll('#mse-table .mse-row').forEach(r => r.classList.remove('show'));
+    document.getElementById('mse-total').textContent = '—';
+  }
+
+  // limit demo
+  function runLimit(){
+    const rows = document.querySelectorAll('#limit-table tbody tr');
+    rows.forEach(r => r.classList.remove('show'));
+    rows.forEach((r,i) => setTimeout(() => r.classList.add('show'), i*450));
+  }
+  function resetLimit(){
+    document.querySelectorAll('#limit-table tbody tr').forEach(r => r.classList.remove('show'));
+  }
+</script>
+
+</body>
+</html>

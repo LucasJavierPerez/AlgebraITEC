@@ -1,0 +1,490 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Unidad 2 — Operaciones Vectorizadas y Álgebra Práctica</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#EDEAE4;
+    --paper-2:#E3DFD6;
+    --ink:#161A22;
+    --ink-soft:#4A4F5C;
+    --indigo:#4740E0;
+    --indigo-soft:#E7E5FB;
+    --amber:#E0972E;
+    --amber-soft:#FBEFD9;
+    --sage:#3E8E5F;
+    --sage-soft:#E1F0E5;
+    --rose:#C0456B;
+    --rose-soft:#F7E3E9;
+    --line:rgba(22,26,34,0.14);
+    --line-strong:rgba(22,26,34,0.28);
+  }
+  *{box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+  body{margin:0;background:var(--paper);color:var(--ink);font-family:'Inter',sans-serif;line-height:1.6;-webkit-font-smoothing:antialiased;}
+  h1,h2,h3{font-family:'Fraunces',serif;font-weight:600;margin:0;letter-spacing:-0.01em;}
+  .mono{font-family:'JetBrains Mono',monospace;}
+  .wrap{max-width:900px;margin:0 auto;padding:0 28px;}
+
+  .hero{
+    position:relative;padding:90px 0 70px;
+    background-image:linear-gradient(var(--line) 1px, transparent 1px), linear-gradient(90deg, var(--line) 1px, transparent 1px);
+    background-size:36px 36px;border-bottom:1px solid var(--line-strong);overflow:hidden;
+  }
+  .hero::before{content:"";position:absolute;inset:0;background:radial-gradient(circle at 12% 15%, var(--paper) 0%, transparent 45%),radial-gradient(circle at 88% 85%, var(--paper) 0%, transparent 40%);pointer-events:none;}
+  .eyebrow{font-family:'JetBrains Mono',monospace;font-size:12.5px;letter-spacing:0.14em;text-transform:uppercase;color:var(--indigo);background:var(--indigo-soft);display:inline-block;padding:5px 12px;border-radius:100px;margin-bottom:22px;}
+  .hero h1{font-size:clamp(32px,5vw,50px);line-height:1.1;max-width:14ch;}
+  .hero p.lede{margin-top:18px;max-width:56ch;font-size:18px;color:var(--ink-soft);}
+
+  .demo{position:relative;margin-top:44px;background:#fff;border:1px solid var(--line-strong);border-radius:14px;box-shadow:0 1px 0 var(--line-strong), 0 20px 40px -28px rgba(22,26,34,0.35);overflow:hidden;}
+  .demo-tabs{display:flex;border-bottom:1px solid var(--line);background:var(--paper-2);}
+  .demo-tab{flex:1;padding:14px 10px;text-align:center;font-family:'JetBrains Mono',monospace;font-size:13px;cursor:pointer;color:var(--ink-soft);border:none;background:none;border-bottom:2px solid transparent;transition:all .15s ease;}
+  .demo-tab:hover{color:var(--ink);}
+  .demo-tab.active{color:var(--indigo);background:#fff;border-bottom-color:var(--indigo);font-weight:600;}
+  .demo-body{padding:34px 30px;display:none;}
+  .demo-body.active{display:block;}
+  .demo-caption{font-size:14.5px;color:var(--ink-soft);margin-top:16px;}
+  .demo-caption b{color:var(--ink);}
+
+  section{padding:60px 0;border-bottom:1px solid var(--line);}
+  section.no-border{border-bottom:none;}
+  .kicker{font-family:'JetBrains Mono',monospace;font-size:12px;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-soft);margin-bottom:10px;}
+  section h2{font-size:clamp(23px,3.2vw,30px);max-width:22ch;}
+  .section-lede{margin-top:14px;font-size:16.5px;color:var(--ink-soft);max-width:64ch;}
+
+  .card{background:#fff;border:1px solid var(--line-strong);border-radius:12px;padding:24px 26px;}
+  .chip{display:inline-flex;align-items:center;gap:6px;font-family:'JetBrains Mono',monospace;font-size:12.5px;background:var(--paper-2);border:1px solid var(--line-strong);padding:5px 10px;border-radius:7px;margin:4px 6px 0 0;}
+  .chip b{color:var(--indigo);}
+  .note{background:var(--amber-soft);border:1px solid var(--amber);border-radius:10px;padding:14px 16px;font-size:14px;color:#6B4A11;margin-top:16px;}
+  .note b{color:#3E2C05;}
+
+  .btn-row{display:flex;gap:8px;flex-wrap:wrap;margin-top:18px;}
+  .btn{font-family:'Inter',sans-serif;font-size:13.5px;font-weight:600;padding:9px 14px;border-radius:8px;border:1px solid var(--line-strong);background:#fff;cursor:pointer;color:var(--ink);transition:all .15s ease;}
+  .btn:hover{border-color:var(--indigo);color:var(--indigo);}
+  .btn.active{background:var(--indigo);border-color:var(--indigo);color:#fff;}
+  .btn.reset{color:var(--ink-soft);}
+
+  .cell{font-family:'JetBrains Mono',monospace;font-size:13.5px;background:var(--indigo-soft);border:1px solid var(--indigo);color:var(--indigo);border-radius:6px;padding:10px 4px;width:68px;text-align:center;font-weight:600;transition:all .3s ease;}
+  .grid-row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;}
+  .stack{display:flex;flex-direction:column;gap:6px;align-items:center;}
+
+  /* loop vs vectorized */
+  .race-row{display:flex;gap:7px;flex-wrap:wrap;justify-content:center;min-height:52px;}
+  .race-cell{opacity:0;transform:translateY(6px);transition:opacity .25s ease, transform .25s ease;}
+  .race-cell.show{opacity:1;transform:translateY(0);}
+  .race-time{text-align:center;margin-top:14px;font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--ink-soft);}
+  .race-time b{color:var(--rose);}
+
+  /* broadcasting */
+  .bc-wrap{display:flex;flex-direction:column;align-items:center;gap:10px;}
+  .bc-mean-row{opacity:0.85;}
+  .bc-mean-row .cell{background:var(--amber-soft);border-color:var(--amber);color:#6B4A11;}
+  .bc-arrow{font-size:20px;color:var(--ink-soft);margin:2px 0;}
+  .bc-result .cell{background:var(--sage-soft);border-color:var(--sage);color:#215C39;}
+
+  /* dot product */
+  .dot-vectors{display:flex;justify-content:center;gap:60px;flex-wrap:wrap;}
+  .dot-col{display:flex;flex-direction:column;gap:8px;align-items:center;}
+  .dot-col .cell{width:110px;}
+  .dot-total{text-align:center;margin-top:20px;font-family:'JetBrains Mono',monospace;font-size:15px;}
+  .dot-total .val{font-size:26px;font-weight:700;color:var(--sage);}
+  .dot-step{opacity:0;transition:opacity .3s ease;}
+  .dot-step.show{opacity:1;}
+
+  /* matmul */
+  .matmul-wrap{display:flex;align-items:center;justify-content:center;gap:18px;flex-wrap:wrap;}
+  .mm-grid{display:grid;gap:6px;}
+  .mm-x{grid-template-columns:repeat(3,64px);}
+  .mm-w{grid-template-columns:64px;}
+  .mm-res{grid-template-columns:70px;}
+  .mm-cell{font-family:'JetBrains Mono',monospace;font-size:13px;background:#fff;border:1px solid var(--line-strong);border-radius:6px;padding:10px 4px;text-align:center;cursor:pointer;transition:all .2s ease;}
+  .mm-cell.hl-x{background:var(--indigo-soft);border-color:var(--indigo);color:var(--indigo);font-weight:700;}
+  .mm-cell.hl-w{background:var(--amber-soft);border-color:var(--amber);color:#6B4A11;font-weight:700;}
+  .mm-cell.hl-r{background:var(--sage-soft);border-color:var(--sage);color:#215C39;font-weight:700;}
+  .mm-label{text-align:center;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--ink-soft);margin-bottom:6px;}
+
+  /* transpose */
+  .transpose-wrap{display:flex;justify-content:center;}
+  .tr-grid{display:grid;gap:6px;transition:all .35s ease;}
+
+  table.summary{border-collapse:collapse;width:100%;font-size:14px;}
+  table.summary th{text-align:left;font-size:11px;letter-spacing:0.06em;text-transform:uppercase;color:var(--ink-soft);padding:10px 12px;border-bottom:1px solid var(--line-strong);}
+  table.summary td{padding:12px 12px;border-bottom:1px solid var(--line);}
+  table.summary td:first-child{font-weight:600;}
+  table.summary td.mono, table.summary th.mono{font-family:'JetBrains Mono',monospace;font-size:12.5px;}
+
+  .analogy{background:var(--ink);color:var(--paper);border-radius:16px;padding:38px 34px;}
+  .analogy .kicker{color:#B9BCC9;}
+  .analogy h2{color:#fff;}
+  .analogy p{color:#D6D8E0;font-size:15px;margin-top:14px;max-width:70ch;}
+
+  footer{padding:34px 0 60px;text-align:center;color:var(--ink-soft);font-size:13px;}
+</style>
+</head>
+<body>
+
+<div class="hero">
+  <div class="wrap">
+    <span class="eyebrow">Ciencia de Datos · Unidad 2</span>
+    <h1>Operaciones vectorizadas y álgebra práctica</h1>
+    <p class="lede">En la Unidad 1 entendimos la forma de los datos. Ahora los hacemos trabajar: sumar, multiplicar y combinar arrays enteros de una sola vez, sin recorrerlos uno por uno.</p>
+
+    <div class="demo">
+      <div class="demo-tabs">
+        <button class="demo-tab active" data-tab="loop">Con loop</button>
+        <button class="demo-tab" data-tab="vector">Vectorizado</button>
+      </div>
+      <div class="demo-body active" id="tab-loop">
+        <p class="demo-caption" style="margin-top:0;">Convertir 8 casas de m² a pies² <b>una por una</b>. Tocá el botón y mirá cómo aparecen de a poco.</p>
+        <div class="race-row" id="race-loop"></div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn" onclick="runLoop()">Ejecutar con loop</button>
+        </div>
+        <div class="race-time" id="race-loop-time"></div>
+      </div>
+      <div class="demo-body" id="tab-vector">
+        <p class="demo-caption" style="margin-top:0;">La misma conversión, <b>vectorizada</b>: todo el array se transforma en un solo paso.</p>
+        <div class="race-row" id="race-vector"></div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn" onclick="runVector()">Ejecutar vectorizado</button>
+        </div>
+        <div class="race-time" id="race-vector-time"></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">¿Por qué evitar los loops?</div>
+    <h2>Con 1 millón de casas, la diferencia se siente</h2>
+    <p class="section-lede">Con un loop de Python, cada casa se procesa una por una. Con NumPy, la operación se aplica a todo el array al mismo tiempo. La diferencia puede llegar a ser de hasta <b>100 veces más rápido</b> — en producción, eso separa un modelo que entrena en minutos de uno que tarda horas.</p>
+    <div class="note"><b>¿Qué pasa por dentro?</b> Cuando usás NumPy, esa operación se la delega a código C ya compilado, corriendo por debajo de Python. No hace falta saber programar en C ni entender esa capa — alcanza con saber que existe, y que es la razón por la que todo va tan rápido.</div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Operaciones elemento a elemento</div>
+    <h2>Una operación, aplicada a todo el array</h2>
+    <p class="section-lede">Sumar, restar, multiplicar o dividir un array por un número se aplica automáticamente a cada elemento. No hay que pensar "elemento por elemento", sino "transformo el array completo".</p>
+    <div class="card" style="margin-top:22px;">
+      <p class="mono" style="font-size:13px;color:var(--ink-soft);margin:0 0 12px;">precios / 1000 → precios en miles</p>
+      <div class="grid-row">
+        <div class="cell">180000</div><div class="cell">150000</div><div class="cell">250000</div><div class="cell">120000</div><div class="cell">210000</div>
+      </div>
+      <div style="text-align:center;margin:10px 0;color:var(--ink-soft);">↓ ÷ 1000</div>
+      <div class="grid-row">
+        <div class="cell" style="background:var(--sage-soft);border-color:var(--sage);color:#215C39;">180</div>
+        <div class="cell" style="background:var(--sage-soft);border-color:var(--sage);color:#215C39;">150</div>
+        <div class="cell" style="background:var(--sage-soft);border-color:var(--sage);color:#215C39;">250</div>
+        <div class="cell" style="background:var(--sage-soft);border-color:var(--sage);color:#215C39;">120</div>
+        <div class="cell" style="background:var(--sage-soft);border-color:var(--sage);color:#215C39;">210</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Broadcasting</div>
+    <h2>Operar entre formas distintas</h2>
+    <p class="section-lede">Broadcasting es la regla que le permite a NumPy operar un array 2D con uno 1D, "expandiendo" el más chico para que encaje con el más grande — sin copiar datos en memoria. El caso típico: restarle a cada fila del dataset el promedio de cada columna, para normalizar.</p>
+    <div class="card" style="margin-top:22px;">
+      <div class="bc-wrap">
+        <p class="mono" style="font-size:12.5px;color:var(--ink-soft);">dataset (5, 4)</p>
+        <div class="stack" id="bc-dataset"></div>
+        <div class="bc-arrow">−</div>
+        <p class="mono" style="font-size:12.5px;color:var(--ink-soft);">media_por_columna (4,)</p>
+        <div class="grid-row bc-mean-row" id="bc-mean">
+          <div class="cell">123</div><div class="cell">2.6</div><div class="cell">2.44</div><div class="cell">182000</div>
+        </div>
+        <div class="btn-row" style="justify-content:center;">
+          <button class="btn" onclick="runBroadcast()">Aplicar broadcasting</button>
+          <button class="btn reset" onclick="resetBroadcast()">Reiniciar</button>
+        </div>
+        <p class="demo-caption" id="bc-caption">La fila de medias se "estira" para restarse de cada una de las 5 filas — sin escribir ningún loop.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Producto escalar (dot product)</div>
+    <h2>De dos vectores a un solo número</h2>
+    <p class="section-lede">El producto punto multiplica cada par de elementos y suma los resultados. Si un vector son las características de una casa y el otro son los pesos del modelo, el resultado es la predicción — el corazón de la regresión lineal.</p>
+    <div class="card" style="margin-top:22px;">
+      <div class="dot-vectors">
+        <div class="dot-col">
+          <p class="mono" style="font-size:12px;color:var(--ink-soft);">features_casa</p>
+          <div class="cell">120</div><div class="cell">3</div><div class="cell">2.5</div><div class="cell">1<small style="display:block;font-weight:400;font-size:9px;">bias</small></div>
+        </div>
+        <div class="dot-col">
+          <p class="mono" style="font-size:12px;color:var(--ink-soft);">pesos</p>
+          <div class="cell">1500</div><div class="cell">5000</div><div class="cell">-2000</div><div class="cell">10000</div>
+        </div>
+        <div class="dot-col">
+          <p class="mono" style="font-size:12px;color:var(--ink-soft);">producto</p>
+          <div class="cell dot-step" id="dp0">180000</div>
+          <div class="cell dot-step" id="dp1">15000</div>
+          <div class="cell dot-step" id="dp2">-5000</div>
+          <div class="cell dot-step" id="dp3">10000</div>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="runDotProduct()">Calcular producto punto</button>
+        <button class="btn reset" onclick="resetDotProduct()">Reiniciar</button>
+      </div>
+      <div class="dot-total">predicción = <span class="val" id="dot-total">—</span></div>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Multiplicación matricial</div>
+    <h2>El producto punto, para todas las casas a la vez</h2>
+    <p class="section-lede"><span class="mono">X @ W</span> generaliza el producto punto a múltiples filas al mismo tiempo. Tocá una fila del resultado para ver qué fila de <span class="mono">X</span> y qué columna de <span class="mono">W</span> la generaron.</p>
+    <div class="card" style="margin-top:22px;">
+      <div class="matmul-wrap">
+        <div>
+          <div class="mm-label">X (3, 3)</div>
+          <div class="mm-grid mm-x" id="mm-x">
+            <div class="mm-cell" data-row="0">120</div><div class="mm-cell" data-row="0">3</div><div class="mm-cell" data-row="0">2.5</div>
+            <div class="mm-cell" data-row="1">85</div><div class="mm-cell" data-row="1">2</div><div class="mm-cell" data-row="1">1.0</div>
+            <div class="mm-cell" data-row="2">200</div><div class="mm-cell" data-row="2">4</div><div class="mm-cell" data-row="2">5.0</div>
+          </div>
+        </div>
+        <div class="mono" style="font-size:20px;color:var(--ink-soft);">×</div>
+        <div>
+          <div class="mm-label">W (3, 1)</div>
+          <div class="mm-grid mm-w" id="mm-w">
+            <div class="mm-cell">1500</div>
+            <div class="mm-cell">5000</div>
+            <div class="mm-cell">-2000</div>
+          </div>
+        </div>
+        <div class="mono" style="font-size:20px;color:var(--ink-soft);">=</div>
+        <div>
+          <div class="mm-label">predicciones (3, 1)</div>
+          <div class="mm-grid mm-res" id="mm-res">
+            <div class="mm-cell" data-res="0" onclick="mmHighlight(0)">190000</div>
+            <div class="mm-cell" data-res="1" onclick="mmHighlight(1)">135500</div>
+            <div class="mm-cell" data-res="2" onclick="mmHighlight(2)">310000</div>
+          </div>
+        </div>
+      </div>
+      <p class="demo-caption" id="mm-caption">Tocá un resultado para ver de dónde sale.</p>
+    </div>
+  </div>
+</section>
+
+<section>
+  <div class="wrap">
+    <div class="kicker">Transposición</div>
+    <h2>Filas y columnas, intercambiadas</h2>
+    <p class="section-lede"><span class="mono">A.T</span> convierte una matriz de forma <span class="mono">(m, n)</span> en <span class="mono">(n, m)</span>: lo que era fila pasa a ser columna, y viceversa. Se usa todo el tiempo en fórmulas de álgebra lineal, como la Ecuación Normal que viene más abajo.</p>
+    <div class="card" style="margin-top:22px;">
+      <div class="transpose-wrap">
+        <div>
+          <p class="mono" id="tr-label" style="font-size:12.5px;color:var(--ink-soft);text-align:center;">X — shape (3, 3)</p>
+          <div class="tr-grid" id="tr-grid" style="grid-template-columns:repeat(3,64px);"></div>
+        </div>
+      </div>
+      <div class="btn-row" style="justify-content:center;">
+        <button class="btn" onclick="toggleTranspose()">Transponer (X.T)</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="kicker">Sistemas de ecuaciones y la Ecuación Normal</div>
+    <h2>Encontrar los parámetros sin prueba y error</h2>
+    <p class="section-lede">Un sistema como <span class="mono">2x + 3y = 8</span> y <span class="mono">x − 2y = 1</span> se puede escribir en forma matricial y resolver directamente con <span class="mono">np.linalg.solve(A, b)</span>, que internamente usa un método clásico y estable para resolver sistemas de ecuaciones paso a paso.</p>
+    <p class="section-lede">La <b>Ecuación Normal</b> aplica esa misma idea a la regresión lineal: en vez de ir probando parámetros hasta acertar, hay una fórmula directa que los calcula de una sola vez.</p>
+    <div class="card" style="margin-top:22px;">
+      <p class="mono" style="text-align:center;font-size:19px;color:var(--indigo);margin:0;">θ = (Xᵀ X)⁻¹ Xᵀ y</p>
+      <div class="note" style="margin-top:18px;"><b>No hace falta calcular esto a mano.</b> Lo importante es la idea: existe una fórmula directa, sin prueba y error, que encuentra los mejores parámetros del modelo. Cuando el dataset es grande, esta cuenta se vuelve costosa — si el dataset crece, el tiempo de cálculo crece muchísimo más rápido — y ahí conviene el Descenso de Gradiente que vemos en la Unidad 4.</div>
+    </div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="kicker">Resumen de operaciones</div>
+    <h2>Para tener a mano</h2>
+    <div class="card" style="margin-top:22px;overflow-x:auto;">
+      <table class="summary">
+        <thead><tr><th>Operación</th><th class="mono">NumPy</th><th>Shape resultado</th></tr></thead>
+        <tbody>
+          <tr><td>Suma/resta elemento a elemento</td><td class="mono">A + B</td><td>igual a A y B</td></tr>
+          <tr><td>Broadcasting</td><td class="mono">A - A.mean(axis=0)</td><td>igual a A</td></tr>
+          <tr><td>Producto punto</td><td class="mono">np.dot(a, b) / a @ b</td><td>escalar</td></tr>
+          <tr><td>Multiplicación matricial</td><td class="mono">A @ B</td><td>(m, p) si A=(m,n), B=(n,p)</td></tr>
+          <tr><td>Transpuesta</td><td class="mono">A.T</td><td>(n, m) si A=(m,n)</td></tr>
+          <tr><td>Sistema lineal</td><td class="mono">np.linalg.solve(A, b)</td><td>vector solución</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+<section class="no-border">
+  <div class="wrap">
+    <div class="analogy">
+      <div class="kicker">Conexión con lo que viene</div>
+      <h2>La misma cuenta, ahora optimizada</h2>
+      <p><span class="mono">X @ theta</span> que aprendimos acá es exactamente la operación que el Descenso de Gradiente (Unidad 4) va a ir ajustando paso a paso. Primero entendemos la cuenta; después aprendemos a encontrarle los mejores parámetros minimizando el error.</p>
+    </div>
+  </div>
+</section>
+
+<footer>Unidad 2 — Operaciones Vectorizadas y Álgebra Práctica · Ciencia de Datos</footer>
+
+<script>
+  // tabs
+  document.querySelectorAll('.demo-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.demo-tab').forEach(t => t.classList.remove('active'));
+      document.querySelectorAll('.demo-body').forEach(b => b.classList.remove('active'));
+      tab.classList.add('active');
+      document.getElementById('tab-' + tab.dataset.tab).classList.add('active');
+    });
+  });
+
+  // loop vs vectorized race
+  const m2vals = [120,85,200,60,150,95,175,110];
+  const ft2vals = m2vals.map(v => Math.round(v * 10.764));
+
+  function buildRace(containerId, vals){
+    const c = document.getElementById(containerId);
+    c.innerHTML = '';
+    vals.forEach(v => {
+      const cell = document.createElement('div');
+      cell.className = 'cell race-cell';
+      cell.textContent = v;
+      c.appendChild(cell);
+    });
+  }
+  buildRace('race-loop', ft2vals);
+  buildRace('race-vector', ft2vals);
+
+  function runLoop(){
+    document.querySelectorAll('#race-loop .race-cell').forEach(c => c.classList.remove('show'));
+    const cells = document.querySelectorAll('#race-loop .race-cell');
+    cells.forEach((c,i) => setTimeout(() => c.classList.add('show'), i * 260));
+    document.getElementById('race-loop-time').innerHTML = 'procesando <b>una por una</b>… ' + (cells.length * 260) + ' ms simulados';
+  }
+  function runVector(){
+    document.querySelectorAll('#race-vector .race-cell').forEach(c => c.classList.remove('show'));
+    setTimeout(() => {
+      document.querySelectorAll('#race-vector .race-cell').forEach(c => c.classList.add('show'));
+    }, 40);
+    document.getElementById('race-vector-time').innerHTML = 'procesado <b>todo junto</b> — 1 sola operación';
+  }
+
+  // broadcasting
+  const bcData = [
+    [120,3,2.5,180000],[85,2,1.0,150000],[200,4,5.0,250000],[60,1,0.5,120000],[150,3,3.2,210000]
+  ];
+  const bcNorm = [
+    [-3,0.4,0.06,-2000],[-38,-0.6,-1.44,-32000],[77,1.4,2.56,68000],[-63,-1.6,-1.94,-62000],[27,0.4,0.76,28000]
+  ];
+  function buildBcGrid(data, cls){
+    const wrap = document.createElement('div');
+    data.forEach(row => {
+      const r = document.createElement('div');
+      r.className = 'grid-row';
+      row.forEach(v => {
+        const cell = document.createElement('div');
+        cell.className = 'cell' + (cls ? ' ' + cls : '');
+        cell.textContent = v;
+        r.appendChild(cell);
+      });
+      wrap.appendChild(r);
+    });
+    return wrap;
+  }
+  function resetBroadcast(){
+    const c = document.getElementById('bc-dataset');
+    c.innerHTML = '';
+    c.appendChild(buildBcGrid(bcData, ''));
+    document.getElementById('bc-caption').innerHTML = 'La fila de medias se "estira" para restarse de cada una de las 5 filas — sin escribir ningún loop.';
+  }
+  function runBroadcast(){
+    const c = document.getElementById('bc-dataset');
+    c.innerHTML = '';
+    c.appendChild(buildBcGrid(bcNorm, 'bc-result'));
+    document.getElementById('bc-caption').innerHTML = '<b>Resultado normalizado:</b> a cada fila se le restó la misma fila de medias. NumPy la "repitió" 5 veces sin copiar memoria de más.';
+  }
+  resetBroadcast();
+
+  // dot product
+  function runDotProduct(){
+    const steps = ['dp0','dp1','dp2','dp3'];
+    steps.forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('dot-total').textContent = '—';
+    let total = 0;
+    const values = [180000, 15000, -5000, 10000];
+    steps.forEach((id, i) => {
+      setTimeout(() => {
+        document.getElementById(id).classList.add('show');
+        total += values[i];
+        document.getElementById('dot-total').textContent = total.toLocaleString('es-AR');
+      }, i * 500);
+    });
+  }
+  function resetDotProduct(){
+    ['dp0','dp1','dp2','dp3'].forEach(id => document.getElementById(id).classList.remove('show'));
+    document.getElementById('dot-total').textContent = '—';
+  }
+
+  // matrix multiplication
+  function mmHighlight(rowIndex){
+    document.querySelectorAll('#mm-x .mm-cell').forEach(c => c.classList.remove('hl-x'));
+    document.querySelectorAll('#mm-w .mm-cell').forEach(c => c.classList.remove('hl-w'));
+    document.querySelectorAll('#mm-res .mm-cell').forEach(c => c.classList.remove('hl-r'));
+
+    document.querySelectorAll('#mm-x .mm-cell[data-row="' + rowIndex + '"]').forEach(c => c.classList.add('hl-x'));
+    document.querySelectorAll('#mm-w .mm-cell').forEach(c => c.classList.add('hl-w'));
+    document.querySelector('#mm-res .mm-cell[data-res="' + rowIndex + '"]').classList.add('hl-r');
+
+    const captions = [
+      'Fila 1 de X (casa de 120m²) × columna de W → 190.000.',
+      'Fila 2 de X (casa de 85m²) × columna de W → 135.500.',
+      'Fila 3 de X (casa de 200m²) × columna de W → 310.000.'
+    ];
+    document.getElementById('mm-caption').innerHTML = captions[rowIndex];
+  }
+
+  // transpose
+  const trOriginal = [[120,3,2.5],[85,2,1.0],[200,4,5.0]];
+  let transposed = false;
+  function renderTranspose(){
+    const grid = document.getElementById('tr-grid');
+    const data = transposed ? trOriginal[0].map((_,c) => trOriginal.map(r => r[c])) : trOriginal;
+    const cols = data[0].length;
+    grid.style.gridTemplateColumns = 'repeat(' + cols + ', 64px)';
+    grid.innerHTML = '';
+    data.forEach(row => row.forEach(v => {
+      const cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.textContent = v;
+      grid.appendChild(cell);
+    }));
+    document.getElementById('tr-label').textContent = transposed ? 'X.T — shape (3, 3) con filas/columnas invertidas' : 'X — shape (3, 3)';
+  }
+  function toggleTranspose(){ transposed = !transposed; renderTranspose(); }
+  renderTranspose();
+</script>
+
+</body>
+</html>
