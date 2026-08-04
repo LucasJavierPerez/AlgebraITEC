@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="../favicon.ico" />
+    <!-- Preload is necessary because we show these images when we disconnect from the server,
+    but at that point we cannot load these images from the server -->
+    <link rel="preload" href="../assets/gradient-yHQUC_QB.png" as="image" />
+    <link rel="preload" href="../assets/noise-60BoTA8O.png" as="image" />
+    <!-- Preload the fonts -->
+    <link rel="preload" href="../assets/Lora-VariableFont_wght-CZceb_kH.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/PTSans-Regular-Bam3NpBI.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/PTSans-Bold-C_DwAp7Z.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Regular-CEsLFVD9.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Medium-D5MAsWEG.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Bold-C6PDArdf.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="a marimo app" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="manifest" href="../manifest.json" />
+
+    <script data-marimo="true">
+      function __resizeIframe(obj) {
+        const scrollbarHeight = 20; // Max between windows, mac, and linux
+
+        function setHeight() {
+          // Guard against race condition where iframe isn't ready
+          if (!obj.contentWindow?.document?.documentElement) {
+            return;
+          }
+          const element = obj.contentWindow.document.documentElement;
+          // If there is no vertical scrollbar, we don't need to resize the iframe
+          if (element.scrollHeight === element.clientHeight) {
+            return;
+          }
+
+          // Create a new height that includes the scrollbar height if it's visible
+          const hasHorizontalScrollbar = element.scrollWidth > element.clientWidth;
+          const newHeight = element.scrollHeight + (hasHorizontalScrollbar ? scrollbarHeight : 0);
+
+          // Only update the height if it's different from the current height
+          if (obj.style.height !== `${newHeight}px`) {
+            obj.style.height = `${newHeight}px`;
+          }
+        }
+
+        // Resize the iframe to the height of the content and bottom scrollbar height
+        setHeight();
+
+        // Resize the iframe when the content changes
+        const resizeObserver = new ResizeObserver((_entries) => {
+          setHeight();
+        });
+        // Only observe if iframe content is ready
+        if (obj.contentWindow?.document?.body) {
+          resizeObserver.observe(obj.contentWindow.document.body);
+        }
+      }
+    </script>
+    <marimo-filename hidden>notebook.py</marimo-filename>
+    <!-- TODO(Trevor): Legacy, required by VS Code plugin. Remove when plugin is updated (see marimo/server/_templates/template.py) -->
+    <marimo-version data-version="{{ version }}" hidden></marimo-version>
+    <marimo-user-config data-config="{{ user_config }}" hidden></marimo-user-config>
+    <marimo-server-token data-token="{{ server_token }}" hidden></marimo-server-token>
+    <!-- /TODO -->
+    <title>unidad1 marimo</title>
+    <script type="module" crossorigin src="../assets/index-CA2sQKnW.js"></script>
+    <link rel="modulepreload" crossorigin href="../assets/preload-helper-DdZsAcJe.js">
+    <link rel="modulepreload" crossorigin href="../assets/chunk-LvLJmgfZ.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-Bj1aDYRI.js">
+    <link rel="modulepreload" crossorigin href="../assets/compiler-runtime-B3qBwwSJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/jsx-runtime-BqBOg78p.js">
+    <link rel="modulepreload" crossorigin href="../assets/useEventListener-DvoEXWke.js">
+    <link rel="modulepreload" crossorigin href="../assets/defaultLocale-DPBdGRrH.js">
+    <link rel="modulepreload" crossorigin href="../assets/precisionRound-NX56vp6K.js">
+    <link rel="modulepreload" crossorigin href="../assets/defaultLocale-Lfi0pexn.js">
+    <link rel="modulepreload" crossorigin href="../assets/vega-loader.browser-xq8miGHn.js">
+    <link rel="modulepreload" crossorigin href="../assets/utils-DQRuLEof.js">
+    <link rel="modulepreload" crossorigin href="../assets/clsx-Dz_KRrWq.js">
+    <link rel="modulepreload" crossorigin href="../assets/cn-DCUzRj2J.js">
+    <link rel="modulepreload" crossorigin href="../assets/badge-DOX1Xxa9.js">
+    <link rel="modulepreload" crossorigin href="../assets/button-BbCh-29a.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-dom-CSu739Rf.js">
+    <link rel="modulepreload" crossorigin href="../assets/fullscreen-eipL3i3Y.js">
+    <link rel="modulepreload" crossorigin href="../assets/menu-items-DcP01QzW.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BdyjRhEt.js">
+    <link rel="modulepreload" crossorigin href="../assets/createLucideIcon-D5guW7EU.js">
+    <link rel="modulepreload" crossorigin href="../assets/check-BH35Ndha.js">
+    <link rel="modulepreload" crossorigin href="../assets/x-C-6liIBr.js">
+    <link rel="modulepreload" crossorigin href="../assets/select-DZcFyKFQ.js">
+    <link rel="modulepreload" crossorigin href="../assets/tooltip-DTV9tlSr.js">
+    <link rel="modulepreload" crossorigin href="../assets/use-toast-ERM44-k9.js">
+    <link rel="modulepreload" crossorigin href="../assets/useEvent-D91BmmQi.js">
+    <link rel="modulepreload" crossorigin href="../assets/invariant-BUdrueMv.js">
+    <link rel="modulepreload" crossorigin href="../assets/isObject-DvLSfCY5.js">
+    <link rel="modulepreload" crossorigin href="../assets/_baseFor-DKD1r8uL.js">
+    <link rel="modulepreload" crossorigin href="../assets/merge-_9WLTEyt.js">
+    <link rel="modulepreload" crossorigin href="../assets/zod-H_cgTO0M.js">
+    <link rel="modulepreload" crossorigin href="../assets/utils-Wvjk_Y4h.js">
+    <link rel="modulepreload" crossorigin href="../assets/Deferred-DWBqOhWa.js">
+    <link rel="modulepreload" crossorigin href="../assets/uuid-D_zLHhNi.js">
+    <link rel="modulepreload" crossorigin href="../assets/DeferredRequestRegistry-CzVJLtsG.js">
+    <link rel="modulepreload" crossorigin href="../assets/constants-DMpttj8Q.js">
+    <link rel="modulepreload" crossorigin href="../assets/session-DGdfs0bJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/config-C2lTvbuU.js">
+    <link rel="modulepreload" crossorigin href="../assets/requests-DIwGYs0l.js">
+    <link rel="modulepreload" crossorigin href="../assets/useLifecycle-DieWOfXE.js">
+    <link rel="modulepreload" crossorigin href="../assets/useNonce-DfoVjkkH.js">
+    <link rel="modulepreload" crossorigin href="../assets/useTheme-Kwyx4PvL.js">
+    <link rel="modulepreload" crossorigin href="../assets/arrays-DYDL-3-i.js">
+    <link rel="modulepreload" crossorigin href="../assets/strings-wdPMRf6Z.js">
+    <link rel="modulepreload" crossorigin href="../assets/once-DRroIaBz.js">
+    <link rel="modulepreload" crossorigin href="../assets/capabilities-A_KhFcGV.js">
+    <link rel="modulepreload" crossorigin href="../assets/createReducer-CI9qeK_X.js">
+    <link rel="modulepreload" crossorigin href="../assets/paths-SFhaqGlE.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BrR4M-k3.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-HlsDto3K.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-CHcznzB-.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BU26XwgJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-COs9gIu5.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BZr6MMV-.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-DCqxOggh.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-DkA__6UI.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-C9ZB41s2.js">
+    <link rel="modulepreload" crossorigin href="../assets/stex-lcoTi-7o.js">
+    <link rel="modulepreload" crossorigin href="../assets/toDate-B5A0DFEz.js">
+    <link rel="modulepreload" crossorigin href="../assets/purify.es-DvRMX74T.js">
+    <link rel="modulepreload" crossorigin href="../assets/cjs-BRGiG41H.js">
+    <link rel="modulepreload" crossorigin href="../assets/isSymbol-BT6B8Bon.js">
+    <link rel="modulepreload" crossorigin href="../assets/now-CsYTPAhW.js">
+    <link rel="modulepreload" crossorigin href="../assets/debounce-DhnxH9Rh.js">
+    <link rel="modulepreload" crossorigin href="../assets/database-zap-kIkTfzTX.js">
+    <link rel="modulepreload" crossorigin href="../assets/main-B0OX4z33.js">
+    <link rel="modulepreload" crossorigin href="../assets/cells-Dnu4nDoy.js">
+    <link rel="modulepreload" crossorigin href="../assets/ErrorBoundary-DyYDV0HI.js">
+    <link rel="modulepreload" crossorigin href="../assets/kbd-BJB2rf7K.js">
+    <link rel="modulepreload" crossorigin href="../assets/useInstallPackage-hKfTes-m.js">
+    <link rel="modulepreload" crossorigin href="../assets/alert-dialog-BqFLkbUc.js">
+    <link rel="modulepreload" crossorigin href="../assets/dialog-DqOQT_n4.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDebounce-_BZcy6gx.js">
+    <link rel="modulepreload" crossorigin href="../assets/numbers-mY4EY0yG.js">
+    <link rel="modulepreload" crossorigin href="../assets/SSRProvider-BIDQNg9Q.js">
+    <link rel="modulepreload" crossorigin href="../assets/context-C1Tm_47t.js">
+    <link rel="modulepreload" crossorigin href="../assets/useNumberFormatter-CW4V-fpE.js">
+    <link rel="modulepreload" crossorigin href="../assets/usePress-jH2RfcUG.js">
+    <link rel="modulepreload" crossorigin href="../assets/input-CVE-gIjt.js">
+    <link rel="modulepreload" crossorigin href="../assets/ImperativeModal-DEC1mXgV.js">
+    <link rel="modulepreload" crossorigin href="../assets/cell-link-PQYiMZw1.js">
+    <link rel="modulepreload" crossorigin href="../assets/multi-map-CUuNtzHt.js">
+    <link rel="modulepreload" crossorigin href="../assets/alert-DrHguQlr.js">
+    <link rel="modulepreload" crossorigin href="../assets/chevron-right-CG5QYXYk.js">
+    <link rel="modulepreload" crossorigin href="../assets/dropdown-menu-CR7cnzLX.js">
+    <link rel="modulepreload" crossorigin href="../assets/links-B8WzCnbo.js">
+    <link rel="modulepreload" crossorigin href="../assets/useRunCells-C0BPo9m1.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-Ch48HVPK.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-BwrPA9zQ.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-icon-BdZPgXgo.js">
+    <link rel="modulepreload" crossorigin href="../assets/RenderHTML-B5r25cP5.js">
+    <link rel="modulepreload" crossorigin href="../assets/datasource-I-LOgxeP.js">
+    <link rel="modulepreload" crossorigin href="../assets/state-D9EoHCkz.js">
+    <link rel="modulepreload" crossorigin href="../assets/package-B8oXOUM-.js">
+    <link rel="modulepreload" crossorigin href="../assets/sparkles-CC9Bko6a.js">
+    <link rel="modulepreload" crossorigin href="../assets/MarimoErrorOutput-XWqnhvJ6.js">
+    <link rel="modulepreload" crossorigin href="../assets/spinner-UuZAUjoP.js">
+    <link rel="modulepreload" crossorigin href="../assets/html-to-image-D6SgvARi.js">
+    <link rel="modulepreload" crossorigin href="../assets/focus-BaOnnMs-.js">
+    <link rel="modulepreload" crossorigin href="../assets/useAsyncData-C5i0IRVM.js">
+    <link rel="modulepreload" crossorigin href="../assets/LazyAnyLanguageCodeMirror-GdhQ07zA.js">
+    <link rel="modulepreload" crossorigin href="../assets/micromark-factory-space-BUQpMdx2.js">
+    <link rel="modulepreload" crossorigin href="../assets/chunk-5FQGJX7Z-BSzccEgu.js">
+    <link rel="modulepreload" crossorigin href="../assets/markdown-renderer-BQ-BQLiJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/command-2NPJCYDa.js">
+    <link rel="modulepreload" crossorigin href="../assets/field-DNlzfMKW.js">
+    <link rel="modulepreload" crossorigin href="../assets/popover-Bz_0Vkyf.js">
+    <link rel="modulepreload" crossorigin href="../assets/errors-iwK4b4VF.js">
+    <link rel="modulepreload" crossorigin href="../assets/download-B1QFVDP-.js">
+    <link rel="modulepreload" crossorigin href="../assets/table-DQE9hQzM.js">
+    <link rel="modulepreload" crossorigin href="../assets/useIframeCapabilities-DPVTppnD.js">
+    <link rel="modulepreload" crossorigin href="../assets/error-banner-CLO6LFll.js">
+    <link rel="modulepreload" crossorigin href="../assets/formats-BRq458WH.js">
+    <link rel="modulepreload" crossorigin href="../assets/en-US-C7vnqfgk.js">
+    <link rel="modulepreload" crossorigin href="../assets/isValid-DdlR4-BY.js">
+    <link rel="modulepreload" crossorigin href="../assets/dates-DI1TvEEK.js">
+    <link rel="modulepreload" crossorigin href="../assets/maps-n3GaPJwv.js">
+    <link rel="modulepreload" crossorigin href="../assets/extends-Dqvpuc10.js">
+    <link rel="modulepreload" crossorigin href="../assets/emotion-is-prop-valid.esm-Dangy3Bv.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDateFormatter-d3yglQmW.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-icons.esm--O4lBTlZ.js">
+    <link rel="modulepreload" crossorigin href="../assets/RSPContexts-Bk1r00gJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/table-6NxtGaCm.js">
+    <link rel="modulepreload" crossorigin href="../assets/ellipsis-KAhMaCIV.js">
+    <link rel="modulepreload" crossorigin href="../assets/external-link-BTNxSavU.js">
+    <link rel="modulepreload" crossorigin href="../assets/message-circle-1YLdnr8A.js">
+    <link rel="modulepreload" crossorigin href="../assets/trash-2-BJLYnZpG.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-resizable-panels.browser.esm-Ce2ksurd.js">
+    <link rel="modulepreload" crossorigin href="../assets/JsonOutput-05-R3eil.js">
+    <link rel="modulepreload" crossorigin href="../assets/chart-no-axes-column-nqk474t8.js">
+    <link rel="modulepreload" crossorigin href="../assets/square-function-blYaQso8.js">
+    <link rel="modulepreload" crossorigin href="../assets/spec-D1ptWKg6.js">
+    <link rel="modulepreload" crossorigin href="../assets/ellipsis-vertical-CkwWkOQL.js">
+    <link rel="modulepreload" crossorigin href="../assets/refresh-cw-a_9k9BK7.js">
+    <link rel="modulepreload" crossorigin href="../assets/tree-actions-DY8FUp3V.js">
+    <link rel="modulepreload" crossorigin href="../assets/components-zB5yT_R8.js">
+    <link rel="modulepreload" crossorigin href="../assets/column-preview-BLIWbdOX.js">
+    <link rel="modulepreload" crossorigin href="../assets/icons-8tfAri2V.js">
+    <link rel="modulepreload" crossorigin href="../assets/radio-group-rsi1ibXY.js">
+    <link rel="modulepreload" crossorigin href="../assets/floating-outline-DbOtUfo-.js">
+    <link rel="modulepreload" crossorigin href="../assets/objectWithoutPropertiesLoose-DoKw85w0.js">
+    <link rel="modulepreload" crossorigin href="../assets/esm-Cb2bnV6o.js">
+    <link rel="modulepreload" crossorigin href="../assets/eye-off-BT-KOYV5.js">
+    <link rel="modulepreload" crossorigin href="../assets/plus-CxkHs8QM.js">
+    <link rel="modulepreload" crossorigin href="../assets/readonly-python-code-BKYj8PNf.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-headphone-B3fuktN0.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-HTLbeC2b.js">
+    <link rel="modulepreload" crossorigin href="../assets/image-BIibSXT6.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-icons-B6DaZdP0.js">
+    <link rel="modulepreload" crossorigin href="../assets/switch-BtkQp293.js">
+    <link rel="modulepreload" crossorigin href="../assets/events-CBm-hwqS.js">
+    <link rel="modulepreload" crossorigin href="../assets/globals-CpVAcN9Z.js">
+    <link rel="modulepreload" crossorigin href="../assets/share-oorMPghT.js">
+    <link rel="modulepreload" crossorigin href="../assets/blob-3_FN0u9S.js">
+    <link rel="modulepreload" crossorigin href="../assets/memoize-Tp7rARFe.js">
+    <link rel="modulepreload" crossorigin href="../assets/get-C-qh_et5.js">
+    <link rel="modulepreload" crossorigin href="../assets/_baseSet-CxV9N1bc.js">
+    <link rel="modulepreload" crossorigin href="../assets/state-BXNNuw9g.js">
+    <link rel="modulepreload" crossorigin href="../assets/label-xHqFtfdz.js">
+    <link rel="modulepreload" crossorigin href="../assets/textarea-BBTcSr-i.js">
+    <link rel="modulepreload" crossorigin href="../assets/refresh-ccw-DLc784Sj.js">
+    <link rel="modulepreload" crossorigin href="../assets/form-BjUJP6PJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/renderShortcut-DK-VjfaX.js">
+    <link rel="modulepreload" crossorigin href="../assets/useBoolean-B8LMGUHl.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDeepCompareMemoize-CWcgQCbT.js">
+    <link rel="modulepreload" crossorigin href="../assets/types-BYwxXaSY.js">
+    <link rel="modulepreload" crossorigin href="../assets/semaphore-X3ApuO41.js">
+    <link rel="modulepreload" crossorigin href="../assets/fileToBase64-BeYUTUzO.js">
+    <link rel="modulepreload" crossorigin href="../assets/pathUtils-vgBYIo5B.js">
+    <link rel="modulepreload" crossorigin href="../assets/prop-types-DVDiRdwc.js">
+    <link rel="modulepreload" crossorigin href="../assets/es-au8YY-8E.js">
+    <link rel="modulepreload" crossorigin href="../assets/hasIn-DiS_ryrS.js">
+    <link rel="modulepreload" crossorigin href="../assets/flatten-Dl4V1ub3.js">
+    <link rel="modulepreload" crossorigin href="../assets/pick-DqWUNly1.js">
+    <link rel="modulepreload" crossorigin href="../assets/code-xml-CZN6vNxu.js">
+    <link rel="modulepreload" crossorigin href="../assets/house-D2ldnAB9.js">
+    <link rel="modulepreload" crossorigin href="../assets/square-rACnnz-q.js">
+    <link rel="modulepreload" crossorigin href="../assets/triangle-alert-CJ0ZIqcz.js">
+    <link rel="modulepreload" crossorigin href="../assets/bundle.esm-BXIlAZ6T.js">
+    <link rel="stylesheet" crossorigin href="../assets/cells-jmgGt1lS.css">
+    <link rel="stylesheet" crossorigin href="../assets/markdown-renderer-DdDKmWlR.css">
+    <link rel="stylesheet" crossorigin href="../assets/JsonOutput-B7vuddcd.css">
+    <link rel="stylesheet" crossorigin href="../assets/index-DH00kbhV.css">
+  <marimo-wasm hidden=""></marimo-wasm>
+    <script>
+        if (window.location.protocol === 'file:') {
+            alert('Warning: This file must be served by an HTTP server to function correctly.');
+        }
+    </script>
+    
+    <style>
+        #save-button {
+            display: none !important;
+        }
+        #filename-input {
+            display: none !important;
+        }
+    </style>
+    
+<script data-marimo="true">
+    Object.defineProperty(window, "__MARIMO_EXPORT_CONTEXT__", {
+        value: Object.freeze({
+            trusted: true,
+            notebookCode: "# /// script\n# requires-python = \"\u003E=3.12\"\n# dependencies = [\n#     \"marimo\u003E=0.23.3\",\n#     \"matplotlib\u003E=3.10.9\",\n#     \"numpy\u003E=2.4.6\",\n# ]\n# ///\n\nimport marimo\n\n__generated_with = \"0.23.8\"\napp = marimo.App(width=\"medium\")\n\n\n@app.cell\ndef _():\n    import marimo as mo\n    import numpy as np\n    import matplotlib.pyplot as plt\n\n    return mo, np, plt\n\n\n@app.cell\ndef _(mo):\n    mo.md(r\"\"\"\n    # Unidad 1: Vectores, Matrices y Tensores\n    ### Matem\u00e1ticas para An\u00e1lisis de Datos \u2014 ITEC\n\n    **Dataset del curso:** precios de casas con features `size_m2`, `rooms`, `distance_km`, `price_usd`\n\n    Us\u00e1 los controles interactivos para explorar c\u00f3mo cambia la estructura de los datos.\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 1. El vector: una sola observaci\u00f3n\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    # mo.ui.dictionary (y no un dict comun) es lo que hace que mover un slider\n    # vuelva a ejecutar las celdas que dependen de el\n    casa_data = mo.ui.dictionary({\n        'size_m2':     mo.ui.slider(30, 300, value=120, step=5,  label=\"Tama\u00f1o (m\u00b2)\"),\n        'rooms':       mo.ui.slider(1,  6,   value=3,   step=1,  label=\"Habitaciones\"),\n        'distance_km': mo.ui.slider(0.1, 15, value=2.5, step=0.1, label=\"Distancia al centro (km)\"),\n        'price_usd':   mo.ui.slider(50000, 500000, value=180000, step=5000, label=\"Precio (USD)\")\n    })\n    mo.md(\"### Constru\u00ed tu propia casa:\")\n    return (casa_data,)\n\n\n@app.cell\ndef _(casa_data, mo):\n    mo.vstack([\n        casa_data['size_m2'],\n        casa_data['rooms'],\n        casa_data['distance_km'],\n        casa_data['price_usd'],\n    ])\n    return\n\n\n@app.cell\ndef _(casa_data, mo, np):\n    vector = np.array([\n        float(casa_data.value['size_m2']),\n        float(casa_data.value['rooms']),\n        float(casa_data.value['distance_km']),\n        float(casa_data.value['price_usd']),\n    ])\n    mo.md(\n        f\"\"\"\n        **Vector resultante:**\n        ```\n        casa = {list(vector)}\n        shape = {vector.shape}\n        ndim  = {vector.ndim}\n        dtype = {vector.dtype}\n        ```\n        Cada elemento es una coordenada de la casa en el espacio de features.\n        La norma del vector es **{np.linalg.norm(vector[:3]):.2f}** (en el espacio m\u00b2/hab/km).\n        \"\"\"\n    )\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 2. La Matriz: el dataset completo\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    n_casas_slider = mo.ui.slider(2, 10, value=5, step=1, label=\"N\u00famero de casas en el dataset\")\n    n_casas_slider\n    return (n_casas_slider,)\n\n\n@app.cell\ndef _(mo, n_casas_slider, np):\n    rng_casas = np.random.default_rng(42)\n    n_casas   = n_casas_slider.value\n    sizes     = rng_casas.integers(50, 220, n_casas).astype(float)\n    rooms_arr = rng_casas.integers(1, 5, n_casas).astype(float)\n    dists     = np.round(rng_casas.uniform(0.3, 6.0, n_casas), 1)\n    prices    = (sizes * 1100 + rooms_arr * 8000 - dists * 2500 + rng_casas.normal(0, 5000, n_casas)).round(-3)\n\n    dataset = np.column_stack([sizes, rooms_arr, dists, prices])\n    X_matrix = dataset[:, :3]\n    y_vector  = dataset[:, 3]\n\n    tabla_header = \"| Casa | size_m2 | rooms | dist_km | price_usd |\"\n    tabla_sep    = \"|---|---|---|---|---|\"\n    tabla_rows   = [f\"| {i} | {int(sizes[i])} | {int(rooms_arr[i])} | {dists[i]} | ${int(prices[i]):,} |\" for i in range(n_casas)]\n    tabla_md = \"\\n\".join([tabla_header, tabla_sep] + tabla_rows)\n\n    # Sin indentaci\u00f3n: mo.md() hace dedent y una tabla interpolada dentro de un\n    # literal indentado se rompe (markdown la lee como bloque de c\u00f3digo).\n    mo.md(\"\\n\".join([\n        f\"**Matriz generada** \u2014 `shape = {dataset.shape}` ({n_casas} casas \u00d7 4 features)\",\n        \"\",\n        tabla_md,\n        \"\",\n        \"```python\",\n        f\"X.shape = {X_matrix.shape}   # features\",\n        f\"y.shape = {y_vector.shape}    # precios\",\n        \"```\",\n    ]))\n    return X_matrix, dataset, dists, n_casas, prices, rooms_arr, sizes\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 3. Indexaci\u00f3n y Slicing\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo, n_casas):\n    fila_idx = mo.ui.slider(0, n_casas - 1, value=0, step=1, label=\"Seleccionar casa (fila)\")\n    fila_idx\n    return (fila_idx,)\n\n\n@app.cell\ndef _(X_matrix, dataset, dists, fila_idx, mo, np, prices, rooms_arr, sizes):\n    # Clamp: si el slider de casas baja, fila_idx puede quedar fuera de rango\n    # y el IndexError se propaga a todas las celdas dependientes.\n    i_sel = min(int(fila_idx.value), dataset.shape[0] - 1)\n    fila_sel = dataset[i_sel]\n    norma_fila = np.linalg.norm(X_matrix[i_sel])\n\n    mo.md(\n        f\"\"\"\n        **Casa seleccionada (\u00edndice {i_sel}):**\n        ```\n        dataset[{i_sel}] = {list(fila_sel.astype(int))}\n        ```\n        - Tama\u00f1o: `{int(sizes[i_sel])}` m\u00b2\n        - Habitaciones: `{int(rooms_arr[i_sel])}`\n        - Distancia: `{dists[i_sel]}` km\n        - Precio: `${int(prices[i_sel]):,}`\n        - Norma de features: `{norma_fila:.2f}`\n\n        **Slicing \u00fatil:**\n        ```python\n        dataset[{i_sel}]      # esta fila completa\n        dataset[:, 0]        # todos los tama\u00f1os\n        dataset[dataset[:, 0] \u003E 100]  # casas con m\u00e1s de 100m\u00b2\n        ```\n        \"\"\"\n    )\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 4. Tensores \u2014 Arrays 3D+\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    n_images_slider = mo.ui.slider(1, 6, value=3, step=1, label=\"N\u00famero de im\u00e1genes (batch)\")\n    img_size_slider = mo.ui.slider(4, 16, value=8, step=2, label=\"Tama\u00f1o de imagen (p\u00edxeles)\")\n    mo.vstack([n_images_slider, img_size_slider])\n    return img_size_slider, n_images_slider\n\n\n@app.cell\ndef _(img_size_slider, mo, n_images_slider, np, plt):\n    n_imgs = n_images_slider.value\n    img_s  = img_size_slider.value\n    rng_imgs = np.random.default_rng(7)\n    tensor = rng_imgs.integers(0, 256, size=(n_imgs, img_s, img_s))\n\n    fig, axes = plt.subplots(1, n_imgs, figsize=(n_imgs * 2.5, 2.5))\n    if n_imgs == 1:\n        axes = [axes]\n    for idx_img, ax in enumerate(axes):\n        ax.imshow(tensor[idx_img], cmap='gray', vmin=0, vmax=255)\n        ax.set_title(f'img {idx_img}', fontsize=9)\n        ax.axis('off')\n    plt.suptitle(f'Tensor shape: {tensor.shape}', fontsize=10)\n    plt.tight_layout()\n\n    mo.md(\n        f\"\"\"\n        **Tensor creado:**\n        ```python\n        tensor.shape = {tensor.shape}\n        # {n_imgs} im\u00e1genes \u00d7 {img_s} filas \u00d7 {img_s} columnas\n        tensor.size  = {tensor.size}  # total de elementos\n        ```\n        Aplanado para una red neuronal: `tensor.reshape({n_imgs}, -1)` \u2192 `shape ({n_imgs}, {img_s*img_s})`\n        \"\"\"\n    )\n    return (fig,)\n\n\n@app.cell\ndef _(fig):\n    fig\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 5. Reshape y Flatten\n\n    `reshape` cambia la forma sin mover datos. `-1` significa \"calcul\u00e1 esta dimensi\u00f3n\".\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(X_matrix, mo):\n    flat = X_matrix.flatten()\n    restaurado = flat.reshape(-1, 3)\n\n    pasos = f\"\"\"\n    **X_matrix.shape** = `{X_matrix.shape}`\n\n    **Despu\u00e9s de `.flatten()`:**\n    ```\n    shape = {flat.shape}\n    datos = {flat[:9].round(1).tolist()}...\n    ```\n\n    **Despu\u00e9s de `.reshape(-1, 3)`:**\n    ```\n    shape = {restaurado.shape}   \u2190 volvemos a la forma original\n    ```\n\n    **Regla:** `{X_matrix.shape[0]} \u00d7 {X_matrix.shape[1]} = {X_matrix.size}` elementos \u2014 el reshape no agrega ni quita datos.\n    \"\"\"\n    mo.md(pasos)\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## Resumen conceptual\n\n    | Estructura | ndim | Ejemplo en datos |\n    |---|---|---|\n    | Vector 1D | 1 | Una casa (una fila) |\n    | Matriz 2D | 2 | El dataset completo |\n    | Tensor 3D | 3 | Batch de im\u00e1genes |\n    | Tensor 4D | 4 | Im\u00e1genes a color (RGB) |\n\n    **Atributos clave:** `shape`, `size`, `ndim`, `dtype`\n    \"\"\")\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
+        }),
+        writable: false,
+        configurable: false,
+    });
+</script>
+<marimo-code hidden="">%23%20%2F%2F%2F%20script%0A%23%20requires-python%20%3D%20%22%3E%3D3.12%22%0A%23%20dependencies%20%3D%20%5B%0A%23%20%20%20%20%20%22marimo%3E%3D0.23.3%22%2C%0A%23%20%20%20%20%20%22matplotlib%3E%3D3.10.9%22%2C%0A%23%20%20%20%20%20%22numpy%3E%3D2.4.6%22%2C%0A%23%20%5D%0A%23%20%2F%2F%2F%0A%0Aimport%20marimo%0A%0A__generated_with%20%3D%20%220.23.8%22%0Aapp%20%3D%20marimo.App(width%3D%22medium%22)%0A%0A%0A%40app.cell%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20numpy%20as%20np%0A%20%20%20%20import%20matplotlib.pyplot%20as%20plt%0A%0A%20%20%20%20return%20mo%2C%20np%2C%20plt%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%20Unidad%201%3A%20Vectores%2C%20Matrices%20y%20Tensores%0A%20%20%20%20%23%23%23%20Matem%C3%A1ticas%20para%20An%C3%A1lisis%20de%20Datos%20%E2%80%94%20ITEC%0A%0A%20%20%20%20**Dataset%20del%20curso%3A**%20precios%20de%20casas%20con%20features%20%60size_m2%60%2C%20%60rooms%60%2C%20%60distance_km%60%2C%20%60price_usd%60%0A%0A%20%20%20%20Us%C3%A1%20los%20controles%20interactivos%20para%20explorar%20c%C3%B3mo%20cambia%20la%20estructura%20de%20los%20datos.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%201.%20El%20vector%3A%20una%20sola%20observaci%C3%B3n%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20%23%20mo.ui.dictionary%20(y%20no%20un%20dict%20comun)%20es%20lo%20que%20hace%20que%20mover%20un%20slider%0A%20%20%20%20%23%20vuelva%20a%20ejecutar%20las%20celdas%20que%20dependen%20de%20el%0A%20%20%20%20casa_data%20%3D%20mo.ui.dictionary(%7B%0A%20%20%20%20%20%20%20%20'size_m2'%3A%20%20%20%20%20mo.ui.slider(30%2C%20300%2C%20value%3D120%2C%20step%3D5%2C%20%20label%3D%22Tama%C3%B1o%20(m%C2%B2)%22)%2C%0A%20%20%20%20%20%20%20%20'rooms'%3A%20%20%20%20%20%20%20mo.ui.slider(1%2C%20%206%2C%20%20%20value%3D3%2C%20%20%20step%3D1%2C%20%20label%3D%22Habitaciones%22)%2C%0A%20%20%20%20%20%20%20%20'distance_km'%3A%20mo.ui.slider(0.1%2C%2015%2C%20value%3D2.5%2C%20step%3D0.1%2C%20label%3D%22Distancia%20al%20centro%20(km)%22)%2C%0A%20%20%20%20%20%20%20%20'price_usd'%3A%20%20%20mo.ui.slider(50000%2C%20500000%2C%20value%3D180000%2C%20step%3D5000%2C%20label%3D%22Precio%20(USD)%22)%0A%20%20%20%20%7D)%0A%20%20%20%20mo.md(%22%23%23%23%20Constru%C3%AD%20tu%20propia%20casa%3A%22)%0A%20%20%20%20return%20(casa_data%2C)%0A%0A%0A%40app.cell%0Adef%20_(casa_data%2C%20mo)%3A%0A%20%20%20%20mo.vstack(%5B%0A%20%20%20%20%20%20%20%20casa_data%5B'size_m2'%5D%2C%0A%20%20%20%20%20%20%20%20casa_data%5B'rooms'%5D%2C%0A%20%20%20%20%20%20%20%20casa_data%5B'distance_km'%5D%2C%0A%20%20%20%20%20%20%20%20casa_data%5B'price_usd'%5D%2C%0A%20%20%20%20%5D)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(casa_data%2C%20mo%2C%20np)%3A%0A%20%20%20%20vector%20%3D%20np.array(%5B%0A%20%20%20%20%20%20%20%20float(casa_data.value%5B'size_m2'%5D)%2C%0A%20%20%20%20%20%20%20%20float(casa_data.value%5B'rooms'%5D)%2C%0A%20%20%20%20%20%20%20%20float(casa_data.value%5B'distance_km'%5D)%2C%0A%20%20%20%20%20%20%20%20float(casa_data.value%5B'price_usd'%5D)%2C%0A%20%20%20%20%5D)%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20f%22%22%22%0A%20%20%20%20%20%20%20%20**Vector%20resultante%3A**%0A%20%20%20%20%20%20%20%20%60%60%60%0A%20%20%20%20%20%20%20%20casa%20%3D%20%7Blist(vector)%7D%0A%20%20%20%20%20%20%20%20shape%20%3D%20%7Bvector.shape%7D%0A%20%20%20%20%20%20%20%20ndim%20%20%3D%20%7Bvector.ndim%7D%0A%20%20%20%20%20%20%20%20dtype%20%3D%20%7Bvector.dtype%7D%0A%20%20%20%20%20%20%20%20%60%60%60%0A%20%20%20%20%20%20%20%20Cada%20elemento%20es%20una%20coordenada%20de%20la%20casa%20en%20el%20espacio%20de%20features.%0A%20%20%20%20%20%20%20%20La%20norma%20del%20vector%20es%20**%7Bnp.linalg.norm(vector%5B%3A3%5D)%3A.2f%7D**%20(en%20el%20espacio%20m%C2%B2%2Fhab%2Fkm).%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%202.%20La%20Matriz%3A%20el%20dataset%20completo%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20n_casas_slider%20%3D%20mo.ui.slider(2%2C%2010%2C%20value%3D5%2C%20step%3D1%2C%20label%3D%22N%C3%BAmero%20de%20casas%20en%20el%20dataset%22)%0A%20%20%20%20n_casas_slider%0A%20%20%20%20return%20(n_casas_slider%2C)%0A%0A%0A%40app.cell%0Adef%20_(mo%2C%20n_casas_slider%2C%20np)%3A%0A%20%20%20%20rng_casas%20%3D%20np.random.default_rng(42)%0A%20%20%20%20n_casas%20%20%20%3D%20n_casas_slider.value%0A%20%20%20%20sizes%20%20%20%20%20%3D%20rng_casas.integers(50%2C%20220%2C%20n_casas).astype(float)%0A%20%20%20%20rooms_arr%20%3D%20rng_casas.integers(1%2C%205%2C%20n_casas).astype(float)%0A%20%20%20%20dists%20%20%20%20%20%3D%20np.round(rng_casas.uniform(0.3%2C%206.0%2C%20n_casas)%2C%201)%0A%20%20%20%20prices%20%20%20%20%3D%20(sizes%20*%201100%20%2B%20rooms_arr%20*%208000%20-%20dists%20*%202500%20%2B%20rng_casas.normal(0%2C%205000%2C%20n_casas)).round(-3)%0A%0A%20%20%20%20dataset%20%3D%20np.column_stack(%5Bsizes%2C%20rooms_arr%2C%20dists%2C%20prices%5D)%0A%20%20%20%20X_matrix%20%3D%20dataset%5B%3A%2C%20%3A3%5D%0A%20%20%20%20y_vector%20%20%3D%20dataset%5B%3A%2C%203%5D%0A%0A%20%20%20%20tabla_header%20%3D%20%22%7C%20Casa%20%7C%20size_m2%20%7C%20rooms%20%7C%20dist_km%20%7C%20price_usd%20%7C%22%0A%20%20%20%20tabla_sep%20%20%20%20%3D%20%22%7C---%7C---%7C---%7C---%7C---%7C%22%0A%20%20%20%20tabla_rows%20%20%20%3D%20%5Bf%22%7C%20%7Bi%7D%20%7C%20%7Bint(sizes%5Bi%5D)%7D%20%7C%20%7Bint(rooms_arr%5Bi%5D)%7D%20%7C%20%7Bdists%5Bi%5D%7D%20%7C%20%24%7Bint(prices%5Bi%5D)%3A%2C%7D%20%7C%22%20for%20i%20in%20range(n_casas)%5D%0A%20%20%20%20tabla_md%20%3D%20%22%5Cn%22.join(%5Btabla_header%2C%20tabla_sep%5D%20%2B%20tabla_rows)%0A%0A%20%20%20%20%23%20Sin%20indentaci%C3%B3n%3A%20mo.md()%20hace%20dedent%20y%20una%20tabla%20interpolada%20dentro%20de%20un%0A%20%20%20%20%23%20literal%20indentado%20se%20rompe%20(markdown%20la%20lee%20como%20bloque%20de%20c%C3%B3digo).%0A%20%20%20%20mo.md(%22%5Cn%22.join(%5B%0A%20%20%20%20%20%20%20%20f%22**Matriz%20generada**%20%E2%80%94%20%60shape%20%3D%20%7Bdataset.shape%7D%60%20(%7Bn_casas%7D%20casas%20%C3%97%204%20features)%22%2C%0A%20%20%20%20%20%20%20%20%22%22%2C%0A%20%20%20%20%20%20%20%20tabla_md%2C%0A%20%20%20%20%20%20%20%20%22%22%2C%0A%20%20%20%20%20%20%20%20%22%60%60%60python%22%2C%0A%20%20%20%20%20%20%20%20f%22X.shape%20%3D%20%7BX_matrix.shape%7D%20%20%20%23%20features%22%2C%0A%20%20%20%20%20%20%20%20f%22y.shape%20%3D%20%7By_vector.shape%7D%20%20%20%20%23%20precios%22%2C%0A%20%20%20%20%20%20%20%20%22%60%60%60%22%2C%0A%20%20%20%20%5D))%0A%20%20%20%20return%20X_matrix%2C%20dataset%2C%20dists%2C%20n_casas%2C%20prices%2C%20rooms_arr%2C%20sizes%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%203.%20Indexaci%C3%B3n%20y%20Slicing%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo%2C%20n_casas)%3A%0A%20%20%20%20fila_idx%20%3D%20mo.ui.slider(0%2C%20n_casas%20-%201%2C%20value%3D0%2C%20step%3D1%2C%20label%3D%22Seleccionar%20casa%20(fila)%22)%0A%20%20%20%20fila_idx%0A%20%20%20%20return%20(fila_idx%2C)%0A%0A%0A%40app.cell%0Adef%20_(X_matrix%2C%20dataset%2C%20dists%2C%20fila_idx%2C%20mo%2C%20np%2C%20prices%2C%20rooms_arr%2C%20sizes)%3A%0A%20%20%20%20%23%20Clamp%3A%20si%20el%20slider%20de%20casas%20baja%2C%20fila_idx%20puede%20quedar%20fuera%20de%20rango%0A%20%20%20%20%23%20y%20el%20IndexError%20se%20propaga%20a%20todas%20las%20celdas%20dependientes.%0A%20%20%20%20i_sel%20%3D%20min(int(fila_idx.value)%2C%20dataset.shape%5B0%5D%20-%201)%0A%20%20%20%20fila_sel%20%3D%20dataset%5Bi_sel%5D%0A%20%20%20%20norma_fila%20%3D%20np.linalg.norm(X_matrix%5Bi_sel%5D)%0A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20f%22%22%22%0A%20%20%20%20%20%20%20%20**Casa%20seleccionada%20(%C3%ADndice%20%7Bi_sel%7D)%3A**%0A%20%20%20%20%20%20%20%20%60%60%60%0A%20%20%20%20%20%20%20%20dataset%5B%7Bi_sel%7D%5D%20%3D%20%7Blist(fila_sel.astype(int))%7D%0A%20%20%20%20%20%20%20%20%60%60%60%0A%20%20%20%20%20%20%20%20-%20Tama%C3%B1o%3A%20%60%7Bint(sizes%5Bi_sel%5D)%7D%60%20m%C2%B2%0A%20%20%20%20%20%20%20%20-%20Habitaciones%3A%20%60%7Bint(rooms_arr%5Bi_sel%5D)%7D%60%0A%20%20%20%20%20%20%20%20-%20Distancia%3A%20%60%7Bdists%5Bi_sel%5D%7D%60%20km%0A%20%20%20%20%20%20%20%20-%20Precio%3A%20%60%24%7Bint(prices%5Bi_sel%5D)%3A%2C%7D%60%0A%20%20%20%20%20%20%20%20-%20Norma%20de%20features%3A%20%60%7Bnorma_fila%3A.2f%7D%60%0A%0A%20%20%20%20%20%20%20%20**Slicing%20%C3%BAtil%3A**%0A%20%20%20%20%20%20%20%20%60%60%60python%0A%20%20%20%20%20%20%20%20dataset%5B%7Bi_sel%7D%5D%20%20%20%20%20%20%23%20esta%20fila%20completa%0A%20%20%20%20%20%20%20%20dataset%5B%3A%2C%200%5D%20%20%20%20%20%20%20%20%23%20todos%20los%20tama%C3%B1os%0A%20%20%20%20%20%20%20%20dataset%5Bdataset%5B%3A%2C%200%5D%20%3E%20100%5D%20%20%23%20casas%20con%20m%C3%A1s%20de%20100m%C2%B2%0A%20%20%20%20%20%20%20%20%60%60%60%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%204.%20Tensores%20%E2%80%94%20Arrays%203D%2B%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20n_images_slider%20%3D%20mo.ui.slider(1%2C%206%2C%20value%3D3%2C%20step%3D1%2C%20label%3D%22N%C3%BAmero%20de%20im%C3%A1genes%20(batch)%22)%0A%20%20%20%20img_size_slider%20%3D%20mo.ui.slider(4%2C%2016%2C%20value%3D8%2C%20step%3D2%2C%20label%3D%22Tama%C3%B1o%20de%20imagen%20(p%C3%ADxeles)%22)%0A%20%20%20%20mo.vstack(%5Bn_images_slider%2C%20img_size_slider%5D)%0A%20%20%20%20return%20img_size_slider%2C%20n_images_slider%0A%0A%0A%40app.cell%0Adef%20_(img_size_slider%2C%20mo%2C%20n_images_slider%2C%20np%2C%20plt)%3A%0A%20%20%20%20n_imgs%20%3D%20n_images_slider.value%0A%20%20%20%20img_s%20%20%3D%20img_size_slider.value%0A%20%20%20%20rng_imgs%20%3D%20np.random.default_rng(7)%0A%20%20%20%20tensor%20%3D%20rng_imgs.integers(0%2C%20256%2C%20size%3D(n_imgs%2C%20img_s%2C%20img_s))%0A%0A%20%20%20%20fig%2C%20axes%20%3D%20plt.subplots(1%2C%20n_imgs%2C%20figsize%3D(n_imgs%20*%202.5%2C%202.5))%0A%20%20%20%20if%20n_imgs%20%3D%3D%201%3A%0A%20%20%20%20%20%20%20%20axes%20%3D%20%5Baxes%5D%0A%20%20%20%20for%20idx_img%2C%20ax%20in%20enumerate(axes)%3A%0A%20%20%20%20%20%20%20%20ax.imshow(tensor%5Bidx_img%5D%2C%20cmap%3D'gray'%2C%20vmin%3D0%2C%20vmax%3D255)%0A%20%20%20%20%20%20%20%20ax.set_title(f'img%20%7Bidx_img%7D'%2C%20fontsize%3D9)%0A%20%20%20%20%20%20%20%20ax.axis('off')%0A%20%20%20%20plt.suptitle(f'Tensor%20shape%3A%20%7Btensor.shape%7D'%2C%20fontsize%3D10)%0A%20%20%20%20plt.tight_layout()%0A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20f%22%22%22%0A%20%20%20%20%20%20%20%20**Tensor%20creado%3A**%0A%20%20%20%20%20%20%20%20%60%60%60python%0A%20%20%20%20%20%20%20%20tensor.shape%20%3D%20%7Btensor.shape%7D%0A%20%20%20%20%20%20%20%20%23%20%7Bn_imgs%7D%20im%C3%A1genes%20%C3%97%20%7Bimg_s%7D%20filas%20%C3%97%20%7Bimg_s%7D%20columnas%0A%20%20%20%20%20%20%20%20tensor.size%20%20%3D%20%7Btensor.size%7D%20%20%23%20total%20de%20elementos%0A%20%20%20%20%20%20%20%20%60%60%60%0A%20%20%20%20%20%20%20%20Aplanado%20para%20una%20red%20neuronal%3A%20%60tensor.reshape(%7Bn_imgs%7D%2C%20-1)%60%20%E2%86%92%20%60shape%20(%7Bn_imgs%7D%2C%20%7Bimg_s*img_s%7D)%60%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%20(fig%2C)%0A%0A%0A%40app.cell%0Adef%20_(fig)%3A%0A%20%20%20%20fig%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%205.%20Reshape%20y%20Flatten%0A%0A%20%20%20%20%60reshape%60%20cambia%20la%20forma%20sin%20mover%20datos.%20%60-1%60%20significa%20%22calcul%C3%A1%20esta%20dimensi%C3%B3n%22.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(X_matrix%2C%20mo)%3A%0A%20%20%20%20flat%20%3D%20X_matrix.flatten()%0A%20%20%20%20restaurado%20%3D%20flat.reshape(-1%2C%203)%0A%0A%20%20%20%20pasos%20%3D%20f%22%22%22%0A%20%20%20%20**X_matrix.shape**%20%3D%20%60%7BX_matrix.shape%7D%60%0A%0A%20%20%20%20**Despu%C3%A9s%20de%20%60.flatten()%60%3A**%0A%20%20%20%20%60%60%60%0A%20%20%20%20shape%20%3D%20%7Bflat.shape%7D%0A%20%20%20%20datos%20%3D%20%7Bflat%5B%3A9%5D.round(1).tolist()%7D...%0A%20%20%20%20%60%60%60%0A%0A%20%20%20%20**Despu%C3%A9s%20de%20%60.reshape(-1%2C%203)%60%3A**%0A%20%20%20%20%60%60%60%0A%20%20%20%20shape%20%3D%20%7Brestaurado.shape%7D%20%20%20%E2%86%90%20volvemos%20a%20la%20forma%20original%0A%20%20%20%20%60%60%60%0A%0A%20%20%20%20**Regla%3A**%20%60%7BX_matrix.shape%5B0%5D%7D%20%C3%97%20%7BX_matrix.shape%5B1%5D%7D%20%3D%20%7BX_matrix.size%7D%60%20elementos%20%E2%80%94%20el%20reshape%20no%20agrega%20ni%20quita%20datos.%0A%20%20%20%20%22%22%22%0A%20%20%20%20mo.md(pasos)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%20Resumen%20conceptual%0A%0A%20%20%20%20%7C%20Estructura%20%7C%20ndim%20%7C%20Ejemplo%20en%20datos%20%7C%0A%20%20%20%20%7C---%7C---%7C---%7C%0A%20%20%20%20%7C%20Vector%201D%20%7C%201%20%7C%20Una%20casa%20(una%20fila)%20%7C%0A%20%20%20%20%7C%20Matriz%202D%20%7C%202%20%7C%20El%20dataset%20completo%20%7C%0A%20%20%20%20%7C%20Tensor%203D%20%7C%203%20%7C%20Batch%20de%20im%C3%A1genes%20%7C%0A%20%20%20%20%7C%20Tensor%204D%20%7C%204%20%7C%20Im%C3%A1genes%20a%20color%20(RGB)%20%7C%0A%0A%20%20%20%20**Atributos%20clave%3A**%20%60shape%60%2C%20%60size%60%2C%20%60ndim%60%2C%20%60dtype%60%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run()%0A</marimo-code></head>
+  <body>
+<a href="../../index.html" id="volver-al-indice">&larr;&nbsp; Volver al inicio</a>
+<style>
+#volver-al-indice{
+  position:fixed; top:16px; left:16px; z-index:99999;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; line-height:1; text-decoration:none;
+  color:#161A22; background:rgba(237,234,228,0.92);
+  border:1px solid rgba(22,26,34,0.28); border-radius:100px;
+  padding:9px 15px; backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(22,26,34,0.10);
+  transition:background .15s ease,border-color .15s ease;
+}
+#volver-al-indice:hover{ background:#fff; border-color:#4740E0; color:#4740E0; }
+@media print{ #volver-al-indice{ display:none; } }
+</style>
+
+    <div id="root"></div>
+    <!-- This is a portal for the data editor to render in -->
+    <div id="portal" data-testid="glide-portal" style="position: fixed; left: 0; top: 0; z-index: 9999"></div>
+    <script data-marimo="true">
+      Object.defineProperty(window, "__MARIMO_MOUNT_CONFIG__", {
+        value: Object.freeze({
+            "filename": "notebook.py",
+            "cwd": "",
+            "lspWorkspace": null,
+            "mode": "read",
+            "version": "0.23.8",
+            "serverToken": "unused",
+            "config": {"ai": {"custom_providers": {}, "models": {"custom_models": [], "displayed_models": []}}, "completion": {"activate_on_typing": true, "copilot": false, "signature_hint_on_typing": false}, "diagnostics": {"sql_linter": true}, "display": {"cell_output": "below", "code_editor_font_size": 14, "dataframes": "rich", "default_table_max_columns": 50, "default_table_page_size": 10, "default_width": "medium", "reference_highlighting": true, "theme": "light"}, "formatting": {"line_length": 79}, "keymap": {"overrides": {}, "preset": "default"}, "language_servers": {"pylsp": {"enable_flake8": false, "enable_mypy": true, "enable_pydocstyle": false, "enable_pyflakes": false, "enable_pylint": false, "enable_ruff": true, "enabled": false}}, "mcp": {"mcpServers": {}, "presets": []}, "package_management": {"manager": "pip"}, "runtime": {"auto_instantiate": false, "auto_reload": "off", "default_csv_encoding": "utf-8", "default_sql_output": "auto", "on_cell_change": "autorun", "output_max_bytes": 8000000, "reactive_tests": true, "show_tracebacks": false, "std_stream_max_bytes": 1000000, "watcher_on_save": "lazy"}, "save": {"autosave": "off", "autosave_delay": 1000, "format_on_save": false}, "server": {"browser": "default", "follow_symlink": false}, "snippets": {"custom_paths": [], "include_default_snippets": true}},
+            "configOverrides": {},
+            "appConfig": {"sql_output": "auto", "width": "medium"},
+            "view": {"showAppCode": false},
+            "notebook": null,
+            "session": null,
+            "runtimeConfig": null,
+        }),
+        writable: false,
+        configurable: false,
+      });
+    </script>
+  </body>
+</html>

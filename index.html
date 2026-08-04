@@ -134,6 +134,11 @@
   .chip:hover{background:var(--paper);border-color:var(--ink-soft);}
   .chip.principal{background:var(--ink);color:var(--paper);border-color:var(--ink);}
   .chip.principal:hover{background:var(--indigo);border-color:var(--indigo);}
+  .chip.vivo{
+    background:var(--sage-soft);border-color:rgba(62,142,95,0.45);color:#2F6B47;
+  }
+  .chip.vivo:hover{background:#fff;border-color:var(--sage);color:var(--sage);}
+  .chip .etq{opacity:0.55;}
 
   /* ---------- COMO USAR ---------- */
   .aparte{
@@ -199,7 +204,9 @@
          termina siendo un array — esta unidad es sobre entender esa idea.</p>
       <div class="card-links">
         <a class="chip principal" href="unidades/unidad1.html">Leer la unidad</a>
-        <a class="chip" href="notebooks/unidad1.ipynb" download>Notebook .ipynb</a>
+        <a class="chip vivo" href="marimo/unidad1/">Notebook interactivo</a>
+        <a class="chip" href="notebooks-html/unidad1.html">Ver el notebook</a>
+        <a class="chip" href="notebooks/unidad1.ipynb" download><span class="etq">Descargar</span> .ipynb</a>
       </div>
     </div>
 
@@ -212,7 +219,9 @@
          recorrerlos uno por uno.</p>
       <div class="card-links">
         <a class="chip principal" href="unidades/unidad2.html">Leer la unidad</a>
-        <a class="chip" href="notebooks/unidad2.ipynb" download>Notebook .ipynb</a>
+        <a class="chip vivo" href="marimo/unidad2/">Notebook interactivo</a>
+        <a class="chip" href="notebooks-html/unidad2.html">Ver el notebook</a>
+        <a class="chip" href="notebooks/unidad2.ipynb" download><span class="etq">Descargar</span> .ipynb</a>
       </div>
     </div>
 
@@ -225,7 +234,9 @@
          La derivada es lo que te dice hacia dónde moverte para llegar ahí.</p>
       <div class="card-links">
         <a class="chip principal" href="unidades/unidad3.html">Leer la unidad</a>
-        <a class="chip" href="notebooks/unidad3.ipynb" download>Notebook .ipynb</a>
+        <a class="chip vivo" href="marimo/unidad3/">Notebook interactivo</a>
+        <a class="chip" href="notebooks-html/unidad3.html">Ver el notebook</a>
+        <a class="chip" href="notebooks/unidad3.ipynb" download><span class="etq">Descargar</span> .ipynb</a>
       </div>
     </div>
 
@@ -238,7 +249,9 @@
          inclinación bajo tus pies y vas para el lado contrario a donde sube.</p>
       <div class="card-links">
         <a class="chip principal" href="unidades/unidad4.html">Leer la unidad</a>
-        <a class="chip" href="notebooks/unidad4.ipynb" download>Notebook .ipynb</a>
+        <a class="chip vivo" href="marimo/unidad4/">Notebook interactivo</a>
+        <a class="chip" href="notebooks-html/unidad4.html">Ver el notebook</a>
+        <a class="chip" href="notebooks/unidad4.ipynb" download><span class="etq">Descargar</span> .ipynb</a>
       </div>
     </div>
 
@@ -251,20 +264,26 @@
          y por qué esa distancia puede engañarte si no la calculás bien.</p>
       <div class="card-links">
         <a class="chip principal" href="unidades/unidad5.html">Leer la unidad</a>
-        <a class="chip" href="notebooks/unidad5.ipynb" download>Notebook .ipynb</a>
+        <a class="chip vivo" href="marimo/unidad5/">Notebook interactivo</a>
+        <a class="chip" href="notebooks-html/unidad5.html">Ver el notebook</a>
+        <a class="chip" href="notebooks/unidad5.ipynb" download><span class="etq">Descargar</span> .ipynb</a>
       </div>
     </div>
 
   </div>
 
   <section class="aparte">
-    <h3>Cómo usar los notebooks</h3>
-    <p>Los archivos <code>.ipynb</code> se descargan y se abren con Jupyter,
-       VS Code o Google Colab. Necesitás <code>numpy</code> y
-       <code>matplotlib</code> instalados.</p>
-    <p>Si no querés instalar nada, subilos a
+    <h3>Cuál abrir</h3>
+    <p><strong>Leer la unidad</strong> — el apunte de la clase, con explicaciones y
+       demos para tocar. Es por donde conviene empezar.</p>
+    <p><strong>Notebook interactivo</strong> — el notebook corriendo de verdad dentro
+       del navegador: movés los controles y el código se vuelve a ejecutar. No hay que
+       instalar nada. La primera carga tarda unos segundos porque baja Python.</p>
+    <p><strong>Ver el notebook</strong> — el notebook de Jupyter como página web, con
+       el código y los resultados ya calculados. Para leer, no se ejecuta.</p>
+    <p><strong>Descargar .ipynb</strong> — para abrirlo en Jupyter, VS Code o
        <a href="https://colab.research.google.com" target="_blank" rel="noopener">Google Colab</a>
-       y se ejecutan en el navegador.</p>
+       y modificarlo. Necesitás <code>numpy</code> y <code>matplotlib</code>.</p>
   </section>
 </main>
 

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="../favicon.ico" />
+    <!-- Preload is necessary because we show these images when we disconnect from the server,
+    but at that point we cannot load these images from the server -->
+    <link rel="preload" href="../assets/gradient-yHQUC_QB.png" as="image" />
+    <link rel="preload" href="../assets/noise-60BoTA8O.png" as="image" />
+    <!-- Preload the fonts -->
+    <link rel="preload" href="../assets/Lora-VariableFont_wght-CZceb_kH.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/PTSans-Regular-Bam3NpBI.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/PTSans-Bold-C_DwAp7Z.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Regular-CEsLFVD9.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Medium-D5MAsWEG.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Bold-C6PDArdf.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="a marimo app" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="manifest" href="../manifest.json" />
+
+    <script data-marimo="true">
+      function __resizeIframe(obj) {
+        const scrollbarHeight = 20; // Max between windows, mac, and linux
+
+        function setHeight() {
+          // Guard against race condition where iframe isn't ready
+          if (!obj.contentWindow?.document?.documentElement) {
+            return;
+          }
+          const element = obj.contentWindow.document.documentElement;
+          // If there is no vertical scrollbar, we don't need to resize the iframe
+          if (element.scrollHeight === element.clientHeight) {
+            return;
+          }
+
+          // Create a new height that includes the scrollbar height if it's visible
+          const hasHorizontalScrollbar = element.scrollWidth > element.clientWidth;
+          const newHeight = element.scrollHeight + (hasHorizontalScrollbar ? scrollbarHeight : 0);
+
+          // Only update the height if it's different from the current height
+          if (obj.style.height !== `${newHeight}px`) {
+            obj.style.height = `${newHeight}px`;
+          }
+        }
+
+        // Resize the iframe to the height of the content and bottom scrollbar height
+        setHeight();
+
+        // Resize the iframe when the content changes
+        const resizeObserver = new ResizeObserver((_entries) => {
+          setHeight();
+        });
+        // Only observe if iframe content is ready
+        if (obj.contentWindow?.document?.body) {
+          resizeObserver.observe(obj.contentWindow.document.body);
+        }
+      }
+    </script>
+    <marimo-filename hidden>notebook.py</marimo-filename>
+    <!-- TODO(Trevor): Legacy, required by VS Code plugin. Remove when plugin is updated (see marimo/server/_templates/template.py) -->
+    <marimo-version data-version="{{ version }}" hidden></marimo-version>
+    <marimo-user-config data-config="{{ user_config }}" hidden></marimo-user-config>
+    <marimo-server-token data-token="{{ server_token }}" hidden></marimo-server-token>
+    <!-- /TODO -->
+    <title>unidad3 marimo</title>
+    <script type="module" crossorigin src="../assets/index-CA2sQKnW.js"></script>
+    <link rel="modulepreload" crossorigin href="../assets/preload-helper-DdZsAcJe.js">
+    <link rel="modulepreload" crossorigin href="../assets/chunk-LvLJmgfZ.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-Bj1aDYRI.js">
+    <link rel="modulepreload" crossorigin href="../assets/compiler-runtime-B3qBwwSJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/jsx-runtime-BqBOg78p.js">
+    <link rel="modulepreload" crossorigin href="../assets/useEventListener-DvoEXWke.js">
+    <link rel="modulepreload" crossorigin href="../assets/defaultLocale-DPBdGRrH.js">
+    <link rel="modulepreload" crossorigin href="../assets/precisionRound-NX56vp6K.js">
+    <link rel="modulepreload" crossorigin href="../assets/defaultLocale-Lfi0pexn.js">
+    <link rel="modulepreload" crossorigin href="../assets/vega-loader.browser-xq8miGHn.js">
+    <link rel="modulepreload" crossorigin href="../assets/utils-DQRuLEof.js">
+    <link rel="modulepreload" crossorigin href="../assets/clsx-Dz_KRrWq.js">
+    <link rel="modulepreload" crossorigin href="../assets/cn-DCUzRj2J.js">
+    <link rel="modulepreload" crossorigin href="../assets/badge-DOX1Xxa9.js">
+    <link rel="modulepreload" crossorigin href="../assets/button-BbCh-29a.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-dom-CSu739Rf.js">
+    <link rel="modulepreload" crossorigin href="../assets/fullscreen-eipL3i3Y.js">
+    <link rel="modulepreload" crossorigin href="../assets/menu-items-DcP01QzW.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BdyjRhEt.js">
+    <link rel="modulepreload" crossorigin href="../assets/createLucideIcon-D5guW7EU.js">
+    <link rel="modulepreload" crossorigin href="../assets/check-BH35Ndha.js">
+    <link rel="modulepreload" crossorigin href="../assets/x-C-6liIBr.js">
+    <link rel="modulepreload" crossorigin href="../assets/select-DZcFyKFQ.js">
+    <link rel="modulepreload" crossorigin href="../assets/tooltip-DTV9tlSr.js">
+    <link rel="modulepreload" crossorigin href="../assets/use-toast-ERM44-k9.js">
+    <link rel="modulepreload" crossorigin href="../assets/useEvent-D91BmmQi.js">
+    <link rel="modulepreload" crossorigin href="../assets/invariant-BUdrueMv.js">
+    <link rel="modulepreload" crossorigin href="../assets/isObject-DvLSfCY5.js">
+    <link rel="modulepreload" crossorigin href="../assets/_baseFor-DKD1r8uL.js">
+    <link rel="modulepreload" crossorigin href="../assets/merge-_9WLTEyt.js">
+    <link rel="modulepreload" crossorigin href="../assets/zod-H_cgTO0M.js">
+    <link rel="modulepreload" crossorigin href="../assets/utils-Wvjk_Y4h.js">
+    <link rel="modulepreload" crossorigin href="../assets/Deferred-DWBqOhWa.js">
+    <link rel="modulepreload" crossorigin href="../assets/uuid-D_zLHhNi.js">
+    <link rel="modulepreload" crossorigin href="../assets/DeferredRequestRegistry-CzVJLtsG.js">
+    <link rel="modulepreload" crossorigin href="../assets/constants-DMpttj8Q.js">
+    <link rel="modulepreload" crossorigin href="../assets/session-DGdfs0bJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/config-C2lTvbuU.js">
+    <link rel="modulepreload" crossorigin href="../assets/requests-DIwGYs0l.js">
+    <link rel="modulepreload" crossorigin href="../assets/useLifecycle-DieWOfXE.js">
+    <link rel="modulepreload" crossorigin href="../assets/useNonce-DfoVjkkH.js">
+    <link rel="modulepreload" crossorigin href="../assets/useTheme-Kwyx4PvL.js">
+    <link rel="modulepreload" crossorigin href="../assets/arrays-DYDL-3-i.js">
+    <link rel="modulepreload" crossorigin href="../assets/strings-wdPMRf6Z.js">
+    <link rel="modulepreload" crossorigin href="../assets/once-DRroIaBz.js">
+    <link rel="modulepreload" crossorigin href="../assets/capabilities-A_KhFcGV.js">
+    <link rel="modulepreload" crossorigin href="../assets/createReducer-CI9qeK_X.js">
+    <link rel="modulepreload" crossorigin href="../assets/paths-SFhaqGlE.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BrR4M-k3.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-HlsDto3K.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-CHcznzB-.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BU26XwgJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-COs9gIu5.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BZr6MMV-.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-DCqxOggh.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-DkA__6UI.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-C9ZB41s2.js">
+    <link rel="modulepreload" crossorigin href="../assets/stex-lcoTi-7o.js">
+    <link rel="modulepreload" crossorigin href="../assets/toDate-B5A0DFEz.js">
+    <link rel="modulepreload" crossorigin href="../assets/purify.es-DvRMX74T.js">
+    <link rel="modulepreload" crossorigin href="../assets/cjs-BRGiG41H.js">
+    <link rel="modulepreload" crossorigin href="../assets/isSymbol-BT6B8Bon.js">
+    <link rel="modulepreload" crossorigin href="../assets/now-CsYTPAhW.js">
+    <link rel="modulepreload" crossorigin href="../assets/debounce-DhnxH9Rh.js">
+    <link rel="modulepreload" crossorigin href="../assets/database-zap-kIkTfzTX.js">
+    <link rel="modulepreload" crossorigin href="../assets/main-B0OX4z33.js">
+    <link rel="modulepreload" crossorigin href="../assets/cells-Dnu4nDoy.js">
+    <link rel="modulepreload" crossorigin href="../assets/ErrorBoundary-DyYDV0HI.js">
+    <link rel="modulepreload" crossorigin href="../assets/kbd-BJB2rf7K.js">
+    <link rel="modulepreload" crossorigin href="../assets/useInstallPackage-hKfTes-m.js">
+    <link rel="modulepreload" crossorigin href="../assets/alert-dialog-BqFLkbUc.js">
+    <link rel="modulepreload" crossorigin href="../assets/dialog-DqOQT_n4.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDebounce-_BZcy6gx.js">
+    <link rel="modulepreload" crossorigin href="../assets/numbers-mY4EY0yG.js">
+    <link rel="modulepreload" crossorigin href="../assets/SSRProvider-BIDQNg9Q.js">
+    <link rel="modulepreload" crossorigin href="../assets/context-C1Tm_47t.js">
+    <link rel="modulepreload" crossorigin href="../assets/useNumberFormatter-CW4V-fpE.js">
+    <link rel="modulepreload" crossorigin href="../assets/usePress-jH2RfcUG.js">
+    <link rel="modulepreload" crossorigin href="../assets/input-CVE-gIjt.js">
+    <link rel="modulepreload" crossorigin href="../assets/ImperativeModal-DEC1mXgV.js">
+    <link rel="modulepreload" crossorigin href="../assets/cell-link-PQYiMZw1.js">
+    <link rel="modulepreload" crossorigin href="../assets/multi-map-CUuNtzHt.js">
+    <link rel="modulepreload" crossorigin href="../assets/alert-DrHguQlr.js">
+    <link rel="modulepreload" crossorigin href="../assets/chevron-right-CG5QYXYk.js">
+    <link rel="modulepreload" crossorigin href="../assets/dropdown-menu-CR7cnzLX.js">
+    <link rel="modulepreload" crossorigin href="../assets/links-B8WzCnbo.js">
+    <link rel="modulepreload" crossorigin href="../assets/useRunCells-C0BPo9m1.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-Ch48HVPK.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-BwrPA9zQ.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-icon-BdZPgXgo.js">
+    <link rel="modulepreload" crossorigin href="../assets/RenderHTML-B5r25cP5.js">
+    <link rel="modulepreload" crossorigin href="../assets/datasource-I-LOgxeP.js">
+    <link rel="modulepreload" crossorigin href="../assets/state-D9EoHCkz.js">
+    <link rel="modulepreload" crossorigin href="../assets/package-B8oXOUM-.js">
+    <link rel="modulepreload" crossorigin href="../assets/sparkles-CC9Bko6a.js">
+    <link rel="modulepreload" crossorigin href="../assets/MarimoErrorOutput-XWqnhvJ6.js">
+    <link rel="modulepreload" crossorigin href="../assets/spinner-UuZAUjoP.js">
+    <link rel="modulepreload" crossorigin href="../assets/html-to-image-D6SgvARi.js">
+    <link rel="modulepreload" crossorigin href="../assets/focus-BaOnnMs-.js">
+    <link rel="modulepreload" crossorigin href="../assets/useAsyncData-C5i0IRVM.js">
+    <link rel="modulepreload" crossorigin href="../assets/LazyAnyLanguageCodeMirror-GdhQ07zA.js">
+    <link rel="modulepreload" crossorigin href="../assets/micromark-factory-space-BUQpMdx2.js">
+    <link rel="modulepreload" crossorigin href="../assets/chunk-5FQGJX7Z-BSzccEgu.js">
+    <link rel="modulepreload" crossorigin href="../assets/markdown-renderer-BQ-BQLiJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/command-2NPJCYDa.js">
+    <link rel="modulepreload" crossorigin href="../assets/field-DNlzfMKW.js">
+    <link rel="modulepreload" crossorigin href="../assets/popover-Bz_0Vkyf.js">
+    <link rel="modulepreload" crossorigin href="../assets/errors-iwK4b4VF.js">
+    <link rel="modulepreload" crossorigin href="../assets/download-B1QFVDP-.js">
+    <link rel="modulepreload" crossorigin href="../assets/table-DQE9hQzM.js">
+    <link rel="modulepreload" crossorigin href="../assets/useIframeCapabilities-DPVTppnD.js">
+    <link rel="modulepreload" crossorigin href="../assets/error-banner-CLO6LFll.js">
+    <link rel="modulepreload" crossorigin href="../assets/formats-BRq458WH.js">
+    <link rel="modulepreload" crossorigin href="../assets/en-US-C7vnqfgk.js">
+    <link rel="modulepreload" crossorigin href="../assets/isValid-DdlR4-BY.js">
+    <link rel="modulepreload" crossorigin href="../assets/dates-DI1TvEEK.js">
+    <link rel="modulepreload" crossorigin href="../assets/maps-n3GaPJwv.js">
+    <link rel="modulepreload" crossorigin href="../assets/extends-Dqvpuc10.js">
+    <link rel="modulepreload" crossorigin href="../assets/emotion-is-prop-valid.esm-Dangy3Bv.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDateFormatter-d3yglQmW.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-icons.esm--O4lBTlZ.js">
+    <link rel="modulepreload" crossorigin href="../assets/RSPContexts-Bk1r00gJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/table-6NxtGaCm.js">
+    <link rel="modulepreload" crossorigin href="../assets/ellipsis-KAhMaCIV.js">
+    <link rel="modulepreload" crossorigin href="../assets/external-link-BTNxSavU.js">
+    <link rel="modulepreload" crossorigin href="../assets/message-circle-1YLdnr8A.js">
+    <link rel="modulepreload" crossorigin href="../assets/trash-2-BJLYnZpG.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-resizable-panels.browser.esm-Ce2ksurd.js">
+    <link rel="modulepreload" crossorigin href="../assets/JsonOutput-05-R3eil.js">
+    <link rel="modulepreload" crossorigin href="../assets/chart-no-axes-column-nqk474t8.js">
+    <link rel="modulepreload" crossorigin href="../assets/square-function-blYaQso8.js">
+    <link rel="modulepreload" crossorigin href="../assets/spec-D1ptWKg6.js">
+    <link rel="modulepreload" crossorigin href="../assets/ellipsis-vertical-CkwWkOQL.js">
+    <link rel="modulepreload" crossorigin href="../assets/refresh-cw-a_9k9BK7.js">
+    <link rel="modulepreload" crossorigin href="../assets/tree-actions-DY8FUp3V.js">
+    <link rel="modulepreload" crossorigin href="../assets/components-zB5yT_R8.js">
+    <link rel="modulepreload" crossorigin href="../assets/column-preview-BLIWbdOX.js">
+    <link rel="modulepreload" crossorigin href="../assets/icons-8tfAri2V.js">
+    <link rel="modulepreload" crossorigin href="../assets/radio-group-rsi1ibXY.js">
+    <link rel="modulepreload" crossorigin href="../assets/floating-outline-DbOtUfo-.js">
+    <link rel="modulepreload" crossorigin href="../assets/objectWithoutPropertiesLoose-DoKw85w0.js">
+    <link rel="modulepreload" crossorigin href="../assets/esm-Cb2bnV6o.js">
+    <link rel="modulepreload" crossorigin href="../assets/eye-off-BT-KOYV5.js">
+    <link rel="modulepreload" crossorigin href="../assets/plus-CxkHs8QM.js">
+    <link rel="modulepreload" crossorigin href="../assets/readonly-python-code-BKYj8PNf.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-headphone-B3fuktN0.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-HTLbeC2b.js">
+    <link rel="modulepreload" crossorigin href="../assets/image-BIibSXT6.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-icons-B6DaZdP0.js">
+    <link rel="modulepreload" crossorigin href="../assets/switch-BtkQp293.js">
+    <link rel="modulepreload" crossorigin href="../assets/events-CBm-hwqS.js">
+    <link rel="modulepreload" crossorigin href="../assets/globals-CpVAcN9Z.js">
+    <link rel="modulepreload" crossorigin href="../assets/share-oorMPghT.js">
+    <link rel="modulepreload" crossorigin href="../assets/blob-3_FN0u9S.js">
+    <link rel="modulepreload" crossorigin href="../assets/memoize-Tp7rARFe.js">
+    <link rel="modulepreload" crossorigin href="../assets/get-C-qh_et5.js">
+    <link rel="modulepreload" crossorigin href="../assets/_baseSet-CxV9N1bc.js">
+    <link rel="modulepreload" crossorigin href="../assets/state-BXNNuw9g.js">
+    <link rel="modulepreload" crossorigin href="../assets/label-xHqFtfdz.js">
+    <link rel="modulepreload" crossorigin href="../assets/textarea-BBTcSr-i.js">
+    <link rel="modulepreload" crossorigin href="../assets/refresh-ccw-DLc784Sj.js">
+    <link rel="modulepreload" crossorigin href="../assets/form-BjUJP6PJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/renderShortcut-DK-VjfaX.js">
+    <link rel="modulepreload" crossorigin href="../assets/useBoolean-B8LMGUHl.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDeepCompareMemoize-CWcgQCbT.js">
+    <link rel="modulepreload" crossorigin href="../assets/types-BYwxXaSY.js">
+    <link rel="modulepreload" crossorigin href="../assets/semaphore-X3ApuO41.js">
+    <link rel="modulepreload" crossorigin href="../assets/fileToBase64-BeYUTUzO.js">
+    <link rel="modulepreload" crossorigin href="../assets/pathUtils-vgBYIo5B.js">
+    <link rel="modulepreload" crossorigin href="../assets/prop-types-DVDiRdwc.js">
+    <link rel="modulepreload" crossorigin href="../assets/es-au8YY-8E.js">
+    <link rel="modulepreload" crossorigin href="../assets/hasIn-DiS_ryrS.js">
+    <link rel="modulepreload" crossorigin href="../assets/flatten-Dl4V1ub3.js">
+    <link rel="modulepreload" crossorigin href="../assets/pick-DqWUNly1.js">
+    <link rel="modulepreload" crossorigin href="../assets/code-xml-CZN6vNxu.js">
+    <link rel="modulepreload" crossorigin href="../assets/house-D2ldnAB9.js">
+    <link rel="modulepreload" crossorigin href="../assets/square-rACnnz-q.js">
+    <link rel="modulepreload" crossorigin href="../assets/triangle-alert-CJ0ZIqcz.js">
+    <link rel="modulepreload" crossorigin href="../assets/bundle.esm-BXIlAZ6T.js">
+    <link rel="stylesheet" crossorigin href="../assets/cells-jmgGt1lS.css">
+    <link rel="stylesheet" crossorigin href="../assets/markdown-renderer-DdDKmWlR.css">
+    <link rel="stylesheet" crossorigin href="../assets/JsonOutput-B7vuddcd.css">
+    <link rel="stylesheet" crossorigin href="../assets/index-DH00kbhV.css">
+  <marimo-wasm hidden=""></marimo-wasm>
+    <script>
+        if (window.location.protocol === 'file:') {
+            alert('Warning: This file must be served by an HTTP server to function correctly.');
+        }
+    </script>
+    
+    <style>
+        #save-button {
+            display: none !important;
+        }
+        #filename-input {
+            display: none !important;
+        }
+    </style>
+    
+<script data-marimo="true">
+    Object.defineProperty(window, "__MARIMO_EXPORT_CONTEXT__", {
+        value: Object.freeze({
+            trusted: true,
+            notebookCode: "import marimo\n\n__generated_with = \"0.23.8\"\napp = marimo.App(width=\"medium\")\n\n\n@app.cell\ndef _():\n    import marimo as mo\n    import numpy as np\n    import matplotlib.pyplot as plt\n    import sympy as sp\n\n    return mo, np, plt, sp\n\n\n@app.cell\ndef _(mo):\n    mo.md(r\"\"\"\n    # Unidad 3: Funciones, Visualizaci\u00f3n y Tasas de Cambio\n    ### Matem\u00e1ticas para An\u00e1lisis de Datos \u2014 ITEC\n\n    La funci\u00f3n de costo es el concepto central del ML. Ac\u00e1 vas a ver\n    c\u00f3mo se ve, c\u00f3mo cambia, y c\u00f3mo la derivada nos dice hacia d\u00f3nde movernos.\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(np):\n    x_data = np.array([60.0, 85.0, 120.0, 150.0, 200.0])\n    y_data = np.array([120000.0, 150000.0, 180000.0, 210000.0, 250000.0])\n    return x_data, y_data\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 1. La Funci\u00f3n de Costo MSE \u2014 explor\u00e1 el paisaje\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    m_slider = mo.ui.slider(500.0, 2000.0, value=1200.0, step=10.0,\n                            label=\"m \u2014 pendiente (precio por m\u00b2)\")\n    b_slider = mo.ui.slider(-50000.0, 50000.0, value=0.0, step=1000.0,\n                            label=\"b \u2014 intercepto (USD)\")\n    mo.vstack([m_slider, b_slider])\n    return b_slider, m_slider\n\n\n@app.cell\ndef _(b_slider, m_slider, mo, np, plt, x_data, y_data):\n    m_val = m_slider.value\n    b_val = b_slider.value\n\n    y_pred = m_val * x_data + b_val\n    errores = y_pred - y_data\n    mse_actual = np.mean(errores**2)\n\n    fig1, axes = plt.subplots(1, 2, figsize=(13, 5))\n\n    # Ajuste del modelo\n    x_linea = np.linspace(50, 220, 200)\n    y_linea = m_val * x_linea + b_val\n    axes[0].scatter(x_data, y_data/1000, color='red', s=120, zorder=5, label='Datos reales')\n    axes[0].plot(x_linea, y_linea/1000, color='steelblue', linewidth=2, label=f'\u0177 = {m_val:.0f}\u00b7x + {b_val:.0f}')\n    for xi, yi, ypi in zip(x_data, y_data, y_pred):\n        axes[0].vlines(xi, min(yi, ypi)/1000, max(yi, ypi)/1000, color='orange', alpha=0.7, linewidth=2)\n    axes[0].set_xlabel('Tama\u00f1o (m\u00b2)')\n    axes[0].set_ylabel('Precio (miles USD)')\n    axes[0].set_title(f'Modelo | MSE = {mse_actual:,.0f}')\n    axes[0].legend(fontsize=9)\n    axes[0].grid(True, alpha=0.3)\n\n    # Curva MSE en funci\u00f3n de m (fijando b)\n    m_range = np.linspace(500, 2000, 300)\n    mse_m_range = np.array([np.mean((m * x_data + b_val - y_data)**2) for m in m_range])\n    m_opt_b = m_range[np.argmin(mse_m_range)]\n    axes[1].plot(m_range, mse_m_range/1e9, color='steelblue', linewidth=2)\n    axes[1].scatter([m_val], [mse_actual/1e9], color='red', s=150, zorder=5, label=f'm={m_val:.0f}')\n    axes[1].scatter([m_opt_b], [min(mse_m_range)/1e9], color='green', s=100, zorder=5, marker='*', label=f'm\u00ednimo\u2248{m_opt_b:.0f}')\n    axes[1].set_xlabel('m (pendiente)')\n    axes[1].set_ylabel('MSE (\u00d710\u2079)')\n    axes[1].set_title(f'MSE vs m  (b={b_val:.0f} fijo)')\n    axes[1].legend(fontsize=9)\n    axes[1].grid(True, alpha=0.3)\n\n    plt.suptitle('La funci\u00f3n de costo MSE', fontsize=13)\n    plt.tight_layout()\n\n    mo.md(f\"**MSE actual = `{mse_actual:,.0f}`**  |  m = `{m_val:.0f}` | b = `{b_val:.0f}`\")\n    return b_val, fig1, m_range, mse_m_range\n\n\n@app.cell\ndef _(fig1):\n    fig1\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 2. La Derivada como Pendiente \u2014 recta tangente en vivo\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    m_tangente = mo.ui.slider(500.0, 2000.0, value=1200.0, step=10.0,\n                              label=\"Punto donde calcular la derivada\")\n    m_tangente\n    return (m_tangente,)\n\n\n@app.cell\ndef _(b_val, m_range, m_tangente, mo, mse_m_range, np, plt, x_data, y_data):\n    m_pt = m_tangente.value\n\n    def mse_fn(m):\n        return np.mean((m * x_data + b_val - y_data) ** 2)\n\n    h = 1.0\n    pendiente = (mse_fn(m_pt + h) - mse_fn(m_pt - h)) / (2 * h)\n    mse_pt = mse_fn(m_pt)\n\n    x_tang = np.linspace(m_pt - 250, m_pt + 250, 50)\n    y_tang = mse_pt + pendiente * (x_tang - m_pt)\n\n    fig2, ax2 = plt.subplots(figsize=(9, 5))\n    ax2.plot(m_range, mse_m_range/1e9, color='steelblue', linewidth=2, label='MSE(m)')\n    ax2.plot(x_tang, y_tang/1e9, color='red', linestyle='--', linewidth=2,\n             label=f'Tangente (pendiente={pendiente:.2e})')\n    ax2.scatter([m_pt], [mse_pt/1e9], color='red', s=150, zorder=6)\n    ax2.set_xlabel('m (pendiente del modelo)')\n    ax2.set_ylabel('MSE (\u00d710\u2079)')\n    ax2.set_title('Derivada = pendiente de la recta tangente')\n    ax2.legend()\n    ax2.grid(True, alpha=0.3)\n    ax2.set_xlim(500, 2000)\n    plt.tight_layout()\n\n    if abs(pendiente) \u003C 1e6:\n        interpretacion = \"\u26a1 Est\u00e1s cerca del m\u00ednimo (pendiente \u2248 0)\"\n    elif pendiente \u003E 0:\n        interpretacion = \"\u2b07 La pendiente es positiva \u2192 hay que **disminuir** m para bajar el error\"\n    else:\n        interpretacion = \"\u2b06 La pendiente es negativa \u2192 hay que **aumentar** m para bajar el error\"\n\n    mo.md(\n        f\"\"\"\n        **En m = {m_pt:.0f}:**\n        - MSE = `{mse_pt:,.0f}`\n        - Derivada (pendiente tangente) = `{pendiente:.4e}`\n\n        **{interpretacion}**\n        \"\"\"\n    )\n    return (fig2,)\n\n\n@app.cell\ndef _(fig2):\n    fig2\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 3. Derivada Simb\u00f3lica con SymPy\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo, sp):\n    m_sym, b_sym, x_sym, y_sym = sp.symbols('m b x y', real=True)\n\n    error_sq = (m_sym * x_sym + b_sym - y_sym)**2\n\n    d_dm_sym = sp.diff(error_sq, m_sym)\n    d_db_sym = sp.diff(error_sq, b_sym)\n\n    mo.md(\n        f\"\"\"\n        **Funci\u00f3n de error cuadr\u00e1tico:**\n\n        `error\u00b2 = (m\u00b7x + b - y)\u00b2`\n\n        **Derivada \u2202/\u2202m (SymPy):**\n\n        `{sp.latex(d_dm_sym)}`\n\n        Simplificada: `{sp.latex(sp.simplify(d_dm_sym))}`\n\n        **Derivada \u2202/\u2202b (SymPy):**\n\n        `{sp.latex(d_db_sym)}`\n\n        Simplificada: `{sp.latex(sp.simplify(d_db_sym))}`\n\n        \u2192 Estas son las f\u00f3rmulas exactas que usaremos en la Unidad 4 para actualizar los par\u00e1metros.\n        \"\"\"\n    )\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## 4. Superficie de Costo 3D\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo, np, plt, x_data, y_data):\n    m_grid = np.linspace(800, 1600, 50)\n    b_grid = np.linspace(-50000, 50000, 50)\n    MG, BG = np.meshgrid(m_grid, b_grid)\n    MSE_grid = np.array([\n        [np.mean((m * x_data + b * np.ones_like(x_data) - y_data)**2)\n         for m in m_grid]\n        for b in b_grid\n    ])\n\n    fig3, axes3 = plt.subplots(1, 2, figsize=(13, 5))\n\n    ax3d = fig3.add_subplot(121, projection='3d')\n    ax3d.plot_surface(MG, BG, MSE_grid/1e9, cmap='viridis', alpha=0.85)\n    ax3d.set_xlabel('m')\n    ax3d.set_ylabel('b')\n    ax3d.set_zlabel('MSE (\u00d710\u2079)')\n    ax3d.set_title('Superficie de costo')\n\n    axes3[1].contourf(MG, BG, np.log1p(MSE_grid), levels=35, cmap='viridis')\n    axes3[1].set_xlabel('m (pendiente)')\n    axes3[1].set_ylabel('b (intercepto)')\n    axes3[1].set_title('Vista superior \u2014 el oscuro es el m\u00ednimo')\n    plt.colorbar(axes3[1].collections[0], ax=axes3[1], label='log(1+MSE)')\n\n    plt.tight_layout()\n    mo.md(\"El m\u00ednimo (punto oscuro) es la combinaci\u00f3n `(m, b)` que minimiza el error \u2014 lo encontraremos con Descenso de Gradiente en la Unidad 4.\")\n    return (fig3,)\n\n\n@app.cell\ndef _(fig3):\n    fig3\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
+        }),
+        writable: false,
+        configurable: false,
+    });
+</script>
+<marimo-code hidden="">import%20marimo%0A%0A__generated_with%20%3D%20%220.23.8%22%0Aapp%20%3D%20marimo.App(width%3D%22medium%22)%0A%0A%0A%40app.cell%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20numpy%20as%20np%0A%20%20%20%20import%20matplotlib.pyplot%20as%20plt%0A%20%20%20%20import%20sympy%20as%20sp%0A%0A%20%20%20%20return%20mo%2C%20np%2C%20plt%2C%20sp%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%20Unidad%203%3A%20Funciones%2C%20Visualizaci%C3%B3n%20y%20Tasas%20de%20Cambio%0A%20%20%20%20%23%23%23%20Matem%C3%A1ticas%20para%20An%C3%A1lisis%20de%20Datos%20%E2%80%94%20ITEC%0A%0A%20%20%20%20La%20funci%C3%B3n%20de%20costo%20es%20el%20concepto%20central%20del%20ML.%20Ac%C3%A1%20vas%20a%20ver%0A%20%20%20%20c%C3%B3mo%20se%20ve%2C%20c%C3%B3mo%20cambia%2C%20y%20c%C3%B3mo%20la%20derivada%20nos%20dice%20hacia%20d%C3%B3nde%20movernos.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(np)%3A%0A%20%20%20%20x_data%20%3D%20np.array(%5B60.0%2C%2085.0%2C%20120.0%2C%20150.0%2C%20200.0%5D)%0A%20%20%20%20y_data%20%3D%20np.array(%5B120000.0%2C%20150000.0%2C%20180000.0%2C%20210000.0%2C%20250000.0%5D)%0A%20%20%20%20return%20x_data%2C%20y_data%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%201.%20La%20Funci%C3%B3n%20de%20Costo%20MSE%20%E2%80%94%20explor%C3%A1%20el%20paisaje%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20m_slider%20%3D%20mo.ui.slider(500.0%2C%202000.0%2C%20value%3D1200.0%2C%20step%3D10.0%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%3D%22m%20%E2%80%94%20pendiente%20(precio%20por%20m%C2%B2)%22)%0A%20%20%20%20b_slider%20%3D%20mo.ui.slider(-50000.0%2C%2050000.0%2C%20value%3D0.0%2C%20step%3D1000.0%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%3D%22b%20%E2%80%94%20intercepto%20(USD)%22)%0A%20%20%20%20mo.vstack(%5Bm_slider%2C%20b_slider%5D)%0A%20%20%20%20return%20b_slider%2C%20m_slider%0A%0A%0A%40app.cell%0Adef%20_(b_slider%2C%20m_slider%2C%20mo%2C%20np%2C%20plt%2C%20x_data%2C%20y_data)%3A%0A%20%20%20%20m_val%20%3D%20m_slider.value%0A%20%20%20%20b_val%20%3D%20b_slider.value%0A%0A%20%20%20%20y_pred%20%3D%20m_val%20*%20x_data%20%2B%20b_val%0A%20%20%20%20errores%20%3D%20y_pred%20-%20y_data%0A%20%20%20%20mse_actual%20%3D%20np.mean(errores**2)%0A%0A%20%20%20%20fig1%2C%20axes%20%3D%20plt.subplots(1%2C%202%2C%20figsize%3D(13%2C%205))%0A%0A%20%20%20%20%23%20Ajuste%20del%20modelo%0A%20%20%20%20x_linea%20%3D%20np.linspace(50%2C%20220%2C%20200)%0A%20%20%20%20y_linea%20%3D%20m_val%20*%20x_linea%20%2B%20b_val%0A%20%20%20%20axes%5B0%5D.scatter(x_data%2C%20y_data%2F1000%2C%20color%3D'red'%2C%20s%3D120%2C%20zorder%3D5%2C%20label%3D'Datos%20reales')%0A%20%20%20%20axes%5B0%5D.plot(x_linea%2C%20y_linea%2F1000%2C%20color%3D'steelblue'%2C%20linewidth%3D2%2C%20label%3Df'%C5%B7%20%3D%20%7Bm_val%3A.0f%7D%C2%B7x%20%2B%20%7Bb_val%3A.0f%7D')%0A%20%20%20%20for%20xi%2C%20yi%2C%20ypi%20in%20zip(x_data%2C%20y_data%2C%20y_pred)%3A%0A%20%20%20%20%20%20%20%20axes%5B0%5D.vlines(xi%2C%20min(yi%2C%20ypi)%2F1000%2C%20max(yi%2C%20ypi)%2F1000%2C%20color%3D'orange'%2C%20alpha%3D0.7%2C%20linewidth%3D2)%0A%20%20%20%20axes%5B0%5D.set_xlabel('Tama%C3%B1o%20(m%C2%B2)')%0A%20%20%20%20axes%5B0%5D.set_ylabel('Precio%20(miles%20USD)')%0A%20%20%20%20axes%5B0%5D.set_title(f'Modelo%20%7C%20MSE%20%3D%20%7Bmse_actual%3A%2C.0f%7D')%0A%20%20%20%20axes%5B0%5D.legend(fontsize%3D9)%0A%20%20%20%20axes%5B0%5D.grid(True%2C%20alpha%3D0.3)%0A%0A%20%20%20%20%23%20Curva%20MSE%20en%20funci%C3%B3n%20de%20m%20(fijando%20b)%0A%20%20%20%20m_range%20%3D%20np.linspace(500%2C%202000%2C%20300)%0A%20%20%20%20mse_m_range%20%3D%20np.array(%5Bnp.mean((m%20*%20x_data%20%2B%20b_val%20-%20y_data)**2)%20for%20m%20in%20m_range%5D)%0A%20%20%20%20m_opt_b%20%3D%20m_range%5Bnp.argmin(mse_m_range)%5D%0A%20%20%20%20axes%5B1%5D.plot(m_range%2C%20mse_m_range%2F1e9%2C%20color%3D'steelblue'%2C%20linewidth%3D2)%0A%20%20%20%20axes%5B1%5D.scatter(%5Bm_val%5D%2C%20%5Bmse_actual%2F1e9%5D%2C%20color%3D'red'%2C%20s%3D150%2C%20zorder%3D5%2C%20label%3Df'm%3D%7Bm_val%3A.0f%7D')%0A%20%20%20%20axes%5B1%5D.scatter(%5Bm_opt_b%5D%2C%20%5Bmin(mse_m_range)%2F1e9%5D%2C%20color%3D'green'%2C%20s%3D100%2C%20zorder%3D5%2C%20marker%3D'*'%2C%20label%3Df'm%C3%ADnimo%E2%89%88%7Bm_opt_b%3A.0f%7D')%0A%20%20%20%20axes%5B1%5D.set_xlabel('m%20(pendiente)')%0A%20%20%20%20axes%5B1%5D.set_ylabel('MSE%20(%C3%9710%E2%81%B9)')%0A%20%20%20%20axes%5B1%5D.set_title(f'MSE%20vs%20m%20%20(b%3D%7Bb_val%3A.0f%7D%20fijo)')%0A%20%20%20%20axes%5B1%5D.legend(fontsize%3D9)%0A%20%20%20%20axes%5B1%5D.grid(True%2C%20alpha%3D0.3)%0A%0A%20%20%20%20plt.suptitle('La%20funci%C3%B3n%20de%20costo%20MSE'%2C%20fontsize%3D13)%0A%20%20%20%20plt.tight_layout()%0A%0A%20%20%20%20mo.md(f%22**MSE%20actual%20%3D%20%60%7Bmse_actual%3A%2C.0f%7D%60**%20%20%7C%20%20m%20%3D%20%60%7Bm_val%3A.0f%7D%60%20%7C%20b%20%3D%20%60%7Bb_val%3A.0f%7D%60%22)%0A%20%20%20%20return%20b_val%2C%20fig1%2C%20m_range%2C%20mse_m_range%0A%0A%0A%40app.cell%0Adef%20_(fig1)%3A%0A%20%20%20%20fig1%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%202.%20La%20Derivada%20como%20Pendiente%20%E2%80%94%20recta%20tangente%20en%20vivo%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20m_tangente%20%3D%20mo.ui.slider(500.0%2C%202000.0%2C%20value%3D1200.0%2C%20step%3D10.0%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%3D%22Punto%20donde%20calcular%20la%20derivada%22)%0A%20%20%20%20m_tangente%0A%20%20%20%20return%20(m_tangente%2C)%0A%0A%0A%40app.cell%0Adef%20_(b_val%2C%20m_range%2C%20m_tangente%2C%20mo%2C%20mse_m_range%2C%20np%2C%20plt%2C%20x_data%2C%20y_data)%3A%0A%20%20%20%20m_pt%20%3D%20m_tangente.value%0A%0A%20%20%20%20def%20mse_fn(m)%3A%0A%20%20%20%20%20%20%20%20return%20np.mean((m%20*%20x_data%20%2B%20b_val%20-%20y_data)%20**%202)%0A%0A%20%20%20%20h%20%3D%201.0%0A%20%20%20%20pendiente%20%3D%20(mse_fn(m_pt%20%2B%20h)%20-%20mse_fn(m_pt%20-%20h))%20%2F%20(2%20*%20h)%0A%20%20%20%20mse_pt%20%3D%20mse_fn(m_pt)%0A%0A%20%20%20%20x_tang%20%3D%20np.linspace(m_pt%20-%20250%2C%20m_pt%20%2B%20250%2C%2050)%0A%20%20%20%20y_tang%20%3D%20mse_pt%20%2B%20pendiente%20*%20(x_tang%20-%20m_pt)%0A%0A%20%20%20%20fig2%2C%20ax2%20%3D%20plt.subplots(figsize%3D(9%2C%205))%0A%20%20%20%20ax2.plot(m_range%2C%20mse_m_range%2F1e9%2C%20color%3D'steelblue'%2C%20linewidth%3D2%2C%20label%3D'MSE(m)')%0A%20%20%20%20ax2.plot(x_tang%2C%20y_tang%2F1e9%2C%20color%3D'red'%2C%20linestyle%3D'--'%2C%20linewidth%3D2%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20label%3Df'Tangente%20(pendiente%3D%7Bpendiente%3A.2e%7D)')%0A%20%20%20%20ax2.scatter(%5Bm_pt%5D%2C%20%5Bmse_pt%2F1e9%5D%2C%20color%3D'red'%2C%20s%3D150%2C%20zorder%3D6)%0A%20%20%20%20ax2.set_xlabel('m%20(pendiente%20del%20modelo)')%0A%20%20%20%20ax2.set_ylabel('MSE%20(%C3%9710%E2%81%B9)')%0A%20%20%20%20ax2.set_title('Derivada%20%3D%20pendiente%20de%20la%20recta%20tangente')%0A%20%20%20%20ax2.legend()%0A%20%20%20%20ax2.grid(True%2C%20alpha%3D0.3)%0A%20%20%20%20ax2.set_xlim(500%2C%202000)%0A%20%20%20%20plt.tight_layout()%0A%0A%20%20%20%20if%20abs(pendiente)%20%3C%201e6%3A%0A%20%20%20%20%20%20%20%20interpretacion%20%3D%20%22%E2%9A%A1%20Est%C3%A1s%20cerca%20del%20m%C3%ADnimo%20(pendiente%20%E2%89%88%200)%22%0A%20%20%20%20elif%20pendiente%20%3E%200%3A%0A%20%20%20%20%20%20%20%20interpretacion%20%3D%20%22%E2%AC%87%20La%20pendiente%20es%20positiva%20%E2%86%92%20hay%20que%20**disminuir**%20m%20para%20bajar%20el%20error%22%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20interpretacion%20%3D%20%22%E2%AC%86%20La%20pendiente%20es%20negativa%20%E2%86%92%20hay%20que%20**aumentar**%20m%20para%20bajar%20el%20error%22%0A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20f%22%22%22%0A%20%20%20%20%20%20%20%20**En%20m%20%3D%20%7Bm_pt%3A.0f%7D%3A**%0A%20%20%20%20%20%20%20%20-%20MSE%20%3D%20%60%7Bmse_pt%3A%2C.0f%7D%60%0A%20%20%20%20%20%20%20%20-%20Derivada%20(pendiente%20tangente)%20%3D%20%60%7Bpendiente%3A.4e%7D%60%0A%0A%20%20%20%20%20%20%20%20**%7Binterpretacion%7D**%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%20(fig2%2C)%0A%0A%0A%40app.cell%0Adef%20_(fig2)%3A%0A%20%20%20%20fig2%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%203.%20Derivada%20Simb%C3%B3lica%20con%20SymPy%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo%2C%20sp)%3A%0A%20%20%20%20m_sym%2C%20b_sym%2C%20x_sym%2C%20y_sym%20%3D%20sp.symbols('m%20b%20x%20y'%2C%20real%3DTrue)%0A%0A%20%20%20%20error_sq%20%3D%20(m_sym%20*%20x_sym%20%2B%20b_sym%20-%20y_sym)**2%0A%0A%20%20%20%20d_dm_sym%20%3D%20sp.diff(error_sq%2C%20m_sym)%0A%20%20%20%20d_db_sym%20%3D%20sp.diff(error_sq%2C%20b_sym)%0A%0A%20%20%20%20mo.md(%0A%20%20%20%20%20%20%20%20f%22%22%22%0A%20%20%20%20%20%20%20%20**Funci%C3%B3n%20de%20error%20cuadr%C3%A1tico%3A**%0A%0A%20%20%20%20%20%20%20%20%60error%C2%B2%20%3D%20(m%C2%B7x%20%2B%20b%20-%20y)%C2%B2%60%0A%0A%20%20%20%20%20%20%20%20**Derivada%20%E2%88%82%2F%E2%88%82m%20(SymPy)%3A**%0A%0A%20%20%20%20%20%20%20%20%60%7Bsp.latex(d_dm_sym)%7D%60%0A%0A%20%20%20%20%20%20%20%20Simplificada%3A%20%60%7Bsp.latex(sp.simplify(d_dm_sym))%7D%60%0A%0A%20%20%20%20%20%20%20%20**Derivada%20%E2%88%82%2F%E2%88%82b%20(SymPy)%3A**%0A%0A%20%20%20%20%20%20%20%20%60%7Bsp.latex(d_db_sym)%7D%60%0A%0A%20%20%20%20%20%20%20%20Simplificada%3A%20%60%7Bsp.latex(sp.simplify(d_db_sym))%7D%60%0A%0A%20%20%20%20%20%20%20%20%E2%86%92%20Estas%20son%20las%20f%C3%B3rmulas%20exactas%20que%20usaremos%20en%20la%20Unidad%204%20para%20actualizar%20los%20par%C3%A1metros.%0A%20%20%20%20%20%20%20%20%22%22%22%0A%20%20%20%20)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%204.%20Superficie%20de%20Costo%203D%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo%2C%20np%2C%20plt%2C%20x_data%2C%20y_data)%3A%0A%20%20%20%20m_grid%20%3D%20np.linspace(800%2C%201600%2C%2050)%0A%20%20%20%20b_grid%20%3D%20np.linspace(-50000%2C%2050000%2C%2050)%0A%20%20%20%20MG%2C%20BG%20%3D%20np.meshgrid(m_grid%2C%20b_grid)%0A%20%20%20%20MSE_grid%20%3D%20np.array(%5B%0A%20%20%20%20%20%20%20%20%5Bnp.mean((m%20*%20x_data%20%2B%20b%20*%20np.ones_like(x_data)%20-%20y_data)**2)%0A%20%20%20%20%20%20%20%20%20for%20m%20in%20m_grid%5D%0A%20%20%20%20%20%20%20%20for%20b%20in%20b_grid%0A%20%20%20%20%5D)%0A%0A%20%20%20%20fig3%2C%20axes3%20%3D%20plt.subplots(1%2C%202%2C%20figsize%3D(13%2C%205))%0A%0A%20%20%20%20ax3d%20%3D%20fig3.add_subplot(121%2C%20projection%3D'3d')%0A%20%20%20%20ax3d.plot_surface(MG%2C%20BG%2C%20MSE_grid%2F1e9%2C%20cmap%3D'viridis'%2C%20alpha%3D0.85)%0A%20%20%20%20ax3d.set_xlabel('m')%0A%20%20%20%20ax3d.set_ylabel('b')%0A%20%20%20%20ax3d.set_zlabel('MSE%20(%C3%9710%E2%81%B9)')%0A%20%20%20%20ax3d.set_title('Superficie%20de%20costo')%0A%0A%20%20%20%20axes3%5B1%5D.contourf(MG%2C%20BG%2C%20np.log1p(MSE_grid)%2C%20levels%3D35%2C%20cmap%3D'viridis')%0A%20%20%20%20axes3%5B1%5D.set_xlabel('m%20(pendiente)')%0A%20%20%20%20axes3%5B1%5D.set_ylabel('b%20(intercepto)')%0A%20%20%20%20axes3%5B1%5D.set_title('Vista%20superior%20%E2%80%94%20el%20oscuro%20es%20el%20m%C3%ADnimo')%0A%20%20%20%20plt.colorbar(axes3%5B1%5D.collections%5B0%5D%2C%20ax%3Daxes3%5B1%5D%2C%20label%3D'log(1%2BMSE)')%0A%0A%20%20%20%20plt.tight_layout()%0A%20%20%20%20mo.md(%22El%20m%C3%ADnimo%20(punto%20oscuro)%20es%20la%20combinaci%C3%B3n%20%60(m%2C%20b)%60%20que%20minimiza%20el%20error%20%E2%80%94%20lo%20encontraremos%20con%20Descenso%20de%20Gradiente%20en%20la%20Unidad%204.%22)%0A%20%20%20%20return%20(fig3%2C)%0A%0A%0A%40app.cell%0Adef%20_(fig3)%3A%0A%20%20%20%20fig3%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run()%0A</marimo-code></head>
+  <body>
+<a href="../../index.html" id="volver-al-indice">&larr;&nbsp; Volver al inicio</a>
+<style>
+#volver-al-indice{
+  position:fixed; top:16px; left:16px; z-index:99999;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; line-height:1; text-decoration:none;
+  color:#161A22; background:rgba(237,234,228,0.92);
+  border:1px solid rgba(22,26,34,0.28); border-radius:100px;
+  padding:9px 15px; backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(22,26,34,0.10);
+  transition:background .15s ease,border-color .15s ease;
+}
+#volver-al-indice:hover{ background:#fff; border-color:#4740E0; color:#4740E0; }
+@media print{ #volver-al-indice{ display:none; } }
+</style>
+
+    <div id="root"></div>
+    <!-- This is a portal for the data editor to render in -->
+    <div id="portal" data-testid="glide-portal" style="position: fixed; left: 0; top: 0; z-index: 9999"></div>
+    <script data-marimo="true">
+      Object.defineProperty(window, "__MARIMO_MOUNT_CONFIG__", {
+        value: Object.freeze({
+            "filename": "notebook.py",
+            "cwd": "",
+            "lspWorkspace": null,
+            "mode": "read",
+            "version": "0.23.8",
+            "serverToken": "unused",
+            "config": {"ai": {"custom_providers": {}, "models": {"custom_models": [], "displayed_models": []}}, "completion": {"activate_on_typing": true, "copilot": false, "signature_hint_on_typing": false}, "diagnostics": {"sql_linter": true}, "display": {"cell_output": "below", "code_editor_font_size": 14, "dataframes": "rich", "default_table_max_columns": 50, "default_table_page_size": 10, "default_width": "medium", "reference_highlighting": true, "theme": "light"}, "formatting": {"line_length": 79}, "keymap": {"overrides": {}, "preset": "default"}, "language_servers": {"pylsp": {"enable_flake8": false, "enable_mypy": true, "enable_pydocstyle": false, "enable_pyflakes": false, "enable_pylint": false, "enable_ruff": true, "enabled": false}}, "mcp": {"mcpServers": {}, "presets": []}, "package_management": {"manager": "pip"}, "runtime": {"auto_instantiate": false, "auto_reload": "off", "default_csv_encoding": "utf-8", "default_sql_output": "auto", "on_cell_change": "autorun", "output_max_bytes": 8000000, "reactive_tests": true, "show_tracebacks": false, "std_stream_max_bytes": 1000000, "watcher_on_save": "lazy"}, "save": {"autosave": "off", "autosave_delay": 1000, "format_on_save": false}, "server": {"browser": "default", "follow_symlink": false}, "snippets": {"custom_paths": [], "include_default_snippets": true}},
+            "configOverrides": {},
+            "appConfig": {"sql_output": "auto", "width": "medium"},
+            "view": {"showAppCode": false},
+            "notebook": null,
+            "session": null,
+            "runtimeConfig": null,
+        }),
+        writable: false,
+        configurable: false,
+      });
+    </script>
+  </body>
+</html>

@@ -1,0 +1,322 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <link rel="icon" href="../favicon.ico" />
+    <!-- Preload is necessary because we show these images when we disconnect from the server,
+    but at that point we cannot load these images from the server -->
+    <link rel="preload" href="../assets/gradient-yHQUC_QB.png" as="image" />
+    <link rel="preload" href="../assets/noise-60BoTA8O.png" as="image" />
+    <!-- Preload the fonts -->
+    <link rel="preload" href="../assets/Lora-VariableFont_wght-CZceb_kH.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/PTSans-Regular-Bam3NpBI.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/PTSans-Bold-C_DwAp7Z.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Regular-CEsLFVD9.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Medium-D5MAsWEG.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+    <link rel="preload" href="../assets/FiraMono-Bold-C6PDArdf.woff2" as="font" type="font/woff2" crossorigin="anonymous" />
+
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="a marimo app" />
+    <link rel="apple-touch-icon" href="../apple-touch-icon.png" />
+    <link rel="manifest" href="../manifest.json" />
+
+    <script data-marimo="true">
+      function __resizeIframe(obj) {
+        const scrollbarHeight = 20; // Max between windows, mac, and linux
+
+        function setHeight() {
+          // Guard against race condition where iframe isn't ready
+          if (!obj.contentWindow?.document?.documentElement) {
+            return;
+          }
+          const element = obj.contentWindow.document.documentElement;
+          // If there is no vertical scrollbar, we don't need to resize the iframe
+          if (element.scrollHeight === element.clientHeight) {
+            return;
+          }
+
+          // Create a new height that includes the scrollbar height if it's visible
+          const hasHorizontalScrollbar = element.scrollWidth > element.clientWidth;
+          const newHeight = element.scrollHeight + (hasHorizontalScrollbar ? scrollbarHeight : 0);
+
+          // Only update the height if it's different from the current height
+          if (obj.style.height !== `${newHeight}px`) {
+            obj.style.height = `${newHeight}px`;
+          }
+        }
+
+        // Resize the iframe to the height of the content and bottom scrollbar height
+        setHeight();
+
+        // Resize the iframe when the content changes
+        const resizeObserver = new ResizeObserver((_entries) => {
+          setHeight();
+        });
+        // Only observe if iframe content is ready
+        if (obj.contentWindow?.document?.body) {
+          resizeObserver.observe(obj.contentWindow.document.body);
+        }
+      }
+    </script>
+    <marimo-filename hidden>notebook.py</marimo-filename>
+    <!-- TODO(Trevor): Legacy, required by VS Code plugin. Remove when plugin is updated (see marimo/server/_templates/template.py) -->
+    <marimo-version data-version="{{ version }}" hidden></marimo-version>
+    <marimo-user-config data-config="{{ user_config }}" hidden></marimo-user-config>
+    <marimo-server-token data-token="{{ server_token }}" hidden></marimo-server-token>
+    <!-- /TODO -->
+    <title>unidad4 marimo</title>
+    <script type="module" crossorigin src="../assets/index-CA2sQKnW.js"></script>
+    <link rel="modulepreload" crossorigin href="../assets/preload-helper-DdZsAcJe.js">
+    <link rel="modulepreload" crossorigin href="../assets/chunk-LvLJmgfZ.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-Bj1aDYRI.js">
+    <link rel="modulepreload" crossorigin href="../assets/compiler-runtime-B3qBwwSJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/jsx-runtime-BqBOg78p.js">
+    <link rel="modulepreload" crossorigin href="../assets/useEventListener-DvoEXWke.js">
+    <link rel="modulepreload" crossorigin href="../assets/defaultLocale-DPBdGRrH.js">
+    <link rel="modulepreload" crossorigin href="../assets/precisionRound-NX56vp6K.js">
+    <link rel="modulepreload" crossorigin href="../assets/defaultLocale-Lfi0pexn.js">
+    <link rel="modulepreload" crossorigin href="../assets/vega-loader.browser-xq8miGHn.js">
+    <link rel="modulepreload" crossorigin href="../assets/utils-DQRuLEof.js">
+    <link rel="modulepreload" crossorigin href="../assets/clsx-Dz_KRrWq.js">
+    <link rel="modulepreload" crossorigin href="../assets/cn-DCUzRj2J.js">
+    <link rel="modulepreload" crossorigin href="../assets/badge-DOX1Xxa9.js">
+    <link rel="modulepreload" crossorigin href="../assets/button-BbCh-29a.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-dom-CSu739Rf.js">
+    <link rel="modulepreload" crossorigin href="../assets/fullscreen-eipL3i3Y.js">
+    <link rel="modulepreload" crossorigin href="../assets/menu-items-DcP01QzW.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BdyjRhEt.js">
+    <link rel="modulepreload" crossorigin href="../assets/createLucideIcon-D5guW7EU.js">
+    <link rel="modulepreload" crossorigin href="../assets/check-BH35Ndha.js">
+    <link rel="modulepreload" crossorigin href="../assets/x-C-6liIBr.js">
+    <link rel="modulepreload" crossorigin href="../assets/select-DZcFyKFQ.js">
+    <link rel="modulepreload" crossorigin href="../assets/tooltip-DTV9tlSr.js">
+    <link rel="modulepreload" crossorigin href="../assets/use-toast-ERM44-k9.js">
+    <link rel="modulepreload" crossorigin href="../assets/useEvent-D91BmmQi.js">
+    <link rel="modulepreload" crossorigin href="../assets/invariant-BUdrueMv.js">
+    <link rel="modulepreload" crossorigin href="../assets/isObject-DvLSfCY5.js">
+    <link rel="modulepreload" crossorigin href="../assets/_baseFor-DKD1r8uL.js">
+    <link rel="modulepreload" crossorigin href="../assets/merge-_9WLTEyt.js">
+    <link rel="modulepreload" crossorigin href="../assets/zod-H_cgTO0M.js">
+    <link rel="modulepreload" crossorigin href="../assets/utils-Wvjk_Y4h.js">
+    <link rel="modulepreload" crossorigin href="../assets/Deferred-DWBqOhWa.js">
+    <link rel="modulepreload" crossorigin href="../assets/uuid-D_zLHhNi.js">
+    <link rel="modulepreload" crossorigin href="../assets/DeferredRequestRegistry-CzVJLtsG.js">
+    <link rel="modulepreload" crossorigin href="../assets/constants-DMpttj8Q.js">
+    <link rel="modulepreload" crossorigin href="../assets/session-DGdfs0bJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/config-C2lTvbuU.js">
+    <link rel="modulepreload" crossorigin href="../assets/requests-DIwGYs0l.js">
+    <link rel="modulepreload" crossorigin href="../assets/useLifecycle-DieWOfXE.js">
+    <link rel="modulepreload" crossorigin href="../assets/useNonce-DfoVjkkH.js">
+    <link rel="modulepreload" crossorigin href="../assets/useTheme-Kwyx4PvL.js">
+    <link rel="modulepreload" crossorigin href="../assets/arrays-DYDL-3-i.js">
+    <link rel="modulepreload" crossorigin href="../assets/strings-wdPMRf6Z.js">
+    <link rel="modulepreload" crossorigin href="../assets/once-DRroIaBz.js">
+    <link rel="modulepreload" crossorigin href="../assets/capabilities-A_KhFcGV.js">
+    <link rel="modulepreload" crossorigin href="../assets/createReducer-CI9qeK_X.js">
+    <link rel="modulepreload" crossorigin href="../assets/paths-SFhaqGlE.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BrR4M-k3.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-HlsDto3K.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-CHcznzB-.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BU26XwgJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-COs9gIu5.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-BZr6MMV-.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-DCqxOggh.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-DkA__6UI.js">
+    <link rel="modulepreload" crossorigin href="../assets/dist-C9ZB41s2.js">
+    <link rel="modulepreload" crossorigin href="../assets/stex-lcoTi-7o.js">
+    <link rel="modulepreload" crossorigin href="../assets/toDate-B5A0DFEz.js">
+    <link rel="modulepreload" crossorigin href="../assets/purify.es-DvRMX74T.js">
+    <link rel="modulepreload" crossorigin href="../assets/cjs-BRGiG41H.js">
+    <link rel="modulepreload" crossorigin href="../assets/isSymbol-BT6B8Bon.js">
+    <link rel="modulepreload" crossorigin href="../assets/now-CsYTPAhW.js">
+    <link rel="modulepreload" crossorigin href="../assets/debounce-DhnxH9Rh.js">
+    <link rel="modulepreload" crossorigin href="../assets/database-zap-kIkTfzTX.js">
+    <link rel="modulepreload" crossorigin href="../assets/main-B0OX4z33.js">
+    <link rel="modulepreload" crossorigin href="../assets/cells-Dnu4nDoy.js">
+    <link rel="modulepreload" crossorigin href="../assets/ErrorBoundary-DyYDV0HI.js">
+    <link rel="modulepreload" crossorigin href="../assets/kbd-BJB2rf7K.js">
+    <link rel="modulepreload" crossorigin href="../assets/useInstallPackage-hKfTes-m.js">
+    <link rel="modulepreload" crossorigin href="../assets/alert-dialog-BqFLkbUc.js">
+    <link rel="modulepreload" crossorigin href="../assets/dialog-DqOQT_n4.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDebounce-_BZcy6gx.js">
+    <link rel="modulepreload" crossorigin href="../assets/numbers-mY4EY0yG.js">
+    <link rel="modulepreload" crossorigin href="../assets/SSRProvider-BIDQNg9Q.js">
+    <link rel="modulepreload" crossorigin href="../assets/context-C1Tm_47t.js">
+    <link rel="modulepreload" crossorigin href="../assets/useNumberFormatter-CW4V-fpE.js">
+    <link rel="modulepreload" crossorigin href="../assets/usePress-jH2RfcUG.js">
+    <link rel="modulepreload" crossorigin href="../assets/input-CVE-gIjt.js">
+    <link rel="modulepreload" crossorigin href="../assets/ImperativeModal-DEC1mXgV.js">
+    <link rel="modulepreload" crossorigin href="../assets/cell-link-PQYiMZw1.js">
+    <link rel="modulepreload" crossorigin href="../assets/multi-map-CUuNtzHt.js">
+    <link rel="modulepreload" crossorigin href="../assets/alert-DrHguQlr.js">
+    <link rel="modulepreload" crossorigin href="../assets/chevron-right-CG5QYXYk.js">
+    <link rel="modulepreload" crossorigin href="../assets/dropdown-menu-CR7cnzLX.js">
+    <link rel="modulepreload" crossorigin href="../assets/links-B8WzCnbo.js">
+    <link rel="modulepreload" crossorigin href="../assets/useRunCells-C0BPo9m1.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-Ch48HVPK.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-BwrPA9zQ.js">
+    <link rel="modulepreload" crossorigin href="../assets/copy-icon-BdZPgXgo.js">
+    <link rel="modulepreload" crossorigin href="../assets/RenderHTML-B5r25cP5.js">
+    <link rel="modulepreload" crossorigin href="../assets/datasource-I-LOgxeP.js">
+    <link rel="modulepreload" crossorigin href="../assets/state-D9EoHCkz.js">
+    <link rel="modulepreload" crossorigin href="../assets/package-B8oXOUM-.js">
+    <link rel="modulepreload" crossorigin href="../assets/sparkles-CC9Bko6a.js">
+    <link rel="modulepreload" crossorigin href="../assets/MarimoErrorOutput-XWqnhvJ6.js">
+    <link rel="modulepreload" crossorigin href="../assets/spinner-UuZAUjoP.js">
+    <link rel="modulepreload" crossorigin href="../assets/html-to-image-D6SgvARi.js">
+    <link rel="modulepreload" crossorigin href="../assets/focus-BaOnnMs-.js">
+    <link rel="modulepreload" crossorigin href="../assets/useAsyncData-C5i0IRVM.js">
+    <link rel="modulepreload" crossorigin href="../assets/LazyAnyLanguageCodeMirror-GdhQ07zA.js">
+    <link rel="modulepreload" crossorigin href="../assets/micromark-factory-space-BUQpMdx2.js">
+    <link rel="modulepreload" crossorigin href="../assets/chunk-5FQGJX7Z-BSzccEgu.js">
+    <link rel="modulepreload" crossorigin href="../assets/markdown-renderer-BQ-BQLiJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/command-2NPJCYDa.js">
+    <link rel="modulepreload" crossorigin href="../assets/field-DNlzfMKW.js">
+    <link rel="modulepreload" crossorigin href="../assets/popover-Bz_0Vkyf.js">
+    <link rel="modulepreload" crossorigin href="../assets/errors-iwK4b4VF.js">
+    <link rel="modulepreload" crossorigin href="../assets/download-B1QFVDP-.js">
+    <link rel="modulepreload" crossorigin href="../assets/table-DQE9hQzM.js">
+    <link rel="modulepreload" crossorigin href="../assets/useIframeCapabilities-DPVTppnD.js">
+    <link rel="modulepreload" crossorigin href="../assets/error-banner-CLO6LFll.js">
+    <link rel="modulepreload" crossorigin href="../assets/formats-BRq458WH.js">
+    <link rel="modulepreload" crossorigin href="../assets/en-US-C7vnqfgk.js">
+    <link rel="modulepreload" crossorigin href="../assets/isValid-DdlR4-BY.js">
+    <link rel="modulepreload" crossorigin href="../assets/dates-DI1TvEEK.js">
+    <link rel="modulepreload" crossorigin href="../assets/maps-n3GaPJwv.js">
+    <link rel="modulepreload" crossorigin href="../assets/extends-Dqvpuc10.js">
+    <link rel="modulepreload" crossorigin href="../assets/emotion-is-prop-valid.esm-Dangy3Bv.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDateFormatter-d3yglQmW.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-icons.esm--O4lBTlZ.js">
+    <link rel="modulepreload" crossorigin href="../assets/RSPContexts-Bk1r00gJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/table-6NxtGaCm.js">
+    <link rel="modulepreload" crossorigin href="../assets/ellipsis-KAhMaCIV.js">
+    <link rel="modulepreload" crossorigin href="../assets/external-link-BTNxSavU.js">
+    <link rel="modulepreload" crossorigin href="../assets/message-circle-1YLdnr8A.js">
+    <link rel="modulepreload" crossorigin href="../assets/trash-2-BJLYnZpG.js">
+    <link rel="modulepreload" crossorigin href="../assets/react-resizable-panels.browser.esm-Ce2ksurd.js">
+    <link rel="modulepreload" crossorigin href="../assets/JsonOutput-05-R3eil.js">
+    <link rel="modulepreload" crossorigin href="../assets/chart-no-axes-column-nqk474t8.js">
+    <link rel="modulepreload" crossorigin href="../assets/square-function-blYaQso8.js">
+    <link rel="modulepreload" crossorigin href="../assets/spec-D1ptWKg6.js">
+    <link rel="modulepreload" crossorigin href="../assets/ellipsis-vertical-CkwWkOQL.js">
+    <link rel="modulepreload" crossorigin href="../assets/refresh-cw-a_9k9BK7.js">
+    <link rel="modulepreload" crossorigin href="../assets/tree-actions-DY8FUp3V.js">
+    <link rel="modulepreload" crossorigin href="../assets/components-zB5yT_R8.js">
+    <link rel="modulepreload" crossorigin href="../assets/column-preview-BLIWbdOX.js">
+    <link rel="modulepreload" crossorigin href="../assets/icons-8tfAri2V.js">
+    <link rel="modulepreload" crossorigin href="../assets/radio-group-rsi1ibXY.js">
+    <link rel="modulepreload" crossorigin href="../assets/floating-outline-DbOtUfo-.js">
+    <link rel="modulepreload" crossorigin href="../assets/objectWithoutPropertiesLoose-DoKw85w0.js">
+    <link rel="modulepreload" crossorigin href="../assets/esm-Cb2bnV6o.js">
+    <link rel="modulepreload" crossorigin href="../assets/eye-off-BT-KOYV5.js">
+    <link rel="modulepreload" crossorigin href="../assets/plus-CxkHs8QM.js">
+    <link rel="modulepreload" crossorigin href="../assets/readonly-python-code-BKYj8PNf.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-headphone-B3fuktN0.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-HTLbeC2b.js">
+    <link rel="modulepreload" crossorigin href="../assets/image-BIibSXT6.js">
+    <link rel="modulepreload" crossorigin href="../assets/file-icons-B6DaZdP0.js">
+    <link rel="modulepreload" crossorigin href="../assets/switch-BtkQp293.js">
+    <link rel="modulepreload" crossorigin href="../assets/events-CBm-hwqS.js">
+    <link rel="modulepreload" crossorigin href="../assets/globals-CpVAcN9Z.js">
+    <link rel="modulepreload" crossorigin href="../assets/share-oorMPghT.js">
+    <link rel="modulepreload" crossorigin href="../assets/blob-3_FN0u9S.js">
+    <link rel="modulepreload" crossorigin href="../assets/memoize-Tp7rARFe.js">
+    <link rel="modulepreload" crossorigin href="../assets/get-C-qh_et5.js">
+    <link rel="modulepreload" crossorigin href="../assets/_baseSet-CxV9N1bc.js">
+    <link rel="modulepreload" crossorigin href="../assets/state-BXNNuw9g.js">
+    <link rel="modulepreload" crossorigin href="../assets/label-xHqFtfdz.js">
+    <link rel="modulepreload" crossorigin href="../assets/textarea-BBTcSr-i.js">
+    <link rel="modulepreload" crossorigin href="../assets/refresh-ccw-DLc784Sj.js">
+    <link rel="modulepreload" crossorigin href="../assets/form-BjUJP6PJ.js">
+    <link rel="modulepreload" crossorigin href="../assets/renderShortcut-DK-VjfaX.js">
+    <link rel="modulepreload" crossorigin href="../assets/useBoolean-B8LMGUHl.js">
+    <link rel="modulepreload" crossorigin href="../assets/useDeepCompareMemoize-CWcgQCbT.js">
+    <link rel="modulepreload" crossorigin href="../assets/types-BYwxXaSY.js">
+    <link rel="modulepreload" crossorigin href="../assets/semaphore-X3ApuO41.js">
+    <link rel="modulepreload" crossorigin href="../assets/fileToBase64-BeYUTUzO.js">
+    <link rel="modulepreload" crossorigin href="../assets/pathUtils-vgBYIo5B.js">
+    <link rel="modulepreload" crossorigin href="../assets/prop-types-DVDiRdwc.js">
+    <link rel="modulepreload" crossorigin href="../assets/es-au8YY-8E.js">
+    <link rel="modulepreload" crossorigin href="../assets/hasIn-DiS_ryrS.js">
+    <link rel="modulepreload" crossorigin href="../assets/flatten-Dl4V1ub3.js">
+    <link rel="modulepreload" crossorigin href="../assets/pick-DqWUNly1.js">
+    <link rel="modulepreload" crossorigin href="../assets/code-xml-CZN6vNxu.js">
+    <link rel="modulepreload" crossorigin href="../assets/house-D2ldnAB9.js">
+    <link rel="modulepreload" crossorigin href="../assets/square-rACnnz-q.js">
+    <link rel="modulepreload" crossorigin href="../assets/triangle-alert-CJ0ZIqcz.js">
+    <link rel="modulepreload" crossorigin href="../assets/bundle.esm-BXIlAZ6T.js">
+    <link rel="stylesheet" crossorigin href="../assets/cells-jmgGt1lS.css">
+    <link rel="stylesheet" crossorigin href="../assets/markdown-renderer-DdDKmWlR.css">
+    <link rel="stylesheet" crossorigin href="../assets/JsonOutput-B7vuddcd.css">
+    <link rel="stylesheet" crossorigin href="../assets/index-DH00kbhV.css">
+  <marimo-wasm hidden=""></marimo-wasm>
+    <script>
+        if (window.location.protocol === 'file:') {
+            alert('Warning: This file must be served by an HTTP server to function correctly.');
+        }
+    </script>
+    
+    <style>
+        #save-button {
+            display: none !important;
+        }
+        #filename-input {
+            display: none !important;
+        }
+    </style>
+    
+<script data-marimo="true">
+    Object.defineProperty(window, "__MARIMO_EXPORT_CONTEXT__", {
+        value: Object.freeze({
+            trusted: true,
+            notebookCode: "import marimo\n\n__generated_with = \"0.23.8\"\napp = marimo.App(width=\"medium\")\n\n\n@app.cell\ndef _():\n    import marimo as mo\n    import numpy as np\n    import matplotlib.pyplot as plt\n\n    return mo, np, plt\n\n\n@app.cell\ndef _(mo):\n    mo.md(r\"\"\"\n    # Unidad 4: Descenso de Gradiente \u2014 interactivo\n    ### Matem\u00e1ticas para An\u00e1lisis de Datos \u2014 ITEC\n\n    Control\u00e1 la **tasa de aprendizaje** y la cantidad de iteraciones para ver\n    en tiempo real c\u00f3mo el algoritmo converge (o diverge) hacia el m\u00ednimo.\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(np):\n    x_data = np.array([60.0, 85.0, 120.0, 150.0, 200.0])\n    y_data = np.array([120000.0, 150000.0, 180000.0, 210000.0, 250000.0])\n\n    x_mean, x_std = x_data.mean(), x_data.std()\n    y_mean, y_std = y_data.mean(), y_data.std()\n    x_norm = (x_data - x_mean) / x_std\n    y_norm = (y_data - y_mean) / y_std\n    return x_norm, y_norm\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## Controles del algoritmo\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo):\n    lr_slider = mo.ui.slider(0.001, 1.5, value=0.1, step=0.001,\n                             label=\"Tasa de aprendizaje (\u03b1)\")\n    n_iter_slider = mo.ui.slider(10, 500, value=100, step=10,\n                                 label=\"N\u00famero de iteraciones\")\n    mo.vstack([lr_slider, n_iter_slider])\n    return lr_slider, n_iter_slider\n\n\n@app.cell\ndef _(lr_slider, mo, n_iter_slider, np, x_norm, y_norm):\n    alpha = lr_slider.value\n    n_iter = n_iter_slider.value\n\n    def mse(m, b, x, y):\n        return np.mean((m * x + b - y)**2)\n\n    def grad(m, b, x, y):\n        n = len(x)\n        e = m * x + b - y\n        return (2/n) * np.sum(x * e), (2/n) * np.sum(e)\n\n    m_cur, b_cur = 0.0, 0.0\n    hist_mse = []\n    hist_params = []\n    divergio = False\n\n    for _ in range(n_iter):\n        c = mse(m_cur, b_cur, x_norm, y_norm)\n        if np.isnan(c) or c \u003E 1e10:\n            divergio = True\n            break\n        hist_mse.append(c)\n        hist_params.append((m_cur, b_cur))\n        gm, gb = grad(m_cur, b_cur, x_norm, y_norm)\n        m_cur -= alpha * gm\n        b_cur -= alpha * gb\n\n    if divergio:\n        status = f\"\u26a0\ufe0f **DIVERGI\u00d3** con \u03b1={alpha} \u2014 la tasa de aprendizaje es demasiado grande\"\n    else:\n        mejora = ((hist_mse[0] - hist_mse[-1]) / hist_mse[0] * 100) if len(hist_mse) \u003E 1 else 0\n        status = (\n            f\"\u2705 **Convergi\u00f3** \u2014 \u03b1={alpha} | {len(hist_mse)} iters | \"\n            f\"MSE inicial={hist_mse[0]:.4f} \u2192 final={hist_mse[-1]:.6f} \"\n            f\"(mejora {mejora:.1f}%)\"\n        )\n\n    mo.md(status)\n    return divergio, hist_mse, hist_params, m_cur\n\n\n@app.cell\ndef _(divergio, hist_mse, hist_params, m_cur, mo, np, plt, x_norm, y_norm):\n    fig_gd, axes_gd = plt.subplots(1, 3, figsize=(15, 5))\n\n    # Curva de p\u00e9rdida\n    if not divergio and hist_mse:\n        axes_gd[0].plot(hist_mse, color='steelblue', linewidth=2)\n        axes_gd[0].set_yscale('log')\n    axes_gd[0].set_xlabel('Iteraci\u00f3n')\n    axes_gd[0].set_ylabel('MSE (log)')\n    axes_gd[0].set_title('Curva de aprendizaje')\n    axes_gd[0].grid(True, alpha=0.3)\n\n    # Superficie + camino\n    m_rng = np.linspace(-0.5, 2.0, 60)\n    b_rng = np.linspace(-1.0, 1.0, 60)\n    MG, BG = np.meshgrid(m_rng, b_rng)\n    from mpl_toolkits.mplot3d import Axes3D\n    MSE_g = np.array([[np.mean((m * x_norm + b * np.ones_like(x_norm) - y_norm)**2)\n                       for m in m_rng] for b in b_rng])\n    cp = axes_gd[1].contourf(MG, BG, np.log1p(MSE_g), levels=35, cmap='viridis')\n    if hist_params:\n        m_h = [p[0] for p in hist_params]\n        b_h = [p[1] for p in hist_params]\n        axes_gd[1].plot(m_h, b_h, 'w-o', markersize=2, linewidth=1.2, alpha=0.8, label='camino')\n        axes_gd[1].scatter([m_h[0]], [b_h[0]], color='red', s=100, zorder=6, label='inicio')\n        axes_gd[1].scatter([m_h[-1]], [b_h[-1]], color='yellow', s=100, zorder=6, label='fin')\n    axes_gd[1].set_xlabel('m')\n    axes_gd[1].set_ylabel('b')\n    axes_gd[1].set_title('Camino sobre la superficie')\n    axes_gd[1].legend(fontsize=8)\n\n    # Ajuste final\n    x_l = np.linspace(x_norm.min(), x_norm.max(), 100)\n    y_l = m_cur * x_l + hist_params[-1][1] if hist_params else x_l * 0\n    axes_gd[2].scatter(x_norm, y_norm, color='red', s=100, zorder=5, label='datos')\n    axes_gd[2].plot(x_l, y_l, color='steelblue', linewidth=2, label='modelo ajustado')\n    axes_gd[2].set_xlabel('x (normalizado)')\n    axes_gd[2].set_ylabel('y (normalizado)')\n    axes_gd[2].set_title('Modelo final')\n    axes_gd[2].legend()\n    axes_gd[2].grid(True, alpha=0.3)\n\n    plt.tight_layout()\n    mo.md(\"\")\n    return (fig_gd,)\n\n\n@app.cell\ndef _(fig_gd):\n    fig_gd\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## Comparaci\u00f3n de tasas de aprendizaje\n    \"\"\")\n    return\n\n\n@app.cell\ndef _(mo, np, plt, x_norm, y_norm):\n    lrs_a_comparar = [0.001, 0.05, 0.1, 0.5, 0.9, 1.3]\n    colores = ['#1f77b4', '#ff7f0e', '#2ca02c', '#d62728', '#9467bd', '#8c564b']\n\n    def run_gd(lr, n=150):\n        m_, b_ = 0.0, 0.0\n        hist = []\n        for _ in range(n):\n            e = m_ * x_norm + b_ - y_norm\n            c = np.mean(e**2)\n            if np.isnan(c) or c \u003E 1e8:\n                hist.append(None)\n                break\n            hist.append(c)\n            m_ -= lr * (2/len(x_norm)) * np.sum(x_norm * e)\n            b_ -= lr * (2/len(x_norm)) * np.sum(e)\n        return hist\n\n    fig_lr, ax_lr = plt.subplots(figsize=(10, 6))\n    for lr_c, color_c in zip(lrs_a_comparar, colores):\n        hist_c = run_gd(lr_c)\n        vals = [v for v in hist_c if v is not None]\n        if vals:\n            ax_lr.semilogy(range(len(vals)), vals, color=color_c, linewidth=2, label=f'\u03b1={lr_c}')\n        else:\n            ax_lr.axhline(1e7, color=color_c, linestyle='--', alpha=0.5, label=f'\u03b1={lr_c} (diverge)')\n\n    ax_lr.set_xlabel('Iteraci\u00f3n')\n    ax_lr.set_ylabel('MSE (log)')\n    ax_lr.set_title('Efecto de la tasa de aprendizaje en la convergencia')\n    ax_lr.legend(loc='upper right')\n    ax_lr.grid(True, alpha=0.3)\n    plt.tight_layout()\n\n    mo.md(\"**Observ\u00e1:**\\n- `\u03b1` peque\u00f1o \u2192 converge pero lento\\n- `\u03b1` adecuado \u2192 converge r\u00e1pido\\n- `\u03b1` grande \u2192 oscila o diverge\")\n    return (fig_lr,)\n\n\n@app.cell\ndef _(fig_lr):\n    fig_lr\n    return\n\n\n@app.cell\ndef _(mo):\n    mo.md(\"\"\"\n    ## El algoritmo en pseudoc\u00f3digo\n\n    ```\n    \u03b8 = [0, 0]             # inicializar par\u00e1metros\n    para cada iteraci\u00f3n:\n        \u0177 = X @ \u03b8          # predicciones actuales\n        error = \u0177 - y      # vector de errores\n        \u2207\u03b8 = (2/n) X.T @ error   # gradiente\n        \u03b8 = \u03b8 - \u03b1 \u00b7 \u2207\u03b8    # actualizar\n    ```\n\n    \u2192 Una sola l\u00ednea de actualizaci\u00f3n `\u03b8 -= \u03b1 * gradiente` es lo que permite a las m\u00e1quinas \"aprender\".\n    \"\"\")\n    return\n\n\nif __name__ == \"__main__\":\n    app.run()\n",
+        }),
+        writable: false,
+        configurable: false,
+    });
+</script>
+<marimo-code hidden="">import%20marimo%0A%0A__generated_with%20%3D%20%220.23.8%22%0Aapp%20%3D%20marimo.App(width%3D%22medium%22)%0A%0A%0A%40app.cell%0Adef%20_()%3A%0A%20%20%20%20import%20marimo%20as%20mo%0A%20%20%20%20import%20numpy%20as%20np%0A%20%20%20%20import%20matplotlib.pyplot%20as%20plt%0A%0A%20%20%20%20return%20mo%2C%20np%2C%20plt%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(r%22%22%22%0A%20%20%20%20%23%20Unidad%204%3A%20Descenso%20de%20Gradiente%20%E2%80%94%20interactivo%0A%20%20%20%20%23%23%23%20Matem%C3%A1ticas%20para%20An%C3%A1lisis%20de%20Datos%20%E2%80%94%20ITEC%0A%0A%20%20%20%20Control%C3%A1%20la%20**tasa%20de%20aprendizaje**%20y%20la%20cantidad%20de%20iteraciones%20para%20ver%0A%20%20%20%20en%20tiempo%20real%20c%C3%B3mo%20el%20algoritmo%20converge%20(o%20diverge)%20hacia%20el%20m%C3%ADnimo.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(np)%3A%0A%20%20%20%20x_data%20%3D%20np.array(%5B60.0%2C%2085.0%2C%20120.0%2C%20150.0%2C%20200.0%5D)%0A%20%20%20%20y_data%20%3D%20np.array(%5B120000.0%2C%20150000.0%2C%20180000.0%2C%20210000.0%2C%20250000.0%5D)%0A%0A%20%20%20%20x_mean%2C%20x_std%20%3D%20x_data.mean()%2C%20x_data.std()%0A%20%20%20%20y_mean%2C%20y_std%20%3D%20y_data.mean()%2C%20y_data.std()%0A%20%20%20%20x_norm%20%3D%20(x_data%20-%20x_mean)%20%2F%20x_std%0A%20%20%20%20y_norm%20%3D%20(y_data%20-%20y_mean)%20%2F%20y_std%0A%20%20%20%20return%20x_norm%2C%20y_norm%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%20Controles%20del%20algoritmo%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20lr_slider%20%3D%20mo.ui.slider(0.001%2C%201.5%2C%20value%3D0.1%2C%20step%3D0.001%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%3D%22Tasa%20de%20aprendizaje%20(%CE%B1)%22)%0A%20%20%20%20n_iter_slider%20%3D%20mo.ui.slider(10%2C%20500%2C%20value%3D100%2C%20step%3D10%2C%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20label%3D%22N%C3%BAmero%20de%20iteraciones%22)%0A%20%20%20%20mo.vstack(%5Blr_slider%2C%20n_iter_slider%5D)%0A%20%20%20%20return%20lr_slider%2C%20n_iter_slider%0A%0A%0A%40app.cell%0Adef%20_(lr_slider%2C%20mo%2C%20n_iter_slider%2C%20np%2C%20x_norm%2C%20y_norm)%3A%0A%20%20%20%20alpha%20%3D%20lr_slider.value%0A%20%20%20%20n_iter%20%3D%20n_iter_slider.value%0A%0A%20%20%20%20def%20mse(m%2C%20b%2C%20x%2C%20y)%3A%0A%20%20%20%20%20%20%20%20return%20np.mean((m%20*%20x%20%2B%20b%20-%20y)**2)%0A%0A%20%20%20%20def%20grad(m%2C%20b%2C%20x%2C%20y)%3A%0A%20%20%20%20%20%20%20%20n%20%3D%20len(x)%0A%20%20%20%20%20%20%20%20e%20%3D%20m%20*%20x%20%2B%20b%20-%20y%0A%20%20%20%20%20%20%20%20return%20(2%2Fn)%20*%20np.sum(x%20*%20e)%2C%20(2%2Fn)%20*%20np.sum(e)%0A%0A%20%20%20%20m_cur%2C%20b_cur%20%3D%200.0%2C%200.0%0A%20%20%20%20hist_mse%20%3D%20%5B%5D%0A%20%20%20%20hist_params%20%3D%20%5B%5D%0A%20%20%20%20divergio%20%3D%20False%0A%0A%20%20%20%20for%20_%20in%20range(n_iter)%3A%0A%20%20%20%20%20%20%20%20c%20%3D%20mse(m_cur%2C%20b_cur%2C%20x_norm%2C%20y_norm)%0A%20%20%20%20%20%20%20%20if%20np.isnan(c)%20or%20c%20%3E%201e10%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20divergio%20%3D%20True%0A%20%20%20%20%20%20%20%20%20%20%20%20break%0A%20%20%20%20%20%20%20%20hist_mse.append(c)%0A%20%20%20%20%20%20%20%20hist_params.append((m_cur%2C%20b_cur))%0A%20%20%20%20%20%20%20%20gm%2C%20gb%20%3D%20grad(m_cur%2C%20b_cur%2C%20x_norm%2C%20y_norm)%0A%20%20%20%20%20%20%20%20m_cur%20-%3D%20alpha%20*%20gm%0A%20%20%20%20%20%20%20%20b_cur%20-%3D%20alpha%20*%20gb%0A%0A%20%20%20%20if%20divergio%3A%0A%20%20%20%20%20%20%20%20status%20%3D%20f%22%E2%9A%A0%EF%B8%8F%20**DIVERGI%C3%93**%20con%20%CE%B1%3D%7Balpha%7D%20%E2%80%94%20la%20tasa%20de%20aprendizaje%20es%20demasiado%20grande%22%0A%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20mejora%20%3D%20((hist_mse%5B0%5D%20-%20hist_mse%5B-1%5D)%20%2F%20hist_mse%5B0%5D%20*%20100)%20if%20len(hist_mse)%20%3E%201%20else%200%0A%20%20%20%20%20%20%20%20status%20%3D%20(%0A%20%20%20%20%20%20%20%20%20%20%20%20f%22%E2%9C%85%20**Convergi%C3%B3**%20%E2%80%94%20%CE%B1%3D%7Balpha%7D%20%7C%20%7Blen(hist_mse)%7D%20iters%20%7C%20%22%0A%20%20%20%20%20%20%20%20%20%20%20%20f%22MSE%20inicial%3D%7Bhist_mse%5B0%5D%3A.4f%7D%20%E2%86%92%20final%3D%7Bhist_mse%5B-1%5D%3A.6f%7D%20%22%0A%20%20%20%20%20%20%20%20%20%20%20%20f%22(mejora%20%7Bmejora%3A.1f%7D%25)%22%0A%20%20%20%20%20%20%20%20)%0A%0A%20%20%20%20mo.md(status)%0A%20%20%20%20return%20divergio%2C%20hist_mse%2C%20hist_params%2C%20m_cur%0A%0A%0A%40app.cell%0Adef%20_(divergio%2C%20hist_mse%2C%20hist_params%2C%20m_cur%2C%20mo%2C%20np%2C%20plt%2C%20x_norm%2C%20y_norm)%3A%0A%20%20%20%20fig_gd%2C%20axes_gd%20%3D%20plt.subplots(1%2C%203%2C%20figsize%3D(15%2C%205))%0A%0A%20%20%20%20%23%20Curva%20de%20p%C3%A9rdida%0A%20%20%20%20if%20not%20divergio%20and%20hist_mse%3A%0A%20%20%20%20%20%20%20%20axes_gd%5B0%5D.plot(hist_mse%2C%20color%3D'steelblue'%2C%20linewidth%3D2)%0A%20%20%20%20%20%20%20%20axes_gd%5B0%5D.set_yscale('log')%0A%20%20%20%20axes_gd%5B0%5D.set_xlabel('Iteraci%C3%B3n')%0A%20%20%20%20axes_gd%5B0%5D.set_ylabel('MSE%20(log)')%0A%20%20%20%20axes_gd%5B0%5D.set_title('Curva%20de%20aprendizaje')%0A%20%20%20%20axes_gd%5B0%5D.grid(True%2C%20alpha%3D0.3)%0A%0A%20%20%20%20%23%20Superficie%20%2B%20camino%0A%20%20%20%20m_rng%20%3D%20np.linspace(-0.5%2C%202.0%2C%2060)%0A%20%20%20%20b_rng%20%3D%20np.linspace(-1.0%2C%201.0%2C%2060)%0A%20%20%20%20MG%2C%20BG%20%3D%20np.meshgrid(m_rng%2C%20b_rng)%0A%20%20%20%20from%20mpl_toolkits.mplot3d%20import%20Axes3D%0A%20%20%20%20MSE_g%20%3D%20np.array(%5B%5Bnp.mean((m%20*%20x_norm%20%2B%20b%20*%20np.ones_like(x_norm)%20-%20y_norm)**2)%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20for%20m%20in%20m_rng%5D%20for%20b%20in%20b_rng%5D)%0A%20%20%20%20cp%20%3D%20axes_gd%5B1%5D.contourf(MG%2C%20BG%2C%20np.log1p(MSE_g)%2C%20levels%3D35%2C%20cmap%3D'viridis')%0A%20%20%20%20if%20hist_params%3A%0A%20%20%20%20%20%20%20%20m_h%20%3D%20%5Bp%5B0%5D%20for%20p%20in%20hist_params%5D%0A%20%20%20%20%20%20%20%20b_h%20%3D%20%5Bp%5B1%5D%20for%20p%20in%20hist_params%5D%0A%20%20%20%20%20%20%20%20axes_gd%5B1%5D.plot(m_h%2C%20b_h%2C%20'w-o'%2C%20markersize%3D2%2C%20linewidth%3D1.2%2C%20alpha%3D0.8%2C%20label%3D'camino')%0A%20%20%20%20%20%20%20%20axes_gd%5B1%5D.scatter(%5Bm_h%5B0%5D%5D%2C%20%5Bb_h%5B0%5D%5D%2C%20color%3D'red'%2C%20s%3D100%2C%20zorder%3D6%2C%20label%3D'inicio')%0A%20%20%20%20%20%20%20%20axes_gd%5B1%5D.scatter(%5Bm_h%5B-1%5D%5D%2C%20%5Bb_h%5B-1%5D%5D%2C%20color%3D'yellow'%2C%20s%3D100%2C%20zorder%3D6%2C%20label%3D'fin')%0A%20%20%20%20axes_gd%5B1%5D.set_xlabel('m')%0A%20%20%20%20axes_gd%5B1%5D.set_ylabel('b')%0A%20%20%20%20axes_gd%5B1%5D.set_title('Camino%20sobre%20la%20superficie')%0A%20%20%20%20axes_gd%5B1%5D.legend(fontsize%3D8)%0A%0A%20%20%20%20%23%20Ajuste%20final%0A%20%20%20%20x_l%20%3D%20np.linspace(x_norm.min()%2C%20x_norm.max()%2C%20100)%0A%20%20%20%20y_l%20%3D%20m_cur%20*%20x_l%20%2B%20hist_params%5B-1%5D%5B1%5D%20if%20hist_params%20else%20x_l%20*%200%0A%20%20%20%20axes_gd%5B2%5D.scatter(x_norm%2C%20y_norm%2C%20color%3D'red'%2C%20s%3D100%2C%20zorder%3D5%2C%20label%3D'datos')%0A%20%20%20%20axes_gd%5B2%5D.plot(x_l%2C%20y_l%2C%20color%3D'steelblue'%2C%20linewidth%3D2%2C%20label%3D'modelo%20ajustado')%0A%20%20%20%20axes_gd%5B2%5D.set_xlabel('x%20(normalizado)')%0A%20%20%20%20axes_gd%5B2%5D.set_ylabel('y%20(normalizado)')%0A%20%20%20%20axes_gd%5B2%5D.set_title('Modelo%20final')%0A%20%20%20%20axes_gd%5B2%5D.legend()%0A%20%20%20%20axes_gd%5B2%5D.grid(True%2C%20alpha%3D0.3)%0A%0A%20%20%20%20plt.tight_layout()%0A%20%20%20%20mo.md(%22%22)%0A%20%20%20%20return%20(fig_gd%2C)%0A%0A%0A%40app.cell%0Adef%20_(fig_gd)%3A%0A%20%20%20%20fig_gd%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%20Comparaci%C3%B3n%20de%20tasas%20de%20aprendizaje%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo%2C%20np%2C%20plt%2C%20x_norm%2C%20y_norm)%3A%0A%20%20%20%20lrs_a_comparar%20%3D%20%5B0.001%2C%200.05%2C%200.1%2C%200.5%2C%200.9%2C%201.3%5D%0A%20%20%20%20colores%20%3D%20%5B'%231f77b4'%2C%20'%23ff7f0e'%2C%20'%232ca02c'%2C%20'%23d62728'%2C%20'%239467bd'%2C%20'%238c564b'%5D%0A%0A%20%20%20%20def%20run_gd(lr%2C%20n%3D150)%3A%0A%20%20%20%20%20%20%20%20m_%2C%20b_%20%3D%200.0%2C%200.0%0A%20%20%20%20%20%20%20%20hist%20%3D%20%5B%5D%0A%20%20%20%20%20%20%20%20for%20_%20in%20range(n)%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20e%20%3D%20m_%20*%20x_norm%20%2B%20b_%20-%20y_norm%0A%20%20%20%20%20%20%20%20%20%20%20%20c%20%3D%20np.mean(e**2)%0A%20%20%20%20%20%20%20%20%20%20%20%20if%20np.isnan(c)%20or%20c%20%3E%201e8%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20hist.append(None)%0A%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20%20break%0A%20%20%20%20%20%20%20%20%20%20%20%20hist.append(c)%0A%20%20%20%20%20%20%20%20%20%20%20%20m_%20-%3D%20lr%20*%20(2%2Flen(x_norm))%20*%20np.sum(x_norm%20*%20e)%0A%20%20%20%20%20%20%20%20%20%20%20%20b_%20-%3D%20lr%20*%20(2%2Flen(x_norm))%20*%20np.sum(e)%0A%20%20%20%20%20%20%20%20return%20hist%0A%0A%20%20%20%20fig_lr%2C%20ax_lr%20%3D%20plt.subplots(figsize%3D(10%2C%206))%0A%20%20%20%20for%20lr_c%2C%20color_c%20in%20zip(lrs_a_comparar%2C%20colores)%3A%0A%20%20%20%20%20%20%20%20hist_c%20%3D%20run_gd(lr_c)%0A%20%20%20%20%20%20%20%20vals%20%3D%20%5Bv%20for%20v%20in%20hist_c%20if%20v%20is%20not%20None%5D%0A%20%20%20%20%20%20%20%20if%20vals%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20ax_lr.semilogy(range(len(vals))%2C%20vals%2C%20color%3Dcolor_c%2C%20linewidth%3D2%2C%20label%3Df'%CE%B1%3D%7Blr_c%7D')%0A%20%20%20%20%20%20%20%20else%3A%0A%20%20%20%20%20%20%20%20%20%20%20%20ax_lr.axhline(1e7%2C%20color%3Dcolor_c%2C%20linestyle%3D'--'%2C%20alpha%3D0.5%2C%20label%3Df'%CE%B1%3D%7Blr_c%7D%20(diverge)')%0A%0A%20%20%20%20ax_lr.set_xlabel('Iteraci%C3%B3n')%0A%20%20%20%20ax_lr.set_ylabel('MSE%20(log)')%0A%20%20%20%20ax_lr.set_title('Efecto%20de%20la%20tasa%20de%20aprendizaje%20en%20la%20convergencia')%0A%20%20%20%20ax_lr.legend(loc%3D'upper%20right')%0A%20%20%20%20ax_lr.grid(True%2C%20alpha%3D0.3)%0A%20%20%20%20plt.tight_layout()%0A%0A%20%20%20%20mo.md(%22**Observ%C3%A1%3A**%5Cn-%20%60%CE%B1%60%20peque%C3%B1o%20%E2%86%92%20converge%20pero%20lento%5Cn-%20%60%CE%B1%60%20adecuado%20%E2%86%92%20converge%20r%C3%A1pido%5Cn-%20%60%CE%B1%60%20grande%20%E2%86%92%20oscila%20o%20diverge%22)%0A%20%20%20%20return%20(fig_lr%2C)%0A%0A%0A%40app.cell%0Adef%20_(fig_lr)%3A%0A%20%20%20%20fig_lr%0A%20%20%20%20return%0A%0A%0A%40app.cell%0Adef%20_(mo)%3A%0A%20%20%20%20mo.md(%22%22%22%0A%20%20%20%20%23%23%20El%20algoritmo%20en%20pseudoc%C3%B3digo%0A%0A%20%20%20%20%60%60%60%0A%20%20%20%20%CE%B8%20%3D%20%5B0%2C%200%5D%20%20%20%20%20%20%20%20%20%20%20%20%20%23%20inicializar%20par%C3%A1metros%0A%20%20%20%20para%20cada%20iteraci%C3%B3n%3A%0A%20%20%20%20%20%20%20%20%C5%B7%20%3D%20X%20%40%20%CE%B8%20%20%20%20%20%20%20%20%20%20%23%20predicciones%20actuales%0A%20%20%20%20%20%20%20%20error%20%3D%20%C5%B7%20-%20y%20%20%20%20%20%20%23%20vector%20de%20errores%0A%20%20%20%20%20%20%20%20%E2%88%87%CE%B8%20%3D%20(2%2Fn)%20X.T%20%40%20error%20%20%20%23%20gradiente%0A%20%20%20%20%20%20%20%20%CE%B8%20%3D%20%CE%B8%20-%20%CE%B1%20%C2%B7%20%E2%88%87%CE%B8%20%20%20%20%23%20actualizar%0A%20%20%20%20%60%60%60%0A%0A%20%20%20%20%E2%86%92%20Una%20sola%20l%C3%ADnea%20de%20actualizaci%C3%B3n%20%60%CE%B8%20-%3D%20%CE%B1%20*%20gradiente%60%20es%20lo%20que%20permite%20a%20las%20m%C3%A1quinas%20%22aprender%22.%0A%20%20%20%20%22%22%22)%0A%20%20%20%20return%0A%0A%0Aif%20__name__%20%3D%3D%20%22__main__%22%3A%0A%20%20%20%20app.run()%0A</marimo-code></head>
+  <body>
+<a href="../../index.html" id="volver-al-indice">&larr;&nbsp; Volver al inicio</a>
+<style>
+#volver-al-indice{
+  position:fixed; top:16px; left:16px; z-index:99999;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; line-height:1; text-decoration:none;
+  color:#161A22; background:rgba(237,234,228,0.92);
+  border:1px solid rgba(22,26,34,0.28); border-radius:100px;
+  padding:9px 15px; backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(22,26,34,0.10);
+  transition:background .15s ease,border-color .15s ease;
+}
+#volver-al-indice:hover{ background:#fff; border-color:#4740E0; color:#4740E0; }
+@media print{ #volver-al-indice{ display:none; } }
+</style>
+
+    <div id="root"></div>
+    <!-- This is a portal for the data editor to render in -->
+    <div id="portal" data-testid="glide-portal" style="position: fixed; left: 0; top: 0; z-index: 9999"></div>
+    <script data-marimo="true">
+      Object.defineProperty(window, "__MARIMO_MOUNT_CONFIG__", {
+        value: Object.freeze({
+            "filename": "notebook.py",
+            "cwd": "",
+            "lspWorkspace": null,
+            "mode": "read",
+            "version": "0.23.8",
+            "serverToken": "unused",
+            "config": {"ai": {"custom_providers": {}, "models": {"custom_models": [], "displayed_models": []}}, "completion": {"activate_on_typing": true, "copilot": false, "signature_hint_on_typing": false}, "diagnostics": {"sql_linter": true}, "display": {"cell_output": "below", "code_editor_font_size": 14, "dataframes": "rich", "default_table_max_columns": 50, "default_table_page_size": 10, "default_width": "medium", "reference_highlighting": true, "theme": "light"}, "formatting": {"line_length": 79}, "keymap": {"overrides": {}, "preset": "default"}, "language_servers": {"pylsp": {"enable_flake8": false, "enable_mypy": true, "enable_pydocstyle": false, "enable_pyflakes": false, "enable_pylint": false, "enable_ruff": true, "enabled": false}}, "mcp": {"mcpServers": {}, "presets": []}, "package_management": {"manager": "pip"}, "runtime": {"auto_instantiate": false, "auto_reload": "off", "default_csv_encoding": "utf-8", "default_sql_output": "auto", "on_cell_change": "autorun", "output_max_bytes": 8000000, "reactive_tests": true, "show_tracebacks": false, "std_stream_max_bytes": 1000000, "watcher_on_save": "lazy"}, "save": {"autosave": "off", "autosave_delay": 1000, "format_on_save": false}, "server": {"browser": "default", "follow_symlink": false}, "snippets": {"custom_paths": [], "include_default_snippets": true}},
+            "configOverrides": {},
+            "appConfig": {"sql_output": "auto", "width": "medium"},
+            "view": {"showAppCode": false},
+            "notebook": null,
+            "session": null,
+            "runtimeConfig": null,
+        }),
+        writable: false,
+        configurable: false,
+      });
+    </script>
+  </body>
+</html>
