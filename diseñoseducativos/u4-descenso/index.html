@@ -1,0 +1,1124 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Caminante en la niebla</title>
+<meta name="description" content="Unidad 4 · Descenso de gradiente: encuentra el valle más bajo guiándote solo por la pendiente.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,600;9..144,800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #060a15;
+  --bg2: #0c1325;
+  --panel: rgba(16, 24, 46, 0.86);
+  --panel-solid: #10182e;
+  --line: #24314f;
+  --text: #e7ecff;
+  --muted: #9aa6c8;
+  --accent: #ffb547;
+  --accent-ink: #1b1200;
+  --accent2: #7fd6ff;
+  --good: #5be3a1;
+  --warn: #ffcf6b;
+  --bad: #ff7a86;
+  --focus: #ffd27a;
+  --chip: #1a2442;
+  --radius: 16px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.45);
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Fraunces", Georgia, serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #e9eef6;
+    --bg2: #f6f8fc;
+    --panel: rgba(255, 255, 255, 0.9);
+    --panel-solid: #ffffff;
+    --line: #cdd6e6;
+    --text: #141b2e;
+    --muted: #4e5a76;
+    --accent: #c46a00;
+    --accent-ink: #ffffff;
+    --accent2: #1f6fb2;
+    --good: #12805a;
+    --warn: #8a5a00;
+    --bad: #b3263a;
+    --focus: #c46a00;
+    --chip: #eef2f9;
+    --shadow: 0 14px 40px rgba(30, 50, 90, 0.15);
+    color-scheme: light;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font-ui);
+  background: radial-gradient(1200px 600px at 70% -10%, var(--bg2), var(--bg));
+  color: var(--text);
+  min-height: 100vh;
+  line-height: 1.45;
+}
+button, input { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+.top {
+  display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+  gap: 12px; padding: 14px 18px; max-width: 1280px; margin: 0 auto;
+}
+.brand { display: flex; align-items: center; gap: 12px; }
+.logo {
+  width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center;
+  background: linear-gradient(145deg, #1d2a52, #0b1124); box-shadow: inset 0 0 0 1px var(--line), 0 0 24px rgba(255, 181, 71, 0.25);
+}
+.brand h1 { font-family: var(--font-display); font-size: clamp(1.15rem, 3.4vw, 1.6rem); margin: 0; letter-spacing: 0.01em; }
+.brand p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.levels { display: flex; gap: 6px; flex-wrap: wrap; }
+.levels button {
+  border: 1px solid var(--line); background: var(--chip); border-radius: 12px; padding: 7px 12px; cursor: pointer;
+  display: flex; flex-direction: column; align-items: flex-start; min-width: 74px; transition: transform .15s, border-color .15s;
+}
+.levels button:hover { transform: translateY(-1px); border-color: var(--accent2); }
+.levels button[aria-selected="true"] { border-color: var(--accent); box-shadow: 0 0 0 1px var(--accent) inset; }
+.levels .lv { font-weight: 700; font-size: 0.85rem; }
+.levels .st { font-size: 0.8rem; color: var(--accent); letter-spacing: 1px; }
+.layout {
+  display: grid; grid-template-columns: minmax(0, 1fr) 360px; gap: 16px;
+  max-width: 1280px; margin: 0 auto; padding: 0 18px 18px;
+}
+@media (max-width: 920px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.stage {
+  position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 74vh; border-radius: var(--radius); overflow: hidden;
+  box-shadow: var(--shadow); border: 1px solid var(--line); background: #0a1020;
+}
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: manipulation; cursor: crosshair; }
+.hud {
+  position: absolute; left: 10px; top: 10px; display: flex; gap: 6px; flex-wrap: wrap; pointer-events: none; max-width: calc(100% - 20px);
+}
+.hud span {
+  background: rgba(6, 10, 21, 0.62); color: #eef2ff; border: 1px solid rgba(255, 255, 255, 0.12); border-radius: 999px;
+  padding: 4px 10px; font-family: var(--font-mono); font-size: 0.78rem; backdrop-filter: blur(4px);
+}
+.toast {
+  position: absolute; left: 50%; bottom: 12px; transform: translate(-50%, 20px); opacity: 0; transition: all .25s;
+  background: rgba(6, 10, 21, 0.82); color: #eef2ff; border-radius: 12px; padding: 8px 14px; font-size: 0.9rem;
+  max-width: calc(100% - 24px); text-align: center; border: 1px solid rgba(255, 255, 255, 0.14); pointer-events: none;
+}
+.toast.show { opacity: 1; transform: translate(-50%, 0); }
+.toast.good { border-color: #5be3a1; }
+.toast.warn { border-color: #ffcf6b; }
+.toast.bad { border-color: #ff7a86; }
+.panel {
+  background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow);
+  backdrop-filter: blur(10px); align-self: start; min-width: 0;
+}
+.panel h2 { font-family: var(--font-display); font-size: 1.25rem; margin: 0 0 4px; }
+.panel .story { color: var(--muted); margin: 0 0 12px; font-size: 0.93rem; }
+.stats { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 12px; }
+.stat { background: var(--chip); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 0; }
+.stat small { display: block; color: var(--muted); font-size: 0.72rem; }
+.stat b { font-family: var(--font-mono); font-size: 1rem; overflow-wrap: anywhere; }
+.ctrl { margin: 10px 0; }
+.ctrl label { display: flex; justify-content: space-between; font-size: 0.88rem; font-weight: 600; margin-bottom: 4px; gap: 8px; }
+.ctrl output { font-family: var(--font-mono); color: var(--accent); }
+input[type=range] { width: 100%; accent-color: var(--accent); height: 28px; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn {
+  border: 1px solid var(--line); background: var(--chip); border-radius: 12px; padding: 10px 14px; cursor: pointer; font-weight: 600;
+  flex: 1 1 auto; min-height: 44px; transition: transform .12s, background .15s;
+}
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.btn.ghost { background: transparent; }
+.hint { color: var(--muted); font-size: 0.8rem; margin: 8px 0 0; }
+.log { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); max-height: 120px; overflow: auto; padding-left: 22px; margin: 10px 0 0; }
+.log li.up { color: var(--bad); }
+.log li.down { color: var(--good); }
+.card { border: 1px solid var(--line); background: var(--panel-solid); border-radius: 14px; padding: 14px; margin-top: 12px; animation: pop .35s ease; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.card h3 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.1rem; }
+.bigstars { font-size: 1.6rem; color: var(--accent); letter-spacing: 3px; }
+.formula {
+  font-family: var(--font-mono); background: var(--chip); border: 1px dashed var(--accent); border-radius: 10px; padding: 8px 10px;
+  margin: 8px 0; text-align: center; font-size: 1rem; overflow-wrap: anywhere;
+}
+.learned { margin: 8px 0 0; padding-left: 18px; font-size: 0.9rem; }
+.learned li { margin: 3px 0; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0; }
+.chips button { border: 1px solid var(--line); background: var(--chip); border-radius: 999px; padding: 7px 12px; cursor: pointer; min-height: 36px; }
+.chips button[aria-pressed="true"] { border-color: var(--accent); background: var(--accent); color: var(--accent-ink); }
+table.hist { width: 100%; border-collapse: collapse; font-size: 0.8rem; margin-top: 8px; font-family: var(--font-mono); }
+table.hist th, table.hist td { border-bottom: 1px solid var(--line); padding: 4px; text-align: left; }
+.ok { color: var(--good); } .ko { color: var(--bad); } .meh { color: var(--warn); }
+details summary { cursor: pointer; font-weight: 600; margin-top: 10px; }
+.overlay {
+  position: fixed; inset: 0; background: rgba(3, 6, 14, 0.72); display: grid; place-items: center; padding: 16px; z-index: 10;
+  backdrop-filter: blur(4px);
+}
+.overlay[hidden] { display: none; }
+.intro { max-width: 520px; background: var(--panel-solid); border: 1px solid var(--line); border-radius: 20px; padding: 22px; box-shadow: var(--shadow); }
+.intro h2 { font-family: var(--font-display); margin: 0 0 8px; font-size: 1.6rem; }
+.intro p { color: var(--muted); }
+footer { max-width: 1280px; margin: 0 auto; padding: 4px 18px 24px; color: var(--muted); font-size: 0.8rem; }
+@media (max-width: 420px) {
+  .top, .layout, footer { padding-left: 16px; padding-right: 16px; }
+  .levels button { min-width: 0; flex: 1 1 22%; padding: 6px 8px; }
+  .stats { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .toast { font-size: 0.8rem; padding: 6px 10px; bottom: 8px; }
+}
+@media (max-width: 520px) { .stage { aspect-ratio: 1 / 1; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<a href="../../index.html" id="volver-al-indice">&larr;&nbsp; Volver al inicio</a>
+<style>
+#volver-al-indice{
+  position:fixed; top:16px; left:16px; z-index:99999;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; line-height:1; text-decoration:none;
+  color:#161A22; background:rgba(237,234,228,0.92);
+  border:1px solid rgba(22,26,34,0.28); border-radius:100px;
+  padding:9px 15px; backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(22,26,34,0.10);
+  transition:background .15s ease,border-color .15s ease;
+}
+#volver-al-indice:hover{ background:#fff; border-color:#4740E0; color:#4740E0; }
+@media print{ #volver-al-indice{ display:none; } }
+</style>
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 26 26"><path d="M2 21 L9 10 L13 15 L17 8 L24 21 Z" fill="#7fd6ff" opacity=".8"/><circle cx="17" cy="6" r="2.4" fill="#ffb547"/></svg>
+    </div>
+    <div>
+      <h1>Caminante en la niebla</h1>
+      <p>Unidad 4 · Descenso de gradiente</p>
+    </div>
+  </div>
+  <nav class="levels" role="tablist" aria-label="Niveles" id="tabs"></nav>
+</header>
+
+<main class="layout">
+  <section aria-label="Escenario">
+    <div class="stage">
+      <canvas id="cv" tabindex="0" aria-label="Montaña en la niebla. Usa las flechas del teclado o los controles del panel."></canvas>
+      <div class="hud" id="hud" aria-hidden="true"></div>
+      <div class="toast" id="toast" role="status" aria-live="polite"></div>
+    </div>
+  </section>
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</main>
+
+<footer>
+  Prototipo educativo · Álgebra · Tecnicatura en Ciencia de Datos e IA · iTec Río Cuarto. Las funciones son simuladas; el progreso se guarda solo en este navegador.
+</footer>
+
+<div class="overlay" id="intro" role="dialog" aria-modal="true" aria-labelledby="introTitle">
+  <div class="intro">
+    <h2 id="introTitle">Estás perdido en la niebla</h2>
+    <p>Anocheció en la montaña y la niebla no deja ver nada. Tu única pista es la inclinación del suelo bajo tus pies. Debes llegar al valle más bajo.</p>
+    <p>Esta montaña es la <strong>función de pérdida</strong> de un modelo: la altura es el error. Bajar la montaña es entrenar.</p>
+    <button class="btn primary" id="introGo" type="button">Empezar a caminar</button>
+  </div>
+</div>
+
+<script>
+'use strict';
+
+/* ================= Utilities ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = t => (t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2);
+const fmt = (v, d = 2) => {
+  if (!Number.isFinite(v)) return '∞';
+  if (Math.abs(v) >= 1e4) return v.toExponential(1);
+  return v.toFixed(d);
+};
+const sgn = v => (v > 0 ? '+' : '') + fmt(v);
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('u4descenso:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('u4descenso:' + k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
+};
+const starStr = n => '★'.repeat(n) + '☆'.repeat(3 - n);
+
+/* ================= Math (pure) ================= */
+// Level 1 & 3: convex loss. f''(x) = 0.8, so GD is stable for eta < 2/0.8 = 2.5.
+const convex = {
+  f: x => 0.4 * (x - 1.5) ** 2 + 0.2,
+  df: x => 0.8 * (x - 1.5),
+  xmin: -4.5, xmax: 7.5, ymin: 0, ymax: 15, xstar: 1.5, fstar: 0.2
+};
+// Level 2: non-convex loss. Global min near x = -1.902 (f = 0.468), local min near x = 1.593 (f = 1.524).
+const bumpy = {
+  f: x => 0.08 * x ** 4 - 0.5 * x * x + 0.3 * x + 1.8,
+  df: x => 0.32 * x ** 3 - x + 0.3,
+  xmin: -3.6, xmax: 3.6, ymin: 0, ymax: 10, xstar: -1.902, fstar: 0.468, xlocal: 1.593, xhill: 0.31
+};
+function numDeriv(f, x, h = 1e-5) { return (f(x + h) - f(x - h)) / (2 * h); }
+function gdStep(x, eta, df) { return x - eta * df(x); }
+// Level 4: rotated anisotropic bowl f = a*u^2 + b*v^2 + c, (u, v) = rotation of (x - cx, y - cy).
+const bowl = {
+  cx: 1.4, cy: -0.9, th: 0.5, a: 0.12, b: 0.9, c: 0.1, lim: 4,
+  f(x, y) {
+    const dx = x - this.cx, dy = y - this.cy, co = Math.cos(this.th), si = Math.sin(this.th);
+    const u = dx * co + dy * si, v = -dx * si + dy * co;
+    return this.a * u * u + this.b * v * v + this.c;
+  },
+  grad(x, y) {
+    const dx = x - this.cx, dy = y - this.cy, co = Math.cos(this.th), si = Math.sin(this.th);
+    const u = dx * co + dy * si, v = -dx * si + dy * co;
+    const gu = 2 * this.a * u, gv = 2 * this.b * v;
+    return [gu * co - gv * si, gu * si + gv * co];
+  }
+};
+/** Run 1D gradient descent until loss < thr, divergence, or maxSteps. */
+function runGD1D(fn, x0, eta, thr, maxSteps = 60) {
+  const xs = [x0];
+  let x = x0, status = 'slow';
+  for (let i = 0; i < maxSteps; i++) {
+    if (fn.f(x) < thr) { status = 'converged'; break; }
+    x = gdStep(x, eta, fn.df);
+    xs.push(x);
+    if (!Number.isFinite(x) || Math.abs(x - fn.xstar) > 60 || fn.f(x) > 1e4) { status = 'diverged'; break; }
+  }
+  if (status === 'slow' && fn.f(x) < thr) status = 'converged';
+  return { xs, status, steps: xs.length - 1 };
+}
+function runGD2D(F, p0, eta, thr, maxSteps = 200) {
+  const pts = [p0.slice()];
+  let [x, y] = p0;
+  for (let i = 0; i < maxSteps; i++) {
+    if (F.f(x, y) < thr) break;
+    const [gx, gy] = F.grad(x, y);
+    x -= eta * gx; y -= eta * gy;
+    pts.push([x, y]);
+    if (!Number.isFinite(x) || Math.abs(x) > 50 || Math.abs(y) > 50) return { pts, ok: false, steps: pts.length - 1 };
+  }
+  return { pts, ok: F.f(x, y) < thr, steps: pts.length - 1 };
+}
+
+/* ================= Canvas & palette ================= */
+const cv = $('#cv'), ctx = cv.getContext('2d');
+let W = 300, H = 225, DPR = 1;
+const pal = {};
+const mqLight = window.matchMedia('(prefers-color-scheme: light)');
+function readPalette() {
+  const light = mqLight.matches;
+  Object.assign(pal, light ? {
+    dark: false, sky0: '#cfdbee', sky1: '#f4f7fc', ridge1: '#b9c7de', ridge2: '#a6b6d2',
+    ground0: '#7f98c4', ground1: '#dfe7f4', curve: '#1f4f94', fog: [226, 232, 242], wisp: '255,255,255',
+    lantern: '#d97a00', ghost: '#1f6fb2', text: '#14203a', axis: 'rgba(20,32,58,0.55)', path: '#c45a00',
+    good: '#12805a', bad: '#b3263a', heatLo: [40, 120, 150], heatMid: [150, 200, 210], heatHi: [245, 240, 225], contour: 'rgba(20,40,80,0.55)'
+  } : {
+    dark: true, sky0: '#04060f', sky1: '#141c3a', ridge1: '#131b37', ridge2: '#1a2448',
+    ground0: '#2d3d73', ground1: '#0d142b', curve: '#9fd8ff', fog: [26, 34, 60], wisp: '170,185,220',
+    lantern: '#ffb547', ghost: '#7fd6ff', text: '#e7ecff', axis: 'rgba(200,215,255,0.55)', path: '#ffb547',
+    good: '#5be3a1', bad: '#ff7a86', heatLo: [10, 40, 70], heatMid: [40, 110, 150], heatHi: [200, 225, 255], contour: 'rgba(220,235,255,0.5)'
+  });
+}
+readPalette();
+function resize() {
+  const r = cv.getBoundingClientRect();
+  DPR = Math.min(2, window.devicePixelRatio || 1);
+  W = Math.max(200, r.width); H = Math.max(150, r.height);
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR);
+  ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+  if (cur && cur.onResize) cur.onResize();
+}
+if (window.ResizeObserver) new ResizeObserver(resize).observe(cv); else window.addEventListener('resize', resize);
+const onTheme = () => { readPalette(); if (cur && cur.onResize) cur.onResize(); };
+if (mqLight.addEventListener) mqLight.addEventListener('change', onTheme); else if (mqLight.addListener) mqLight.addListener(onTheme);
+
+const skyStars = (() => { const r = mulberry32(7); return Array.from({ length: 110 }, () => ({ x: r(), y: r() * 0.65, s: r() * 1.5 + 0.3, p: r() * 6.28 })); })();
+const wisps = (() => { const r = mulberry32(11); return Array.from({ length: 8 }, (_, i) => ({ x: r(), y: 0.15 + r() * 0.8, r: 0.16 + r() * 0.22, v: (0.3 + r() * 0.6) * (i % 2 ? 1 : -1) })); })();
+
+function drawSky(t) {
+  const g = ctx.createLinearGradient(0, 0, 0, H);
+  g.addColorStop(0, pal.sky0); g.addColorStop(1, pal.sky1);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  if (pal.dark) {
+    ctx.fillStyle = '#d6e4ff';
+    for (const s of skyStars) {
+      ctx.globalAlpha = 0.3 + 0.35 * Math.sin(t * 0.0012 + s.p);
+      ctx.fillRect(s.x * W, s.y * H, s.s, s.s);
+    }
+    ctx.globalAlpha = 1;
+  }
+  drawRidge(0.5, pal.ridge1, t * 0.00001, 26, 4.2);
+  drawRidge(0.62, pal.ridge2, t * 0.00002, 20, 6.5);
+}
+function drawRidge(base, color, shift, amp, freq) {
+  ctx.beginPath(); ctx.moveTo(0, H);
+  for (let i = 0; i <= 64; i++) {
+    const u = i / 64;
+    const y = H * base - amp * (H / 300) * (Math.sin(u * freq + shift * 30) + 0.5 * Math.sin(u * freq * 2.3 + 1.7 + shift * 50));
+    ctx.lineTo(u * W, y);
+  }
+  ctx.lineTo(W, H); ctx.closePath(); ctx.fillStyle = color; ctx.fill();
+}
+/** Dense fog everywhere except a soft window of radius R around (cx, cy). */
+function drawFog(cx, cy, R, t, strength) {
+  if (strength <= 0.001) return;
+  const [r, g, b] = pal.fog;
+  const gr = ctx.createRadialGradient(cx, cy, R * 0.3, cx, cy, R);
+  gr.addColorStop(0, `rgba(${r},${g},${b},0)`);
+  gr.addColorStop(0.55, `rgba(${r},${g},${b},${0.6 * strength})`);
+  gr.addColorStop(1, `rgba(${r},${g},${b},${strength})`);
+  ctx.fillStyle = gr; ctx.fillRect(0, 0, W, H);
+  for (const w of wisps) {
+    const x = ((((w.x + w.v * t * 0.000015) % 1) + 1) % 1) * (W + 200) - 100;
+    const y = w.y * H + Math.sin(t * 0.0004 + w.x * 9) * 8;
+    const rr = w.r * Math.max(W, H);
+    const wg = ctx.createRadialGradient(x, y, 0, x, y, rr);
+    wg.addColorStop(0, `rgba(${pal.wisp},${0.1 * strength})`);
+    wg.addColorStop(1, `rgba(${pal.wisp},0)`);
+    ctx.fillStyle = wg; ctx.fillRect(x - rr, y - rr, rr * 2, rr * 2);
+  }
+}
+function drawHiker(px, py, t, color, alpha = 1, label) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  const glow = ctx.createRadialGradient(px + 6, py - 10, 0, px + 6, py - 10, 34);
+  glow.addColorStop(0, color + 'cc'); glow.addColorStop(1, color + '00');
+  ctx.fillStyle = glow; ctx.fillRect(px - 40, py - 50, 80, 80);
+  const bob = Math.sin(t * 0.006) * 0.8;
+  ctx.strokeStyle = pal.dark ? '#f2f5ff' : '#14203a'; ctx.lineWidth = 2.2; ctx.lineCap = 'round';
+  ctx.beginPath(); ctx.moveTo(px, py - 13 + bob); ctx.lineTo(px, py - 5);
+  ctx.moveTo(px, py - 5); ctx.lineTo(px - 4, py); ctx.moveTo(px, py - 5); ctx.lineTo(px + 4, py);
+  ctx.moveTo(px, py - 11 + bob); ctx.lineTo(px + 6, py - 9);
+  ctx.stroke();
+  ctx.fillStyle = ctx.strokeStyle; ctx.beginPath(); ctx.arc(px, py - 17 + bob, 3.6, 0, 6.283); ctx.fill();
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(px + 7, py - 8, 3, 0, 6.283); ctx.fill();
+  if (label) { ctx.font = '600 11px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.fillStyle = color; ctx.fillText(label, px, py - 26); }
+  ctx.restore();
+}
+function arrow(x0, y0, x1, y1, color, width = 2.5, dash) {
+  const a = Math.atan2(y1 - y0, x1 - x0), hl = 9;
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = width; ctx.lineCap = 'round';
+  if (dash) ctx.setLineDash(dash);
+  ctx.beginPath(); ctx.moveTo(x0, y0); ctx.lineTo(x1, y1); ctx.stroke(); ctx.setLineDash([]);
+  ctx.beginPath(); ctx.moveTo(x1, y1);
+  ctx.lineTo(x1 - hl * Math.cos(a - 0.45), y1 - hl * Math.sin(a - 0.45));
+  ctx.lineTo(x1 - hl * Math.cos(a + 0.45), y1 - hl * Math.sin(a + 0.45));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+function label(text, x, y, color, align = 'center', size = 12) {
+  ctx.save(); ctx.font = `600 ${size}px Inter, sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  const w = ctx.measureText(text).width;
+  const bx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  ctx.fillStyle = pal.dark ? 'rgba(6,10,21,0.7)' : 'rgba(255,255,255,0.8)';
+  ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx - 6, y - 10, w + 12, 20, 8); else ctx.rect(bx - 6, y - 10, w + 12, 20); ctx.fill();
+  ctx.fillStyle = color; ctx.fillText(text, x, y); ctx.restore();
+}
+
+/* ---------- 1D view helpers ---------- */
+function view1D(fn) {
+  const padL = 18, padR = 18, padT = 46, padB = 34;
+  const sx = (W - padL - padR) / (fn.xmax - fn.xmin), sy = (H - padT - padB) / (fn.ymax - fn.ymin);
+  return {
+    sx, sy, padB,
+    X: x => padL + (x - fn.xmin) * sx,
+    Y: y => H - padB - (y - fn.ymin) * sy,
+    invX: px => fn.xmin + (px - padL) / sx
+  };
+}
+function drawTerrain(fn, v) {
+  const N = 220, pts = [];
+  for (let i = 0; i <= N; i++) { const x = fn.xmin + (fn.xmax - fn.xmin) * i / N; pts.push([v.X(x), v.Y(Math.min(fn.f(x), fn.ymax * 1.6))]); }
+  const g = ctx.createLinearGradient(0, H * 0.3, 0, H);
+  g.addColorStop(0, pal.ground0); g.addColorStop(1, pal.ground1);
+  ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y)));
+  ctx.lineTo(pts[N][0], H); ctx.lineTo(pts[0][0], H); ctx.closePath(); ctx.fillStyle = g; ctx.fill();
+  ctx.save(); ctx.shadowColor = pal.curve; ctx.shadowBlur = 12; ctx.strokeStyle = pal.curve; ctx.lineWidth = 2.5;
+  ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.stroke(); ctx.restore();
+}
+function drawXAxis(fn, v) {
+  ctx.save(); ctx.strokeStyle = pal.axis; ctx.fillStyle = pal.axis; ctx.lineWidth = 1;
+  const y = H - v.padB + 8;
+  ctx.beginPath(); ctx.moveTo(v.X(fn.xmin), y); ctx.lineTo(v.X(fn.xmax), y); ctx.stroke();
+  ctx.font = '11px "JetBrains Mono", monospace'; ctx.textAlign = 'center';
+  for (let x = Math.ceil(fn.xmin); x <= fn.xmax; x++) {
+    ctx.beginPath(); ctx.moveTo(v.X(x), y - 3); ctx.lineTo(v.X(x), y + 3); ctx.stroke();
+    ctx.fillText(String(x), v.X(x), y + 15);
+  }
+  ctx.restore();
+}
+function drawPath1D(fn, v, xs, color, upto = xs.length, numbered = true) {
+  ctx.save(); ctx.strokeStyle = color; ctx.fillStyle = color; ctx.lineWidth = 2;
+  const P = x => [v.X(clamp(x, fn.xmin, fn.xmax)), v.Y(Math.min(fn.f(clamp(x, fn.xmin, fn.xmax)), fn.ymax * 1.05))];
+  for (let i = 1; i < Math.min(upto, xs.length); i++) {
+    const [x0, y0] = P(xs[i - 1]), [x1, y1] = P(xs[i]);
+    const top = Math.min(y0, y1) - 18 - Math.abs(x1 - x0) * 0.15;
+    ctx.globalAlpha = 0.85; ctx.setLineDash([5, 4]);
+    ctx.beginPath(); ctx.moveTo(x0, y0); ctx.quadraticCurveTo((x0 + x1) / 2, top, x1, y1); ctx.stroke();
+  }
+  ctx.setLineDash([]); ctx.globalAlpha = 1;
+  for (let i = 0; i < Math.min(upto, xs.length); i++) {
+    const [x, y] = P(xs[i]);
+    ctx.beginPath(); ctx.arc(x, y, 4, 0, 6.283); ctx.fill();
+    if (numbered && xs.length < 25) { ctx.font = '600 10px Inter, sans-serif'; ctx.textAlign = 'center'; ctx.fillText(String(i), x, y + 15); }
+  }
+  ctx.restore();
+}
+function drawSlope(fn, v, x, py, px) {
+  const d = fn.df(x);
+  // Screen-space tangent direction (dy is inverted on screen).
+  let tx = v.sx, ty = -d * v.sy; const n = Math.hypot(tx, ty); tx /= n; ty /= n;
+  const L = 46;
+  // Arrow points uphill (direction of +f'), like the derivative/gradient.
+  const dir = d >= 0 ? 1 : -1;
+  ctx.save(); ctx.strokeStyle = pal.ghost; ctx.lineWidth = 2; ctx.globalAlpha = 0.5;
+  ctx.beginPath(); ctx.moveTo(px - tx * L * dir, py - ty * L * dir); ctx.lineTo(px, py); ctx.stroke(); ctx.restore();
+  if (Math.abs(d) > 0.02) arrow(px, py, px + tx * L * dir, py + ty * L * dir, pal.ghost, 3);
+  label(`f′(x) = ${sgn(d)}`, px, py - 44, pal.ghost);
+}
+
+/* ================= HUD, toast, panel ================= */
+const hud = $('#hud'), toastEl = $('#toast'), panel = $('#panel');
+let toastTimer = 0;
+function toast(msg, kind = '') {
+  toastEl.textContent = msg; toastEl.className = 'toast show ' + kind;
+  clearTimeout(toastTimer); toastTimer = setTimeout(() => { toastEl.className = 'toast'; }, 3600);
+}
+function setHud(items) { hud.innerHTML = items.map(s => `<span>${s}</span>`).join(''); }
+function award(n, s) {
+  const st = store.get('stars', {});
+  if (!(st[n] >= s)) { st[n] = s; store.set('stars', st); }
+  renderTabs();
+}
+
+/* ================= Manual 1D levels (1 and 2) ================= */
+const ManualProto = {
+  enter(start) {
+    this.x0 = start != null ? start : this.start;
+    this.w = { x: this.x0, ax: this.x0, from: this.x0, to: this.x0, t0: 0, dur: 0 };
+    this.path = [this.x0]; this.steps = 0; this.done = false; this.revealT = 0; this.ok = false;
+    this.stepLen = store.get('step' + this.n, 1);
+    this.phase = this.predict ? 'predict' : 'play';
+    this.pred = this.predict ? (this.fn.xmin + this.fn.xmax) / 2 : null;
+    this.renderPanel();
+  },
+  busy() { return this.w.dur > 0; },
+  move(nx) {
+    const w = this.w; w.from = w.ax; w.to = nx; w.x = nx; w.t0 = performance.now(); w.dur = 520;
+  },
+  update(now) {
+    const w = this.w;
+    if (w.dur) { const k = clamp((now - w.t0) / w.dur, 0, 1); w.ax = lerp(w.from, w.to, ease(k)); if (k >= 1) w.dur = 0; }
+  },
+  step(dir) {
+    if (this.phase !== 'play' || this.done || this.busy()) return;
+    const fn = this.fn, x0 = this.w.x, f0 = fn.f(x0), d0 = fn.df(x0);
+    const nx = clamp(x0 + dir * this.stepLen, fn.xmin, fn.xmax);
+    if (nx === x0) { toast('Hay un precipicio: no puedes salir del mapa.', 'warn'); return; }
+    this.move(nx); this.steps++; this.path.push(nx);
+    const f1 = fn.f(nx), d1 = fn.df(nx);
+    let msg, kind, cls;
+    if (f1 > f0) {
+      cls = 'up'; kind = 'bad';
+      msg = Math.sign(d1) !== Math.sign(d0) && dir === -Math.sign(d0)
+        ? `Ibas bien, pero el paso fue tan largo que cruzaste el fondo y subiste del otro lado (${fmt(f0)} → ${fmt(f1)}).`
+        : `Subiste de ${fmt(f0)} a ${fmt(f1)}. La flecha señala hacia dónde sube el terreno.`;
+    } else if (Math.sign(d1) !== Math.sign(d0)) {
+      cls = 'down'; kind = 'warn'; msg = `Bajaste a ${fmt(f1)}, pero cruzaste el fondo: la pendiente cambió de signo.`;
+    } else { cls = 'down'; kind = 'good'; msg = `Bajaste de ${fmt(f0)} a ${fmt(f1)}.`; }
+    toast(msg, kind);
+    const li = document.createElement('li'); li.className = cls;
+    li.textContent = `x: ${fmt(x0)} → ${fmt(nx)} · f: ${fmt(f1)}`;
+    const log = $('#log'); if (log) { log.appendChild(li); log.scrollTop = log.scrollHeight; }
+    this.updateStats();
+    setTimeout(() => this.checkEnd(), 540);
+  },
+  updateStats() {
+    const fn = this.fn, x = this.w.x;
+    const set = (id, v) => { const e = $('#' + id); if (e) e.textContent = v; };
+    set('sF', fmt(fn.f(x))); set('sD', sgn(fn.df(x))); set('sN', `${this.steps}/${this.maxSteps}`);
+  },
+  renderPanel() {
+    const t = this;
+    if (t.phase === 'predict') {
+      panel.innerHTML = `
+        <h2>${t.title}</h2>
+        <p class="story">${t.predictText}</p>
+        <div class="ctrl"><label for="pred">Tu predicción: terminarás en x ≈ <output id="predOut">${fmt(t.pred, 1)}</output></label>
+        <input type="range" id="pred" min="${t.fn.xmin}" max="${t.fn.xmax}" step="0.1" value="${t.pred}"></div>
+        <div class="row"><button class="btn primary" id="goPred" type="button">Confirmar predicción y caminar</button></div>
+        <p class="hint">También puedes tocar el escenario para marcar tu predicción.</p>`;
+      $('#pred').addEventListener('input', e => { t.pred = +e.target.value; $('#predOut').textContent = fmt(t.pred, 1); });
+      $('#goPred').addEventListener('click', () => { t.phase = 'play'; t.renderPanel(); cv.focus(); });
+      return;
+    }
+    panel.innerHTML = `
+      <h2>${t.title}</h2>
+      <p class="story">${t.story}</p>
+      <div class="stats">
+        <div class="stat"><small>Altura f(x)</small><b id="sF"></b></div>
+        <div class="stat"><small>Pendiente f′(x)</small><b id="sD"></b></div>
+        <div class="stat"><small>Pasos</small><b id="sN"></b></div>
+      </div>
+      <div class="ctrl"><label for="stepLen">Longitud del paso <output id="stepOut">${fmt(t.stepLen)}</output></label>
+      <input type="range" id="stepLen" min="0.05" max="3" step="0.05" value="${t.stepLen}"></div>
+      <div class="row">
+        <button class="btn" type="button" data-dir="-1" aria-label="Caminar a la izquierda">← Izquierda</button>
+        <button class="btn" type="button" data-dir="1" aria-label="Caminar a la derecha">Derecha →</button>
+      </div>
+      ${t.campButton ? '<div class="row" style="margin-top:8px"><button class="btn ghost" id="camp" type="button">Acampar aquí (terminar)</button></div>' : ''}
+      <p class="hint">Teclado: ← / → para caminar · ↑ / ↓ para cambiar la longitud del paso.</p>
+      <ol class="log" id="log" aria-label="Historial de pasos"></ol>
+      <div class="row" style="margin-top:10px"><button class="btn ghost" id="restart" type="button">Reiniciar nivel</button></div>`;
+    $('#stepLen').addEventListener('input', e => { t.stepLen = +e.target.value; $('#stepOut').textContent = fmt(t.stepLen); store.set('step' + t.n, t.stepLen); });
+    panel.querySelectorAll('[data-dir]').forEach(b => b.addEventListener('click', () => t.step(+b.dataset.dir)));
+    if (t.campButton) $('#camp').addEventListener('click', () => { if (!t.busy() && !t.done) t.finish(); });
+    $('#restart').addEventListener('click', () => t.enter(t.x0));
+    t.updateStats();
+  },
+  key(e) {
+    if (this.phase === 'predict') {
+      if (e.key === 'ArrowLeft' || e.key === 'ArrowRight') {
+        this.pred = clamp(this.pred + (e.key === 'ArrowLeft' ? -0.1 : 0.1), this.fn.xmin, this.fn.xmax);
+        const s = $('#pred'); if (s) { s.value = this.pred; $('#predOut').textContent = fmt(this.pred, 1); }
+        return true;
+      }
+      return false;
+    }
+    if (e.key === 'ArrowLeft') { this.step(-1); return true; }
+    if (e.key === 'ArrowRight') { this.step(1); return true; }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      this.stepLen = clamp(Math.round((this.stepLen + (e.key === 'ArrowUp' ? 0.05 : -0.05)) * 100) / 100, 0.05, 3);
+      const s = $('#stepLen'); if (s) { s.value = this.stepLen; $('#stepOut').textContent = fmt(this.stepLen); }
+      return true;
+    }
+    return false;
+  },
+  pointer(px) {
+    const v = view1D(this.fn), x = clamp(v.invX(px), this.fn.xmin, this.fn.xmax);
+    if (this.phase === 'predict') {
+      this.pred = Math.round(x * 10) / 10;
+      const s = $('#pred'); if (s) { s.value = this.pred; $('#predOut').textContent = fmt(this.pred, 1); }
+    } else if (this.done && this.onDonePointer) this.onDonePointer(x);
+  },
+  draw(t) {
+    const fn = this.fn, v = view1D(fn);
+    this.update(t);
+    drawSky(t);
+    drawTerrain(fn, v);
+    const hx = this.w.ax, px = v.X(hx), py = v.Y(fn.f(hx));
+    const fogK = this.done ? 1 - clamp((t - this.revealT) / 1400, 0, 1) : 1;
+    if (this.done) { if (this.drawReveal) this.drawReveal(v, t); drawPath1D(fn, v, this.path, pal.path); }
+    drawFog(px, py, Math.max(70, 0.95 * v.sx), t, fogK);
+    drawXAxis(fn, v);
+    if (!this.done) {
+      // Footprints of the places already visited (their altitude is known).
+      ctx.fillStyle = pal.path;
+      for (const x of this.path.slice(0, -1)) { ctx.globalAlpha = 0.6; ctx.beginPath(); ctx.arc(v.X(x), v.Y(fn.f(x)), 3, 0, 6.283); ctx.fill(); }
+      ctx.globalAlpha = 1;
+    }
+    if (this.pred != null) {
+      const qx = v.X(this.pred);
+      ctx.save(); ctx.strokeStyle = pal.ghost; ctx.setLineDash([4, 5]); ctx.lineWidth = 2;
+      ctx.beginPath(); ctx.moveTo(qx, 30); ctx.lineTo(qx, H - v.padB + 8); ctx.stroke(); ctx.restore();
+      label('Tu predicción', qx, 22, pal.ghost);
+    }
+    drawHiker(px, py, t, pal.lantern);
+    if (!this.done && this.phase === 'play' && !this.busy()) drawSlope(fn, v, hx, py, px);
+    setHud([`f(x) = ${fmt(fn.f(this.w.x))}`, `pasos ${this.steps}/${this.maxSteps}`]);
+  }
+};
+function ManualLevel(cfg) { return Object.assign(Object.create(ManualProto), cfg); }
+
+const L1 = ManualLevel({
+  n: 1, fn: convex, start: -3.2, maxSteps: 12, thr: 0.25,
+  title: 'Nivel 1 · La primera bajada',
+  story: 'Solo ves el suelo bajo tus pies. Llega al fondo del valle (altura menor que 0.25) en 12 pasos o menos. Menos pasos, más estrellas.',
+  checkEnd() {
+    if (this.done) return;
+    if (this.fn.f(this.w.x) < this.thr) this.finish(true);
+    else if (this.steps >= this.maxSteps) this.finish(false);
+  },
+  finish(ok) {
+    this.done = true; this.ok = ok; this.revealT = performance.now();
+    const stars = ok ? (this.steps <= 3 ? 3 : this.steps <= 6 ? 2 : 1) : 0;
+    if (stars) award(1, stars);
+    if (ok) {
+      const best = store.get('l1best', null);
+      if (!best || this.steps < best.steps) store.set('l1best', { steps: this.steps, path: this.path.slice() });
+    }
+    const algo = runGD1D(this.fn, this.x0, 1.0, this.thr);
+    toast(ok ? '¡Llegaste al valle! La niebla se disipa.' : 'Te quedaste sin energía. Mira el mapa completo.', ok ? 'good' : 'warn');
+    panel.insertAdjacentHTML('beforeend', `
+      <div class="card" id="endCard">
+        <h3>${ok ? '¡Llegaste al valle!' : 'Te quedaste sin pasos'}</h3>
+        <div class="bigstars" aria-label="${stars} de 3 estrellas">${starStr(stars)}</div>
+        <p>${ok ? `Lo lograste en <b>${this.steps}</b> pasos.` : 'No pasa nada: ahora ves el terreno entero. Observa dónde te equivocaste de dirección o te pasaste del fondo.'}</p>
+        <p><b>Acabas de hacer descenso de gradiente:</b></p>
+        <div class="formula">x ← x − η · f′(x)</div>
+        <p>Tú miraste el signo de la pendiente para decidir la dirección y elegiste el tamaño del paso a ojo. El algoritmo hace lo mismo, pero su paso es η·|f′(x)|: largo donde el terreno es empinado y corto cerca del fondo. Con η = 1, desde el mismo punto, tardaría <b>${algo.steps}</b> pasos.</p>
+        <details open><summary>¿Qué aprendiste?</summary>
+          <ul class="learned">
+            <li>La derivada f′(x) indica hacia dónde <b>sube</b> la función; para bajar, se camina en sentido contrario.</li>
+            <li>Si f′(x) cambia de signo después de un paso, cruzaste el mínimo.</li>
+            <li>Cerca del mínimo, f′(x) ≈ 0: el suelo se vuelve plano.</li>
+          </ul>
+        </details>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" type="button" id="again">Repetir</button>
+          <button class="btn primary" type="button" id="next">Siguiente nivel</button>
+        </div>
+      </div>`);
+    $('#again').addEventListener('click', () => this.enter());
+    $('#next').addEventListener('click', () => goLevel(2));
+    $('#endCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+  drawReveal(v) {
+    const fn = this.fn, y = v.Y(this.thr);
+    ctx.save(); ctx.strokeStyle = pal.good; ctx.setLineDash([3, 4]); ctx.globalAlpha = 0.8;
+    ctx.beginPath(); ctx.moveTo(v.X(fn.xmin), y); ctx.lineTo(v.X(fn.xmax), y); ctx.stroke(); ctx.restore();
+    label('meta: f < 0.25', v.X(fn.xmax) - 4, y - 12, pal.good, 'right', 11);
+  }
+});
+
+const L2 = ManualLevel({
+  n: 2, fn: bumpy, start: 3.0, maxSteps: 15, predict: true, campButton: true,
+  title: 'Nivel 2 · El valle engañoso',
+  predictText: 'Esta montaña es distinta. Empezarás en x = 3. <b>Antes de caminar, predice:</b> ¿en qué x crees que terminarás?',
+  story: 'Busca el punto más bajo de toda la montaña. Si el suelo se vuelve plano, te detendrás automáticamente. También puedes acampar cuando creas haber llegado.',
+  checkEnd() {
+    if (this.done) return;
+    if (Math.abs(this.fn.df(this.w.x)) < 0.08) { toast('El suelo es plano: f′(x) ≈ 0. Te detienes aquí.', 'warn'); this.finish(); }
+    else if (this.steps >= this.maxSteps) this.finish();
+  },
+  finish() {
+    this.done = true; this.revealT = performance.now();
+    const fn = this.fn, x = this.w.x, f = fn.f(x);
+    const global = x < fn.xhill && f < fn.fstar + 0.2;
+    const predOk = Math.abs(this.pred - x) <= 0.6;
+    const stars = 1 + (global ? 1 : 0) + (predOk ? 1 : 0);
+    award(2, stars);
+    const trapped = !global && x > fn.xhill && Math.abs(fn.df(x)) < 0.3;
+    panel.insertAdjacentHTML('beforeend', `
+      <div class="card" id="endCard">
+        <h3>${global ? '¡Encontraste el valle más profundo!' : trapped ? 'Caíste en un mínimo local' : 'Fin del recorrido'}</h3>
+        <div class="bigstars" aria-label="${stars} de 3 estrellas">${starStr(stars)}</div>
+        <p>Predijiste x ≈ <b>${fmt(this.pred, 1)}</b> y terminaste en x = <b>${fmt(x)}</b> ${predOk ? '<span class="ok">(¡buena predicción!)</span>' : '<span class="meh">(lejos de tu predicción)</span>'}.
+        Tu altura final: <b>${fmt(f)}</b>. El punto más bajo del mapa está en x ≈ ${fmt(fn.xstar)} con altura ${fmt(fn.fstar)}.</p>
+        <p>${trapped
+          ? 'Ahí el suelo era plano y todas las direcciones subían: para quien solo ve la pendiente, <b>parece</b> el fondo. Eso es un <b>mínimo local</b>.'
+          : global ? 'Para llegar tuviste que cruzar una loma o empezar del lado correcto: la pendiente local sola no te lo habría indicado.'
+          : 'Observa el mapa: hay dos valles. La pendiente local no dice cuál de los dos es el más profundo.'}</p>
+        <details open><summary>¿Qué aprendiste?</summary>
+          <ul class="learned">
+            <li>f′(x) = 0 no garantiza el mínimo global: puede ser un <b>mínimo local</b>.</li>
+            <li>El <b>punto de partida</b> decide a qué valle llegas.</li>
+            <li>Un paso muy largo a veces salta la loma (por suerte, no por diseño).</li>
+          </ul>
+        </details>
+        <div class="ctrl"><label for="newStart">Nuevo punto de partida <output id="nsOut">${fmt(this.x0, 1)}</output></label>
+        <input type="range" id="newStart" min="${fn.xmin + 0.2}" max="${fn.xmax - 0.2}" step="0.1" value="${this.x0}"></div>
+        <p class="hint">Toca el mapa para elegir dónde empezar.</p>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" type="button" id="again">Volver a la niebla desde ahí</button>
+          <button class="btn primary" type="button" id="next">Siguiente nivel</button>
+        </div>
+      </div>`);
+    this.nextStart = this.x0;
+    $('#newStart').addEventListener('input', e => { this.nextStart = +e.target.value; $('#nsOut').textContent = fmt(this.nextStart, 1); });
+    $('#again').addEventListener('click', () => this.enter(this.nextStart));
+    $('#next').addEventListener('click', () => goLevel(3));
+    $('#endCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+  onDonePointer(x) {
+    this.nextStart = clamp(Math.round(x * 10) / 10, this.fn.xmin + 0.2, this.fn.xmax - 0.2);
+    const s = $('#newStart'); if (s) { s.value = this.nextStart; $('#nsOut').textContent = fmt(this.nextStart, 1); }
+  },
+  drawReveal(v) {
+    const fn = this.fn;
+    const mark = (x, txt, col) => { const px = v.X(x), py = v.Y(fn.f(x)); ctx.fillStyle = col; ctx.beginPath(); ctx.arc(px, py, 6, 0, 6.283); ctx.fill(); label(txt, px, py + 22, col, 'center', 11); };
+    mark(fn.xstar, 'mínimo global', pal.good);
+    mark(fn.xlocal, 'mínimo local', pal.bad);
+    if (this.nextStart != null && this.nextStart !== this.x0) {
+      const px = v.X(this.nextStart); ctx.save(); ctx.strokeStyle = pal.lantern; ctx.setLineDash([2, 4]);
+      ctx.beginPath(); ctx.moveTo(px, 30); ctx.lineTo(px, H - v.padB); ctx.stroke(); ctx.restore();
+      label('nuevo inicio', px, 40, pal.lantern, 'center', 11);
+    }
+  }
+});
+
+/* ================= Level 3: you vs the algorithm ================= */
+const L3 = {
+  n: 3, fn: convex, thr: 0.25, maxSteps: 60,
+  enter() {
+    this.eta = store.get('l3eta', 0.3); this.x0 = -3.2; this.guess = null; this.run = null; this.hist = store.get('l3hist', []);
+    this.i = 0; this.t0 = 0; this.anim = { x: this.x0, gx: null };
+    const best = store.get('l1best', null);
+    this.ghost = best ? best.path : null;
+    this.renderPanel();
+  },
+  etaFromSlider: v => 0.01 * Math.pow(300, v / 100),
+  sliderFromEta: e => Math.round(100 * Math.log(e / 0.01) / Math.log(300)),
+  renderPanel() {
+    const t = this;
+    panel.innerHTML = `
+      <h2>Nivel 3 · Tú contra el algoritmo</h2>
+      <p class="story">Ahora el algoritmo camina solo: en cada paso aplica <span style="font-family:var(--font-mono)">x ← x − η·f′(x)</span>. Tú eliges la <b>tasa de aprendizaje η</b>. ${t.ghost ? `Tu fantasma del Nivel 1 (${t.ghost.length - 1} pasos) correrá a su lado.` : 'Juega el Nivel 1 para que tu fantasma corra a su lado.'}</p>
+      <div class="ctrl"><label for="eta">Tasa de aprendizaje η <output id="etaOut">${t.eta.toPrecision(3)}</output></label>
+      <input type="range" id="eta" min="0" max="100" step="1" value="${t.sliderFromEta(t.eta)}"></div>
+      <div class="ctrl"><label for="x0">Punto de partida x₀ <output id="x0Out">${fmt(t.x0, 1)}</output></label>
+      <input type="range" id="x0" min="${t.fn.xmin}" max="${t.fn.xmax}" step="0.1" value="${t.x0}"></div>
+      <div><b style="font-size:.88rem">¿Qué crees que pasará?</b>
+        <div class="chips" role="group" aria-label="Predicción">
+          ${[['slow', 'Avanza lento'], ['good', 'Llega bien'], ['osc', 'Rebota'], ['div', 'Se descontrola']].map(([k, l]) => `<button type="button" data-g="${k}" aria-pressed="${t.guess === k}">${l}</button>`).join('')}
+        </div></div>
+      <div class="row"><button class="btn primary" id="runBtn" type="button">Ejecutar algoritmo</button></div>
+      <p class="hint"><b>Reto:</b> encuentra un η que llegue a f &lt; 0.25 en menos de 10 pasos sin descontrolarse. 3 pasos o menos: ★★★.</p>
+      <div id="result"></div>
+      ${t.hist.length ? `<table class="hist"><thead><tr><th>η</th><th>pasos</th><th>resultado</th></tr></thead><tbody>${t.hist.slice(-6).reverse().map(h => `<tr><td>${h.eta}</td><td>${h.steps}</td><td class="${h.cls}">${h.label}</td></tr>`).join('')}</tbody></table>` : ''}`;
+    $('#eta').addEventListener('input', e => { t.eta = t.etaFromSlider(+e.target.value); $('#etaOut').textContent = t.eta.toPrecision(3); store.set('l3eta', t.eta); });
+    $('#x0').addEventListener('input', e => { t.setStart(+e.target.value); });
+    panel.querySelectorAll('[data-g]').forEach(b => b.addEventListener('click', () => {
+      t.guess = b.dataset.g; panel.querySelectorAll('[data-g]').forEach(o => o.setAttribute('aria-pressed', String(o === b)));
+    }));
+    $('#runBtn').addEventListener('click', () => t.start());
+  },
+  setStart(x) {
+    if (this.run && !this.run.finished) return;
+    this.x0 = clamp(Math.round(x * 10) / 10, this.fn.xmin, this.fn.xmax);
+    this.run = null; this.anim.x = this.x0;
+    const s = $('#x0'); if (s) { s.value = this.x0; $('#x0Out').textContent = fmt(this.x0, 1); }
+  },
+  classify(r) {
+    const xs = r.xs, s = this.fn.xstar;
+    let flips = 0;
+    for (let i = 1; i < xs.length; i++) if (Math.sign(xs[i] - s) !== Math.sign(xs[i - 1] - s) && Math.abs(xs[i] - s) > 1e-9) flips++;
+    if (r.status === 'diverged') return { k: 'div', label: 'Se descontrola', cls: 'ko', text: 'η demasiado grande: cada paso cruza el fondo y aterriza <b>más alto</b> que antes. La pérdida crece sin límite: el algoritmo <b>diverge</b>.' };
+    if (r.status !== 'converged') {
+      if (flips > 3) return { k: 'osc', label: 'Rebota sin parar', cls: 'ko', text: 'El algoritmo salta de una ladera a la otra sin acercarse al fondo. η está justo en el límite de estabilidad.' };
+      return { k: 'slow', label: 'Muy lento', cls: 'meh', text: `Tras ${r.steps} pasos todavía no llega: η es tan pequeño que avanza a paso de hormiga. Es estable, pero desperdicia cómputo.` };
+    }
+    if (flips >= 2) return { k: 'osc', label: 'Rebota y llega', cls: 'meh', text: 'Llega, pero zigzagueando: cada paso cruza el fondo. Un η un poco menor iría más directo.' };
+    if (r.steps > 15) return { k: 'slow', label: 'Lento', cls: 'meh', text: 'Llega, pero tarda: η podría ser más grande.' };
+    return { k: 'good', label: 'Llega bien', cls: 'ok', text: 'Buen η: pasos grandes al principio (pendiente fuerte) y cada vez más cortos cerca del fondo.' };
+  },
+  start() {
+    if (this.run && !this.run.finished) return;
+    const r = runGD1D(this.fn, this.x0, this.eta, this.thr, this.maxSteps);
+    r.cls = this.classify(r); r.finished = false;
+    this.run = r; this.i = 0; this.t0 = performance.now(); this.anim.x = this.x0;
+    $('#runBtn').disabled = true; $('#result').innerHTML = '';
+  },
+  complete() {
+    const r = this.run, c = r.cls; r.finished = true;
+    const ok = r.status === 'converged';
+    const stars = ok && r.steps < 10 ? (r.steps <= 3 ? 3 : r.steps <= 6 ? 2 : 1) : 0;
+    if (stars) award(3, stars);
+    this.hist.push({ eta: this.eta.toPrecision(3), steps: r.status === 'diverged' ? '∞' : r.steps, label: c.label, cls: c.cls });
+    store.set('l3hist', this.hist.slice(-20));
+    const guessTxt = { slow: 'que avanzaría lento', good: 'que llegaría bien', osc: 'que rebotaría', div: 'que se descontrolaría' };
+    const gfb = this.guess ? (this.guess === c.k ? `<p class="ok">Predijiste ${guessTxt[this.guess]}: ¡acertaste!</p>` : `<p class="meh">Predijiste ${guessTxt[this.guess]}. Compara con lo que ocurrió.</p>`) : '';
+    this.renderPanel();
+    $('#result').innerHTML = `
+      <div class="card">
+        <h3>${c.label} · ${r.status === 'diverged' ? 'pérdida → ∞' : r.steps + ' pasos'}</h3>
+        ${stars ? `<div class="bigstars" aria-label="${stars} de 3 estrellas">${starStr(stars)}</div>` : ''}
+        ${gfb}
+        <p>${c.text}</p>
+        ${this.ghost ? `<p>Tu fantasma del Nivel 1: <b>${this.ghost.length - 1}</b> pasos. Algoritmo con η = ${this.eta.toPrecision(3)}: <b>${r.status === 'diverged' ? 'no llegó' : r.steps}</b>.</p>` : ''}
+        <details><summary>¿Qué aprendiste?</summary>
+          <ul class="learned">
+            <li><b>η pequeño</b>: estable pero lento.</li>
+            <li><b>η grande</b>: zigzag; si es demasiado grande, la pérdida explota (<b>divergencia</b>).</li>
+            <li>Aquí f″(x) = 0.8: con η = 1/0.8 = 1.25 se llega en un paso, y con η &gt; 2/0.8 = 2.5 diverge. En redes reales no conocemos f″, por eso se <b>ajusta η</b> experimentando.</li>
+          </ul>
+        </details>
+      </div>`;
+  },
+  pointer(px) { this.setStart(view1D(this.fn).invX(px)); },
+  key(e) {
+    if (e.key === 'Enter' || e.key === ' ') { this.start(); return true; }
+    return false;
+  },
+  draw(t) {
+    const fn = this.fn, v = view1D(fn), STEP_MS = 380;
+    drawSky(t); drawTerrain(fn, v); drawXAxis(fn, v);
+    const yT = v.Y(this.thr);
+    ctx.save(); ctx.strokeStyle = pal.good; ctx.setLineDash([3, 4]); ctx.globalAlpha = 0.7;
+    ctx.beginPath(); ctx.moveTo(v.X(fn.xmin), yT); ctx.lineTo(v.X(fn.xmax), yT); ctx.stroke(); ctx.restore();
+    let k = 0, ax = this.x0, upto = 1;
+    const r = this.run;
+    if (r) {
+      const elapsed = Math.max(0, t - this.t0);
+      const idx = Math.floor(elapsed / STEP_MS);
+      k = clamp((elapsed % STEP_MS) / (STEP_MS * 0.8), 0, 1);
+      if (idx >= r.xs.length - 1) { if (!r.finished) this.complete(); this.i = r.xs.length - 1; k = 1; } else this.i = idx;
+      const a = r.xs[Math.min(this.i, r.xs.length - 1)], b = r.xs[Math.min(this.i + 1, r.xs.length - 1)];
+      ax = r.finished ? r.xs[r.xs.length - 1] : lerp(a, b, ease(k));
+      upto = r.finished ? r.xs.length : this.i + 1;
+      drawPath1D(fn, v, r.xs, pal.path, upto, r.xs.length < 25);
+    }
+    // Ghost of the student's best manual run from level 1.
+    if (this.ghost) {
+      const gi = r ? Math.min(this.ghost.length - 1, r.finished ? this.ghost.length - 1 : this.i) : 0;
+      const gk = r && !r.finished && gi < this.ghost.length - 1 ? k : 0;
+      const gx = lerp(this.ghost[gi], this.ghost[Math.min(gi + 1, this.ghost.length - 1)], ease(gk));
+      drawHiker(v.X(gx), v.Y(fn.f(gx)), t, pal.ghost, 0.55, 'tú (N1)');
+    }
+    const inside = ax >= fn.xmin && ax <= fn.xmax;
+    const cx = clamp(ax, fn.xmin, fn.xmax);
+    const hy = Math.max(v.Y(fn.f(cx)), 40);
+    drawHiker(v.X(cx), hy, t, pal.lantern, 1, inside ? 'algoritmo' : '');
+    if (!inside) { label(ax > fn.xmax ? 'fuera del mapa →' : '← fuera del mapa', v.X(cx) + (ax > fn.xmax ? -50 : 50), hy + 20, pal.bad, 'center', 11); }
+    this.drawLossChart(r, upto);
+    const curX = r ? r.xs[Math.min(this.i, r.xs.length - 1)] : this.x0;
+    setHud([`η = ${this.eta.toPrecision(3)}`, `paso ${r ? Math.min(this.i, r.steps) : 0}`, `f = ${fmt(fn.f(curX))}`]);
+  },
+  drawLossChart(r, upto) {
+    const w = Math.min(210, W * 0.42), h = 92, x0 = W - w - 10, y0 = 10;
+    ctx.save();
+    ctx.fillStyle = pal.dark ? 'rgba(6,10,21,0.72)' : 'rgba(255,255,255,0.85)';
+    ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(x0, y0, w, h, 10); else ctx.rect(x0, y0, w, h); ctx.fill();
+    ctx.fillStyle = pal.text; ctx.font = '600 10px Inter, sans-serif'; ctx.textAlign = 'left';
+    ctx.fillText('pérdida (escala log)', x0 + 8, y0 + 13);
+    const lo = -1, hi = 3, n = Math.max(10, r ? Math.min(r.xs.length, 60) : 10);
+    const PX = i => x0 + 8 + (i / (n - 1)) * (w - 16);
+    const PY = f => y0 + h - 8 - (clamp(Math.log10(Math.max(f, 1e-3)), lo, hi) - lo) / (hi - lo) * (h - 26);
+    ctx.strokeStyle = pal.good; ctx.setLineDash([3, 3]); ctx.globalAlpha = 0.7;
+    ctx.beginPath(); ctx.moveTo(x0 + 8, PY(this.thr)); ctx.lineTo(x0 + w - 8, PY(this.thr)); ctx.stroke(); ctx.setLineDash([]); ctx.globalAlpha = 1;
+    const line = (xs, col, m) => {
+      ctx.strokeStyle = col; ctx.lineWidth = 2; ctx.beginPath();
+      xs.slice(0, m).forEach((x, i) => { const p = [PX(i), PY(this.fn.f(x))]; i ? ctx.lineTo(...p) : ctx.moveTo(...p); }); ctx.stroke();
+    };
+    if (this.ghost) line(this.ghost, pal.ghost, r ? Math.min(upto, this.ghost.length) : 1);
+    if (r) line(r.xs, pal.path, upto);
+    if (r && r.status === 'diverged' && r.finished) { ctx.fillStyle = pal.bad; ctx.fillText('↑ explota', x0 + w - 62, y0 + 26); }
+    ctx.restore();
+  }
+};
+
+/* ================= Level 4: 2D landscape ================= */
+const L4 = {
+  n: 4, F: bowl, thr: 0.15, maxSteps: 20, start: [-3.2, 2.6],
+  enter() {
+    this.p = this.start.slice(); this.ap = this.p.slice(); this.from = this.p.slice(); this.t0 = 0; this.dur = 0;
+    this.path = [this.p.slice()]; this.steps = 0; this.done = false; this.revealT = 0;
+    this.dir = 0; this.stepLen = store.get('step4', 1); this.algo = null;
+    this.buildHeat(); this.renderPanel();
+  },
+  view() {
+    const S = Math.min(W, H) - 24, ox = (W - S) / 2, oy = (H - S) / 2, L = this.F.lim, k = S / (2 * L);
+    return { S, ox, oy, k, X: x => ox + (x + L) * k, Y: y => oy + (L - y) * k, inv: (px, py) => [(px - ox) / k - L, L - (py - oy) / k] };
+  },
+  onResize() { this.buildHeat(); },
+  buildHeat() {
+    const F = this.F, L = F.lim, res = 320;
+    const off = document.createElement('canvas'); off.width = res; off.height = res;
+    const octx = off.getContext('2d'), img = octx.createImageData(res, res), vals = new Float32Array(res * res);
+    for (let j = 0; j < res; j++) for (let i = 0; i < res; i++) {
+      const x = -L + (i + 0.5) / res * 2 * L, y = L - (j + 0.5) / res * 2 * L;
+      vals[j * res + i] = Math.sqrt(Math.max(0, F.f(x, y) - F.c));
+    }
+    const vmax = Math.sqrt(30), band = 0.3;
+    const cl = pal.contour.match(/[\d.]+/g).map(Number);
+    for (let j = 0; j < res; j++) for (let i = 0; i < res; i++) {
+      const idx = j * res + i, s = clamp(vals[idx] / vmax, 0, 1);
+      const [a, b] = s < 0.5 ? [pal.heatLo, pal.heatMid] : [pal.heatMid, pal.heatHi];
+      const u = s < 0.5 ? s * 2 : (s - 0.5) * 2;
+      let r = lerp(a[0], b[0], u), g = lerp(a[1], b[1], u), bl = lerp(a[2], b[2], u);
+      const lv = Math.floor(vals[idx] / band);
+      const edge = (i < res - 1 && Math.floor(vals[idx + 1] / band) !== lv) || (j < res - 1 && Math.floor(vals[idx + res] / band) !== lv);
+      if (edge) { r = lerp(r, cl[0], cl[3]); g = lerp(g, cl[1], cl[3]); bl = lerp(bl, cl[2], cl[3]); }
+      img.data[idx * 4] = r; img.data[idx * 4 + 1] = g; img.data[idx * 4 + 2] = bl; img.data[idx * 4 + 3] = 255;
+    }
+    octx.putImageData(img, 0, 0); this.heat = off;
+  },
+  renderPanel() {
+    const t = this;
+    panel.innerHTML = `
+      <h2>Nivel 4 · Montaña en dos dimensiones</h2>
+      <p class="story">Ahora te mueves en un mapa (x, y) visto desde arriba. La flecha azul es el <b>gradiente ∇f</b>: apunta hacia donde el terreno sube más rápido. Llega a f &lt; 0.15 en 20 pasos o menos.</p>
+      <div class="stats">
+        <div class="stat"><small>Altura f(x,y)</small><b id="sF"></b></div>
+        <div class="stat"><small>∇f</small><b id="sG"></b></div>
+        <div class="stat"><small>Pasos</small><b id="sN"></b></div>
+      </div>
+      <div class="ctrl"><label for="stepLen">Longitud del paso <output id="stepOut">${fmt(t.stepLen)}</output></label>
+      <input type="range" id="stepLen" min="0.1" max="3" step="0.05" value="${t.stepLen}"></div>
+      <div class="row">
+        <button class="btn" type="button" id="useGrad">Apuntar en contra del gradiente (−∇f)</button>
+        <button class="btn primary" type="button" id="stepBtn">Dar paso</button>
+      </div>
+      <p class="hint">Toca el mapa para elegir la dirección. Teclado: ← / → giran la dirección, Enter da un paso, G apunta a −∇f.</p>
+      <div class="row" style="margin-top:10px"><button class="btn ghost" id="restart" type="button">Reiniciar nivel</button></div>`;
+    $('#stepLen').addEventListener('input', e => { t.stepLen = +e.target.value; $('#stepOut').textContent = fmt(t.stepLen); store.set('step4', t.stepLen); });
+    $('#useGrad').addEventListener('click', () => t.aimGrad());
+    $('#stepBtn').addEventListener('click', () => t.step());
+    $('#restart').addEventListener('click', () => t.enter());
+    t.updateStats();
+  },
+  updateStats() {
+    const [x, y] = this.p, [gx, gy] = this.F.grad(x, y);
+    const set = (id, v) => { const e = $('#' + id); if (e) e.textContent = v; };
+    set('sF', fmt(this.F.f(x, y))); set('sG', `(${fmt(gx, 1)}, ${fmt(gy, 1)})`); set('sN', `${this.steps}/${this.maxSteps}`);
+  },
+  aimGrad() { const [gx, gy] = this.F.grad(...this.p); this.dir = Math.atan2(-gy, -gx); },
+  step() {
+    if (this.done || this.dur) return;
+    const F = this.F, [x, y] = this.p, f0 = F.f(x, y), [gx, gy] = F.grad(x, y);
+    const nx = clamp(x + this.stepLen * Math.cos(this.dir), -F.lim, F.lim), ny = clamp(y + this.stepLen * Math.sin(this.dir), -F.lim, F.lim);
+    this.from = this.ap.slice(); this.p = [nx, ny]; this.t0 = performance.now(); this.dur = 520;
+    this.steps++; this.path.push([nx, ny]);
+    const f1 = F.f(nx, ny);
+    const ang = Math.acos(clamp((Math.cos(this.dir) * -gx + Math.sin(this.dir) * -gy) / (Math.hypot(gx, gy) || 1), -1, 1)) * 180 / Math.PI;
+    if (f1 > f0) toast(ang < 20 ? `Dirección correcta, pero el paso fue tan largo que cruzaste el valle y subiste (${fmt(f0)} → ${fmt(f1)}).` : `Subiste de ${fmt(f0)} a ${fmt(f1)}: caminaste a ${Math.round(ang)}° de −∇f.`, 'bad');
+    else toast(ang < 15 ? `Bajaste a ${fmt(f1)} siguiendo casi exactamente −∇f: la dirección de máximo descenso.` : `Bajaste a ${fmt(f1)} (a ${Math.round(ang)}° de −∇f).`, ang < 15 ? 'good' : 'warn');
+    this.updateStats();
+    setTimeout(() => this.checkEnd(), 540);
+  },
+  checkEnd() {
+    if (this.done) return;
+    const f = this.F.f(...this.p);
+    if (f < this.thr) this.finish(true); else if (this.steps >= this.maxSteps) this.finish(false);
+  },
+  finish(ok) {
+    this.done = true; this.revealT = performance.now();
+    const stars = ok ? (this.steps <= 6 ? 3 : this.steps <= 10 ? 2 : 1) : 0;
+    if (stars) award(4, stars);
+    let best = null;
+    for (let eta = 0.1; eta <= 1.2001; eta += 0.05) {
+      const r = runGD2D(this.F, this.start, eta, this.thr, 200);
+      if (r.ok && (!best || r.steps < best.steps)) best = { ...r, eta };
+    }
+    this.algo = best;
+    panel.insertAdjacentHTML('beforeend', `
+      <div class="card" id="endCard">
+        <h3>${ok ? '¡Llegaste al fondo!' : 'Te quedaste sin pasos'}</h3>
+        <div class="bigstars" aria-label="${stars} de 3 estrellas">${starStr(stars)}</div>
+        <p>${ok ? `Tú: <b>${this.steps}</b> pasos.` : 'Observa en el mapa revelado por dónde fuiste.'} ${best ? `El mejor algoritmo de η fijo (η = ${best.eta.toFixed(2)}) tarda <b>${best.steps}</b> pasos (línea punteada).` : ''}</p>
+        <div class="formula">(x, y) ← (x, y) − η · ∇f(x, y)</div>
+        <p>El gradiente ∇f = (∂f/∂x, ∂f/∂y) reúne las dos pendientes. Las curvas de nivel ahora visibles unen puntos de igual altura: <b>el gradiente siempre es perpendicular a ellas</b>. Como el valle es alargado, −∇f no apunta directo al fondo y los pasos grandes zigzaguean.</p>
+        <details open><summary>¿Qué aprendiste?</summary>
+          <ul class="learned">
+            <li>En varias dimensiones, la derivada se convierte en un <b>vector</b>: el gradiente.</li>
+            <li>−∇f es la dirección de <b>máximo descenso</b> local, no necesariamente la ruta más corta al mínimo.</li>
+            <li>En valles alargados, un η único es un compromiso entre avanzar y no zigzaguear.</li>
+          </ul>
+        </details>
+        <div class="row" style="margin-top:10px">
+          <button class="btn" type="button" id="again">Repetir</button>
+          <button class="btn primary" type="button" id="toL1">Volver al Nivel 1</button>
+        </div>
+      </div>`);
+    $('#again').addEventListener('click', () => this.enter());
+    $('#toL1').addEventListener('click', () => goLevel(1));
+    $('#endCard').scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+  },
+  pointer(px, py) {
+    if (this.done) return;
+    const v = this.view(), [wx, wy] = v.inv(px, py);
+    if (Math.hypot(wx - this.p[0], wy - this.p[1]) > 0.05) this.dir = Math.atan2(wy - this.p[1], wx - this.p[0]);
+  },
+  key(e) {
+    if (e.key === 'ArrowLeft') { this.dir += 0.17; return true; }
+    if (e.key === 'ArrowRight') { this.dir -= 0.17; return true; }
+    if (e.key === 'Enter' || e.key === ' ') { this.step(); return true; }
+    if (e.key === 'g' || e.key === 'G') { this.aimGrad(); return true; }
+    if (e.key === 'ArrowUp' || e.key === 'ArrowDown') {
+      this.stepLen = clamp(Math.round((this.stepLen + (e.key === 'ArrowUp' ? 0.05 : -0.05)) * 100) / 100, 0.1, 3);
+      const s = $('#stepLen'); if (s) { s.value = this.stepLen; $('#stepOut').textContent = fmt(this.stepLen); }
+      return true;
+    }
+    return false;
+  },
+  draw(t) {
+    const v = this.view(), F = this.F;
+    if (this.dur) { const k = clamp((t - this.t0) / this.dur, 0, 1); this.ap = [lerp(this.from[0], this.p[0], ease(k)), lerp(this.from[1], this.p[1], ease(k))]; if (k >= 1) this.dur = 0; }
+    ctx.fillStyle = pal.sky0; ctx.fillRect(0, 0, W, H);
+    if (this.heat) { ctx.imageSmoothingEnabled = true; ctx.drawImage(this.heat, v.ox, v.oy, v.S, v.S); }
+    const hx = v.X(this.ap[0]), hy = v.Y(this.ap[1]);
+    const fogK = this.done ? 1 - clamp((t - this.revealT) / 1400, 0, 1) : 1;
+    if (this.done) {
+      ctx.fillStyle = pal.good; ctx.beginPath(); ctx.arc(v.X(F.cx), v.Y(F.cy), 6, 0, 6.283); ctx.fill();
+      label('mínimo', v.X(F.cx), v.Y(F.cy) + 18, pal.good, 'center', 11);
+      if (this.algo) {
+        ctx.save(); ctx.strokeStyle = pal.ghost; ctx.lineWidth = 2; ctx.setLineDash([5, 4]); ctx.beginPath();
+        this.algo.pts.forEach(([x, y], i) => (i ? ctx.lineTo(v.X(x), v.Y(y)) : ctx.moveTo(v.X(x), v.Y(y)))); ctx.stroke(); ctx.restore();
+      }
+    }
+    drawFog(hx, hy, Math.max(60, 0.95 * v.k), t, fogK);
+    // Student's trail.
+    ctx.save(); ctx.strokeStyle = pal.path; ctx.fillStyle = pal.path; ctx.lineWidth = 2.2;
+    ctx.beginPath(); this.path.forEach(([x, y], i) => (i ? ctx.lineTo(v.X(x), v.Y(y)) : ctx.moveTo(v.X(x), v.Y(y))));
+    if (!this.done && this.dur) ctx.lineTo(hx, hy);
+    ctx.globalAlpha = 0.8; ctx.stroke();
+    for (const [x, y] of this.path) { ctx.beginPath(); ctx.arc(v.X(x), v.Y(y), 3, 0, 6.283); ctx.fill(); }
+    ctx.restore();
+    // Hiker (top-down lantern).
+    const glow = ctx.createRadialGradient(hx, hy, 0, hx, hy, 26);
+    glow.addColorStop(0, pal.lantern + 'ee'); glow.addColorStop(1, pal.lantern + '00');
+    ctx.fillStyle = glow; ctx.beginPath(); ctx.arc(hx, hy, 26, 0, 6.283); ctx.fill();
+    ctx.fillStyle = pal.lantern; ctx.beginPath(); ctx.arc(hx, hy, 6 + Math.sin(t * 0.005), 0, 6.283); ctx.fill();
+    if (!this.done && !this.dur) {
+      const [gx, gy] = F.grad(...this.p), gn = Math.hypot(gx, gy);
+      const gl = clamp(gn * v.k * 0.5, 22, v.S * 0.22);
+      if (gn > 1e-6) arrow(hx, hy, hx + gx / gn * gl, hy - gy / gn * gl, pal.ghost, 3);
+      label(`∇f = (${fmt(gx, 1)}, ${fmt(gy, 1)})`, clamp(hx + gx / (gn || 1) * gl, 64, W - 64), clamp(hy - gy / (gn || 1) * gl - 16, 52, H - 14), pal.ghost, 'center', 11);
+      const dl = this.stepLen * v.k;
+      const tx = hx + Math.cos(this.dir) * dl, ty = hy - Math.sin(this.dir) * dl;
+      arrow(hx, hy, tx, ty, pal.dark ? '#ffffff' : '#14203a', 2, [6, 5]);
+      ctx.strokeStyle = pal.lantern; ctx.lineWidth = 2; ctx.beginPath(); ctx.arc(tx, ty, 7, 0, 6.283); ctx.stroke();
+    }
+    setHud([`f = ${fmt(F.f(...this.p))}`, `pasos ${this.steps}/${this.maxSteps}`]);
+  }
+};
+
+/* ================= Shell: tabs, loop, input ================= */
+const levels = { 1: L1, 2: L2, 3: L3, 4: L4 };
+const levelNames = { 1: 'Curva', 2: 'Trampa', 3: 'vs IA', 4: '2D' };
+let cur = null, curN = 1;
+function renderTabs() {
+  const st = store.get('stars', {});
+  $('#tabs').innerHTML = [1, 2, 3, 4].map(n => `
+    <button type="button" role="tab" aria-selected="${n === curN}" data-l="${n}" aria-label="Nivel ${n}: ${levelNames[n]}, ${st[n] || 0} de 3 estrellas">
+      <span class="lv">N${n} · ${levelNames[n]}</span><span class="st" aria-hidden="true">${starStr(st[n] || 0)}</span>
+    </button>`).join('');
+  $('#tabs').querySelectorAll('[data-l]').forEach(b => b.addEventListener('click', () => goLevel(+b.dataset.l)));
+}
+function goLevel(n) {
+  curN = n; cur = levels[n]; store.set('last', n); renderTabs();
+  clearTimeout(toastTimer); toastEl.className = 'toast';
+  cur.enter();
+}
+function loop(t) {
+  if (cur) { ctx.save(); cur.draw(t); ctx.restore(); }
+  requestAnimationFrame(loop);
+}
+cv.addEventListener('pointerdown', e => {
+  const r = cv.getBoundingClientRect();
+  if (cur && cur.pointer) cur.pointer(e.clientX - r.left, e.clientY - r.top);
+});
+document.addEventListener('keydown', e => {
+  if (!$('#intro').hidden) return;
+  const tag = (e.target.tagName || '').toLowerCase();
+  if (tag === 'input' || tag === 'textarea') return;
+  if (tag === 'button' && (e.key === 'Enter' || e.key === ' ')) return;
+  if (cur && cur.key && cur.key(e)) e.preventDefault();
+});
+$('#introGo').addEventListener('click', () => { $('#intro').hidden = true; store.set('seenIntro', true); cv.focus(); });
+if (store.get('seenIntro', false)) $('#intro').hidden = true; else setTimeout(() => $('#introGo').focus(), 50);
+
+resize();
+goLevel(clamp(store.get('last', 1), 1, 4));
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>

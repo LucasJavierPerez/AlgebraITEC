@@ -1,0 +1,1314 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Espejo del Gradiente</title>
+<meta name="description" content="Pesos, neuronas, capas, vector gradiente y paso de descenso: la relación exacta, de una micro-red a Llama 3 8B.">
+<style>
+:root {
+  --bg: #0f172a;
+  --card: #1e293b;
+  --card-2: #162033;
+  --border: #334155;
+  --text: #e2e8f0;
+  --muted: #94a3b8;
+  --cyan: #38bdf8;
+  --emerald: #4ade80;
+  --amber: #fbbf24;
+  --pos: #60a5fa;
+  --neg: #f87171;
+  --danger: #fb7185;
+  --focus: #fde68a;
+  --radius: 14px;
+  --font-ui: system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue", Arial, sans-serif;
+  --font-mono: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color-scheme: dark;
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: var(--font-ui);
+  font-size: 15px;
+  line-height: 1.5;
+  overflow-x: hidden;
+}
+a { color: var(--cyan); }
+header.top { padding: 20px 16px 8px; max-width: 1400px; margin: 0 auto; }
+header.top h1 { margin: 0; font-size: clamp(1.25rem, 3.2vw, 1.75rem); letter-spacing: 0.01em; }
+header.top p { margin: 4px 0 0; color: var(--muted); max-width: 900px; }
+main { max-width: 1400px; margin: 0 auto; padding: 8px 16px 40px; display: grid; gap: 16px; }
+.card {
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 16px;
+  min-width: 0;
+}
+.card h2 { margin: 0 0 4px; font-size: 1.1rem; }
+.card h3 { margin: 0 0 6px; font-size: 0.98rem; }
+.sub { color: var(--muted); margin: 0 0 12px; font-size: 0.9rem; }
+.mono { font-family: var(--font-mono); }
+.w-num { color: var(--emerald); font-family: var(--font-mono); }
+.g-num { color: var(--amber); font-family: var(--font-mono); }
+.c-num { color: var(--cyan); font-family: var(--font-mono); }
+.middle { display: grid; grid-template-columns: minmax(0, 1.15fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 900px) { .middle { grid-template-columns: minmax(0, 1fr); } }
+
+/* buttons & focus */
+button {
+  font: inherit;
+  color: var(--text);
+  background: #0b1222;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 8px 12px;
+  cursor: pointer;
+}
+button:hover:not(:disabled) { border-color: var(--cyan); }
+button:disabled { opacity: 0.4; cursor: not-allowed; }
+button.primary { background: #0c4a6e; border-color: var(--cyan); }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; }
+svg :focus-visible { outline: none; }
+
+/* mode selector */
+.mode-head { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; }
+.modes { display: inline-flex; flex-wrap: wrap; gap: 6px; background: #0b1222; padding: 4px; border-radius: 12px; border: 1px solid var(--border); }
+.modes button { border: none; background: transparent; padding: 7px 12px; }
+.modes button[aria-selected="true"] { background: var(--cyan); color: #04121f; font-weight: 600; }
+
+/* micro controls */
+.micro-grid { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+@media (max-width: 900px) { .micro-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+.ctrl { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 10px; }
+.ctrl label { display: flex; justify-content: space-between; gap: 6px; font-size: 0.88rem; }
+.ctrl output { font-family: var(--font-mono); color: var(--cyan); font-weight: 600; }
+input[type="range"] { width: 100%; accent-color: var(--cyan); }
+.counters { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; margin-top: 12px; }
+@media (max-width: 520px) { .counters { grid-template-columns: minmax(0, 1fr); } }
+.stat { background: var(--card-2); border: 1px solid var(--border); border-radius: 10px; padding: 8px 10px; }
+.stat span { display: block; color: var(--muted); font-size: 0.78rem; }
+.stat b { font-family: var(--font-mono); font-size: 1.15rem; }
+.shapes { display: flex; flex-wrap: wrap; gap: 8px; margin: 10px 0 0; padding: 0; list-style: none; }
+.shapes li { font-family: var(--font-mono); font-size: 0.84rem; background: #0b1222; border: 1px dashed var(--border); border-radius: 8px; padding: 4px 8px; }
+
+/* LLM view */
+.llm-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-top: 12px; }
+@media (max-width: 1100px) { .llm-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); } }
+@media (max-width: 520px) { .llm-cards { grid-template-columns: minmax(0, 1fr); } }
+.llm-card { background: var(--card-2); border: 1px solid var(--border); border-radius: 12px; padding: 12px; position: relative; }
+.llm-card .lvl { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.06em; color: var(--cyan); }
+.llm-card .big { font-family: var(--font-mono); font-size: 1.35rem; color: var(--emerald); font-weight: 700; overflow-wrap: anywhere; }
+.llm-card p { margin: 4px 0 0; font-size: 0.86rem; color: var(--muted); }
+.llm-card p b { color: var(--text); }
+.bars { margin-top: 14px; display: grid; gap: 14px; }
+.stack { display: flex; height: 26px; border-radius: 8px; overflow: hidden; border: 1px solid var(--border); background: #0b1222; }
+.stack > div { height: 100%; min-width: 2px; transition: width 0.6s ease; }
+.legend { display: flex; flex-wrap: wrap; gap: 6px 14px; font-size: 0.82rem; color: var(--muted); margin-top: 6px; }
+.legend i { display: inline-block; width: 10px; height: 10px; border-radius: 3px; margin-right: 5px; vertical-align: -1px; }
+.ladder { display: grid; gap: 6px; }
+.ladder .rung { display: grid; grid-template-columns: minmax(90px, 160px) minmax(0, 1fr); gap: 8px; align-items: center; font-size: 0.84rem; }
+.ladder .track { background: #0b1222; border-radius: 6px; height: 18px; position: relative; overflow: hidden; border: 1px solid var(--border); }
+.ladder .fill { height: 100%; background: linear-gradient(90deg, #0e7490, var(--cyan)); transition: width 0.6s ease; }
+.ladder .fill.micro { background: linear-gradient(90deg, #166534, var(--emerald)); }
+.ladder .val { position: absolute; right: 6px; top: 0; font-family: var(--font-mono); font-size: 0.74rem; line-height: 18px; color: var(--text); }
+.bridge { margin-top: 14px; padding: 10px 12px; border-left: 4px solid var(--emerald); background: rgba(74, 222, 128, 0.07); border-radius: 0 10px 10px 0; }
+details.fine { margin-top: 12px; background: #0b1222; border: 1px solid var(--border); border-radius: 10px; padding: 8px 12px; }
+details.fine summary { cursor: pointer; color: var(--amber); font-weight: 600; }
+details.fine table { border-collapse: collapse; font-size: 0.82rem; width: 100%; margin-top: 8px; }
+details.fine td, details.fine th { text-align: left; padding: 3px 6px; border-bottom: 1px solid #243045; vertical-align: top; }
+details.fine td.n { font-family: var(--font-mono); text-align: right; white-space: nowrap; }
+.fine-wrap { overflow-x: auto; }
+
+/* graph */
+.graph-wrap { position: relative; }
+#net { width: 100%; height: auto; display: block; background: radial-gradient(ellipse at center, #17223a 0%, #111a2d 70%); border-radius: 10px; border: 1px solid var(--border); touch-action: manipulation; }
+.wire { stroke-linecap: round; transition: stroke-width 0.6s ease, stroke 0.6s ease, opacity 0.2s ease; }
+.wire-hit { stroke: transparent; stroke-width: 9; cursor: pointer; }
+#net.focusing .wire { opacity: 0.08; }
+#net.focusing .wire.in { opacity: 1; }
+#net.hovering .wire { opacity: 0.15; }
+.wire.glow { opacity: 1 !important; stroke-width: 5px !important; filter: drop-shadow(0 0 4px #fde68a); stroke: #fde68a !important; }
+.node circle { fill: #0b1222; stroke: var(--cyan); stroke-width: 2; transition: stroke 0.2s, fill 0.2s; }
+.node.input circle { stroke: #64748b; }
+.node.output circle { stroke: var(--emerald); }
+.node.inspectable { cursor: pointer; }
+.node.inspectable:hover circle { fill: #10304a; }
+.node:focus-visible circle { stroke: var(--focus); stroke-width: 4; }
+.node.selected circle { fill: #0c4a6e; stroke: var(--focus); stroke-width: 3.5; }
+.node.bias-glow circle { stroke: var(--focus); stroke-width: 4; filter: drop-shadow(0 0 5px #fde68a); }
+#net.focusing .node:not(.selected):not(.source) { opacity: 0.45; }
+.node text { fill: var(--text); font-family: var(--font-mono); font-size: 10px; text-anchor: middle; dominant-baseline: central; pointer-events: none; }
+.node text.stale { fill: #64748b; }
+.node.flash circle { fill: #155e75; }
+.lbl { fill: var(--muted); font-size: 12px; text-anchor: middle; font-family: var(--font-ui); }
+.mlbl { fill: var(--emerald); font-size: 13px; text-anchor: middle; font-family: var(--font-mono); font-weight: 600; }
+.mlbl-s { fill: var(--muted); font-size: 10px; text-anchor: middle; font-family: var(--font-mono); }
+.tooltip {
+  position: absolute; z-index: 5; max-width: 290px; pointer-events: none;
+  background: #0b1222; border: 1px solid var(--cyan); border-radius: 10px; padding: 10px 12px;
+  font-size: 0.86rem; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+.tooltip[hidden] { display: none; }
+.tooltip strong { color: var(--cyan); display: block; margin-bottom: 4px; }
+.graph-legend { display: flex; flex-wrap: wrap; gap: 6px 16px; font-size: 0.82rem; color: var(--muted); margin-top: 8px; }
+.swatch { display: inline-block; width: 22px; height: 4px; border-radius: 2px; vertical-align: middle; margin-right: 6px; }
+
+/* mirror table */
+.table-wrap { max-height: 520px; overflow: auto; border: 1px solid var(--border); border-radius: 10px; background: #0b1222; }
+table.mirror { width: 100%; border-collapse: separate; border-spacing: 0; font-size: 0.86rem; }
+table.mirror th {
+  position: sticky; top: 0; z-index: 2; background: #111c30; text-align: left; padding: 8px; border-bottom: 1px solid var(--border);
+  font-size: 0.78rem; font-weight: 600; vertical-align: bottom;
+}
+table.mirror th.a { color: var(--emerald); }
+table.mirror th.b { color: var(--amber); }
+table.mirror th small { display: block; color: var(--muted); font-weight: 400; }
+table.mirror td { padding: 4px 8px; border-bottom: 1px solid #1b2639; white-space: nowrap; }
+table.mirror td.idx { color: #64748b; font-family: var(--font-mono); font-size: 0.76rem; width: 3.5em; }
+table.mirror td.va { color: var(--emerald); font-family: var(--font-mono); text-align: right; }
+table.mirror td.vb { color: var(--amber); font-family: var(--font-mono); text-align: right; transition: opacity 0.5s ease, background 0.5s ease; }
+table.mirror td.vb.empty { color: #475569; }
+table.mirror td.vb.fading { opacity: 0.1; }
+table.mirror tr.prow { cursor: pointer; }
+table.mirror tr.prow:hover td, table.mirror tr.prow.hl td { background: rgba(253, 230, 138, 0.12); }
+table.mirror tr.prow.sel td { background: rgba(56, 189, 248, 0.14); }
+table.mirror tr.prow.focusrow td.name { box-shadow: inset 3px 0 0 var(--cyan); }
+table.mirror tr.layer-h td { background: #13213a; color: var(--cyan); font-weight: 600; font-size: 0.8rem; white-space: normal; }
+table.mirror tr.neuron-h td { color: var(--muted); font-size: 0.76rem; background: #0e1729; white-space: normal; }
+table.mirror tr.neuron-h.sel td { color: var(--text); background: rgba(56, 189, 248, 0.2); }
+.flash-b { animation: flashB 0.9s ease; }
+@keyframes flashB { 0% { background: rgba(251, 191, 36, 0.55); } 100% { background: transparent; } }
+.flash-a { animation: flashA 1.1s ease; }
+@keyframes flashA { 0% { background: rgba(74, 222, 128, 0.45); } 100% { background: transparent; } }
+td.va .old { color: #64748b; text-decoration: line-through; }
+td.va .arrow { color: var(--muted); }
+.table-note { font-size: 0.8rem; color: var(--muted); margin-top: 8px; }
+
+/* trainer */
+.trainer { display: grid; grid-template-columns: minmax(0, 1.1fr) minmax(0, 1fr); gap: 16px; }
+@media (max-width: 900px) { .trainer { grid-template-columns: minmax(0, 1fr); } }
+.sample { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.chip { font-family: var(--font-mono); font-size: 0.84rem; background: #0b1222; border: 1px solid var(--border); border-radius: 999px; padding: 4px 10px; overflow-wrap: anywhere; }
+ol.stepper { list-style: none; padding: 0; margin: 0 0 12px; display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 6px; counter-reset: s; }
+ol.stepper li { font-size: 0.78rem; text-align: center; padding: 6px 4px; border-radius: 8px; border: 1px solid var(--border); color: var(--muted); background: #0b1222; }
+ol.stepper li.active { border-color: var(--cyan); color: var(--text); background: #0c3550; font-weight: 600; }
+ol.stepper li.done { color: var(--emerald); border-color: #166534; }
+.actions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; }
+.actions button { text-align: left; min-height: 48px; }
+.actions button.ready { border-color: var(--cyan); box-shadow: 0 0 0 2px rgba(56, 189, 248, 0.25); }
+@media (max-width: 520px) { .actions { grid-template-columns: minmax(0, 1fr); } }
+.eta-row { margin-top: 12px; }
+.msg { margin-top: 12px; padding: 10px 12px; border-radius: 10px; background: #0b1222; border: 1px solid var(--border); min-height: 52px; font-size: 0.9rem; }
+.msg.warn { border-color: var(--danger); }
+.msg.good { border-color: var(--emerald); }
+.calc { margin-top: 10px; font-family: var(--font-mono); font-size: 0.86rem; background: #0b1222; border: 1px dashed var(--emerald); border-radius: 10px; padding: 8px 10px; overflow-wrap: anywhere; }
+.calc[hidden] { display: none; }
+.chain { font-size: 0.86rem; background: #0b1222; border: 1px dashed var(--amber); border-radius: 10px; padding: 8px 10px; margin-top: 10px; overflow-wrap: anywhere; }
+#mountain { width: 100%; height: auto; display: block; background: #0b1222; border: 1px solid var(--border); border-radius: 10px; }
+.hist { font-family: var(--font-mono); font-size: 0.78rem; color: var(--muted); max-height: 110px; overflow: auto; margin: 8px 0 0; padding: 0; list-style: none; }
+.hist li.up { color: var(--danger); }
+.hist li.down { color: var(--emerald); }
+.toolbar { display: flex; flex-wrap: wrap; gap: 8px; justify-content: space-between; align-items: center; margin-bottom: 8px; }
+.visually-hidden { position: absolute !important; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+footer { text-align: center; color: #64748b; font-size: 0.8rem; padding: 0 16px 24px; }
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<a href="../../index.html" id="volver-al-indice">&larr;&nbsp; Volver al inicio</a>
+<style>
+#volver-al-indice{
+  position:fixed; top:16px; left:16px; z-index:99999;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; line-height:1; text-decoration:none;
+  color:#161A22; background:rgba(237,234,228,0.92);
+  border:1px solid rgba(22,26,34,0.28); border-radius:100px;
+  padding:9px 15px; backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(22,26,34,0.10);
+  transition:background .15s ease,border-color .15s ease;
+}
+#volver-al-indice:hover{ background:#fff; border-color:#4740E0; color:#4740E0; }
+@media print{ #volver-al-indice{ display:none; } }
+</style>
+<header class="top">
+  <h1>Espejo del Gradiente: pesos, neuronas, capas y ∇L</h1>
+  <p>Cada cable de la red es un peso. Cada peso tiene exactamente una derivada parcial. Juntas forman el vector gradiente ∇L, que tiene la misma longitud que el vector de parámetros. Un paso de descenso resta η·∇L a todos los pesos a la vez.</p>
+</header>
+
+<main>
+  <!-- 1. Scale panel -->
+  <section class="card" aria-labelledby="scaleTitle">
+    <div class="mode-head">
+      <div>
+        <h2 id="scaleTitle">Escalímetro de Arquitectura (de lo micro a lo macro)</h2>
+        <p class="sub" style="margin:0">Cambia la arquitectura de la micro-red o mira cómo escala la misma idea hasta un modelo de lenguaje.</p>
+      </div>
+      <div class="modes" role="tablist" aria-label="Modo del escalímetro">
+        <button role="tab" id="tabMicro" aria-selected="true" aria-controls="microView">Micro-Red en Vivo</button>
+        <button role="tab" id="tabLlm" aria-selected="false" aria-controls="llmView" tabindex="-1">Calculadora Escala LLM (Ej. Llama 8B)</button>
+      </div>
+    </div>
+
+    <div id="microView" role="tabpanel" aria-labelledby="tabMicro">
+      <div class="micro-grid">
+        <div class="ctrl"><label for="sIn">Entradas <output id="oIn" for="sIn">3</output></label><input type="range" id="sIn" min="2" max="5" value="3"></div>
+        <div class="ctrl"><label for="sH1">Neuronas Capa Oculta 1 <output id="oH1" for="sH1">4</output></label><input type="range" id="sH1" min="2" max="8" value="4"></div>
+        <div class="ctrl"><label for="sH2">Neuronas Capa Oculta 2 <output id="oH2" for="sH2">3</output></label><input type="range" id="sH2" min="2" max="8" value="3"></div>
+        <div class="ctrl"><label for="sOut">Salidas <output id="oOut" for="sOut">1</output></label><input type="range" id="sOut" min="1" max="2" value="1"></div>
+      </div>
+      <div class="counters" aria-live="polite">
+        <div class="stat"><span>Pesos (cables)</span><b class="w-num" id="cW">0</b></div>
+        <div class="stat"><span>Sesgos</span><b class="w-num" id="cB">0</b></div>
+        <div class="stat"><span>Parámetros totales = componentes de ∇L</span><b class="c-num" id="cT">0</b></div>
+      </div>
+      <ul class="shapes" id="shapes"></ul>
+    </div>
+
+    <div id="llmView" role="tabpanel" aria-labelledby="tabLlm" hidden>
+      <div class="llm-cards" id="llmCards"></div>
+      <div class="bars">
+        <div>
+          <h3>Un bloque (capa) por dentro</h3>
+          <div class="stack" id="barBlock" role="img"></div>
+          <div class="legend" id="legBlock"></div>
+        </div>
+        <div>
+          <h3>La red completa</h3>
+          <div class="stack" id="barNet" role="img"></div>
+          <div class="legend" id="legNet"></div>
+        </div>
+        <div>
+          <h3>Escalera de escalas (escala logarítmica: cada salto es ×10)</h3>
+          <div class="ladder" id="ladder"></div>
+        </div>
+      </div>
+      <div class="bridge" id="bridge"></div>
+      <details class="fine">
+        <summary>Letra chica: para ser exactos</summary>
+        <div id="fineText"></div>
+      </details>
+    </div>
+  </section>
+
+  <!-- 2 & 3. Graph and mirror table -->
+  <div class="middle">
+    <section class="card" aria-labelledby="graphTitle">
+      <h2 id="graphTitle">La red: neuronas, cables y matrices</h2>
+      <p class="sub">Haz clic (o Enter) en una neurona oculta o de salida para ver solo sus cables de entrada. Pasa el cursor por un cable para ver su fila en la tabla; haz clic en el cable para desplazarte hasta ella.</p>
+      <div class="graph-wrap" id="graphWrap">
+        <svg id="net" viewBox="0 0 640 420" role="group" aria-label="Diagrama de la red neuronal"></svg>
+        <div class="tooltip" id="tip" role="status" hidden></div>
+      </div>
+      <div class="graph-legend">
+        <span><i class="swatch" style="background:var(--pos)"></i>peso positivo</span>
+        <span><i class="swatch" style="background:var(--neg)"></i>peso negativo</span>
+        <span>grosor = |w|</span>
+        <span>número dentro del nodo = activación tras la Ida</span>
+      </div>
+    </section>
+
+    <section class="card" aria-labelledby="tableTitle">
+      <h2 id="tableTitle">Tabla Espejo en memoria (Parámetros vs Gradiente)</h2>
+      <p class="sub">Una sola lista larga: cada fila es un parámetro y su derivada parcial, 1 a 1. La columna A vive siempre; la columna B solo existe entre la Vuelta y zero_grad.</p>
+      <div class="table-wrap" id="tableWrap" tabindex="0" aria-label="Tabla de parámetros y gradiente, desplazable">
+        <table class="mirror">
+          <thead>
+            <tr>
+              <th scope="col">#</th>
+              <th scope="col">Parámetro</th>
+              <th scope="col" class="a">Columna A (permanente)<small>Vector de Parámetros W</small></th>
+              <th scope="col" class="b">Columna B (temporal)<small>Vector Gradiente ∇L</small></th>
+            </tr>
+          </thead>
+          <tbody id="tbody"></tbody>
+        </table>
+      </div>
+      <p class="table-note">w<sup>ℓ</sup><sub>j,i</sub> = peso de la capa ℓ que llega a la neurona j desde la neurona i de la capa anterior (fila j, columna i de la matriz W<sup>ℓ</sup>). b<sup>ℓ</sup><sub>j</sub> = sesgo de la neurona j.</p>
+    </section>
+  </div>
+
+  <!-- 4. Training simulator -->
+  <section class="card" aria-labelledby="trainTitle">
+    <h2 id="trainTitle">Simulador del ciclo de entrenamiento paso a paso</h2>
+    <p class="sub">Un único ejemplo de entrenamiento fijo. Capas ocultas con tanh, salida lineal, pérdida L = ½·Σ(ŷ − y)². Todo el cálculo es real.</p>
+    <div class="trainer">
+      <div>
+        <div class="sample" id="sample"></div>
+        <ol class="stepper" id="stepper" aria-label="Fase actual del ciclo">
+          <li>1 · Ida</li><li>2 · Vuelta</li><li>3 · Paso</li><li>4 · zero_grad</li>
+        </ol>
+        <div class="actions">
+          <button id="bFwd">1. Ida (Forward Pass)</button>
+          <button id="bBwd">2. Vuelta (Backpropagation)</button>
+          <button id="bStep">3. ¡Dar paso de descenso! (W = W − η·∇L)</button>
+          <button id="bZero">4. Limpiar gradiente (zero_grad)</button>
+        </div>
+        <div class="ctrl eta-row">
+          <label for="sEta">Tasa de aprendizaje η (escala logarítmica) <output id="oEta" for="sEta">0,100</output></label>
+          <input type="range" id="sEta" min="0" max="1000" step="1" aria-describedby="etaHelp">
+          <small id="etaHelp" style="color:var(--muted)">De 0,001 a 2. Con η grande el paso puede pasarse del valle y la pérdida sube.</small>
+        </div>
+        <div class="msg" id="msg" aria-live="polite">Pulsa <b>1. Ida</b> para medir el error de la red con sus pesos actuales.</div>
+        <div class="calc" id="calc" hidden></div>
+      </div>
+      <div>
+        <div class="toolbar">
+          <span>Paso n.º <b class="c-num" id="stepCount">0</b> · L actual <b class="c-num" id="lossNow">—</b></span>
+          <button id="bReset">Reiniciar entrenamiento</button>
+        </div>
+        <svg id="mountain" viewBox="0 0 360 210" role="img" aria-label="Montaña del Error: pérdida en función del número de paso"></svg>
+        <ul class="hist" id="hist" aria-label="Historial de la pérdida"></ul>
+        <div class="chain" id="chain" aria-live="polite">Regla de la cadena: aparecerá aquí después de la Vuelta. Haz clic en una fila de la tabla para elegir qué peso examinar.</div>
+      </div>
+    </div>
+  </section>
+</main>
+<footer>iTec Río Cuarto · Tecnicatura en Ciencia de Datos e IA · Recurso didáctico interactivo</footer>
+
+<script>
+"use strict";
+/* MATH-START */
+// ---- Pure math: no DOM access in this block (it is extracted by the tests) ----
+var BASE_X = [0.8, -0.5, 0.3, 0.9, -0.2];
+var BASE_Y = [0.6, -0.4];
+
+var LLAMA3_8B = {
+  dModel: 4096,
+  nBlocks: 32,
+  ffDim: 14336,
+  nHeads: 32,
+  nKvHeads: 8,
+  vocab: 128256,
+  tiedEmbeddings: false,
+  bytesPerParam: 2 // bf16
+};
+
+function mulberry32(seed) {
+  var a = seed >>> 0;
+  return function () {
+    a = (a + 0x6D2B79F5) >>> 0;
+    var t = a;
+    t = Math.imul(t ^ (t >>> 15), t | 1);
+    t ^= t + Math.imul(t ^ (t >>> 7), t | 61);
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+
+function seedFor(arch) {
+  return 20261021 + arch[0] * 1000 + arch[1] * 100 + arch[2] * 10 + arch[3];
+}
+
+// arch = [nIn, h1, h2, nOut]; W[l] has shape arch[l+1] x arch[l]
+function createNet(arch, seed) {
+  var rng = mulberry32(seed);
+  var W = [], b = [];
+  for (var l = 0; l < arch.length - 1; l++) {
+    var nIn = arch[l], nOut = arch[l + 1];
+    var limit = Math.sqrt(6 / (nIn + nOut));
+    var M = [], bv = [];
+    for (var j = 0; j < nOut; j++) {
+      var row = [];
+      for (var i = 0; i < nIn; i++) row.push((rng() * 2 - 1) * limit);
+      M.push(row);
+      bv.push((rng() * 2 - 1) * 0.2);
+    }
+    W.push(M);
+    b.push(bv);
+  }
+  return { arch: arch.slice(), W: W, b: b };
+}
+
+function cloneNet(net) {
+  return {
+    arch: net.arch.slice(),
+    W: net.W.map(function (M) { return M.map(function (r) { return r.slice(); }); }),
+    b: net.b.map(function (v) { return v.slice(); })
+  };
+}
+
+// Hidden layers: tanh. Output layer: linear.
+function forward(net, x) {
+  var acts = [x.slice()], zs = [];
+  var nL = net.W.length;
+  for (var l = 0; l < nL; l++) {
+    var prev = acts[l], z = [], a = [];
+    for (var j = 0; j < net.W[l].length; j++) {
+      var s = net.b[l][j];
+      for (var i = 0; i < prev.length; i++) s += net.W[l][j][i] * prev[i];
+      z.push(s);
+      a.push(l < nL - 1 ? Math.tanh(s) : s);
+    }
+    zs.push(z);
+    acts.push(a);
+  }
+  return { acts: acts, zs: zs, yhat: acts[nL] };
+}
+
+function lossOf(yhat, y) {
+  var s = 0;
+  for (var k = 0; k < y.length; k++) s += (yhat[k] - y[k]) * (yhat[k] - y[k]);
+  return 0.5 * s;
+}
+
+// Backpropagation with the chain rule. deltas[l][j] = dL/dz of neuron j in layer l.
+function backward(net, fw, y) {
+  var nL = net.W.length;
+  var gW = new Array(nL), gb = new Array(nL), deltas = new Array(nL);
+  var delta = fw.yhat.map(function (v, k) { return v - y[k]; }); // linear output
+  for (var l = nL - 1; l >= 0; l--) {
+    deltas[l] = delta.slice();
+    var prev = fw.acts[l];
+    gW[l] = delta.map(function (d) { return prev.map(function (a) { return d * a; }); });
+    gb[l] = delta.slice();
+    if (l > 0) {
+      var nd = [];
+      for (var i = 0; i < prev.length; i++) {
+        var s = 0;
+        for (var j = 0; j < delta.length; j++) s += net.W[l][j][i] * delta[j];
+        nd.push(s * (1 - prev[i] * prev[i])); // tanh'(z) = 1 - tanh(z)^2
+      }
+      delta = nd;
+    }
+  }
+  return { gW: gW, gb: gb, deltas: deltas };
+}
+
+// Row order of the flat parameter vector: layer -> destination neuron -> weights then bias
+function paramRows(arch) {
+  var rows = [];
+  for (var l = 0; l < arch.length - 1; l++) {
+    for (var j = 0; j < arch[l + 1]; j++) {
+      for (var i = 0; i < arch[l]; i++) rows.push({ l: l, j: j, i: i });
+      rows.push({ l: l, j: j, i: -1 });
+    }
+  }
+  return rows;
+}
+
+function getParam(net, r) { return r.i < 0 ? net.b[r.l][r.j] : net.W[r.l][r.j][r.i]; }
+function getGrad(g, r) { return r.i < 0 ? g.gb[r.l][r.j] : g.gW[r.l][r.j][r.i]; }
+function setParam(net, r, v) { if (r.i < 0) net.b[r.l][r.j] = v; else net.W[r.l][r.j][r.i] = v; }
+
+function sgdStep(net, g, eta) {
+  var out = cloneNet(net);
+  paramRows(net.arch).forEach(function (r) { setParam(out, r, getParam(net, r) - eta * getGrad(g, r)); });
+  return out;
+}
+
+function countParams(arch) {
+  var per = [], wt = 0, bt = 0;
+  for (var l = 0; l < arch.length - 1; l++) {
+    var w = arch[l + 1] * arch[l];
+    per.push({ rows: arch[l + 1], cols: arch[l], weights: w, biases: arch[l + 1] });
+    wt += w; bt += arch[l + 1];
+  }
+  return { weights: wt, biases: bt, total: wt + bt, perLayer: per };
+}
+
+function llamaCounts(c) {
+  var headDim = c.dModel / c.nHeads;
+  var kvDim = c.nKvHeads * headDim;
+  var q = c.dModel * c.dModel;
+  var k = c.dModel * kvDim;
+  var v = c.dModel * kvDim;
+  var o = c.dModel * c.dModel;
+  var attn = q + k + v + o;
+  var gate = c.dModel * c.ffDim, up = c.dModel * c.ffDim, down = c.ffDim * c.dModel;
+  var mlp = gate + up + down;
+  var norms = 2 * c.dModel;
+  var block = attn + mlp + norms;
+  var blocks = block * c.nBlocks;
+  var embed = c.vocab * c.dModel;
+  var head = c.tiedEmbeddings ? 0 : c.vocab * c.dModel;
+  var finalNorm = c.dModel;
+  var total = blocks + embed + head + finalNorm;
+  return {
+    headDim: headDim, kvDim: kvDim, q: q, k: k, v: v, o: o, attn: attn,
+    gate: gate, up: up, down: down, mlp: mlp, norms: norms, block: block,
+    blocks: blocks, embed: embed, head: head, finalNorm: finalNorm, total: total,
+    neuronInputs: c.dModel, downNeuronInputs: c.ffDim,
+    bytesW: total * c.bytesPerParam, bytesG: total * c.bytesPerParam
+  };
+}
+
+function sampleFor(arch) {
+  return { x: BASE_X.slice(0, arch[0]), y: BASE_Y.slice(0, arch[arch.length - 1]) };
+}
+/* MATH-END */
+
+// ================= UI =================
+(function () {
+  var $ = function (id) { return document.getElementById(id); };
+  var SVGNS = "http://www.w3.org/2000/svg";
+  var LAYER_NAMES = ["Entrada", "Oculta 1", "Oculta 2", "Salida"];
+  var LAYER_LONG = ["Entrada", "Capa Oculta 1", "Capa Oculta 2", "Capa de Salida"];
+  var SUP = { "0": "⁰", "1": "¹", "2": "²", "3": "³", "4": "⁴", "5": "⁵", "6": "⁶", "7": "⁷", "8": "⁸", "9": "⁹" };
+  var SUB = { "0": "₀", "1": "₁", "2": "₂", "3": "₃", "4": "₄", "5": "₅", "6": "₆", "7": "₇", "8": "₈", "9": "₉", ",": "," };
+  function sup(n) { return String(n).split("").map(function (c) { return SUP[c] || c; }).join(""); }
+  function sub(n) { return String(n).split("").map(function (c) { return SUB[c] || c; }).join(""); }
+  function fx(v, d) {
+    if (d === undefined) d = 3;
+    var s = Math.abs(v) < 0.5 * Math.pow(10, -d) ? (0).toFixed(d) : v.toFixed(d);
+    return s.replace(".", ",").replace("-", "−");
+  }
+  function fint(n) { return Math.round(n).toLocaleString("es-AR"); }
+  function fmill(n, d) { return (n / 1e6).toLocaleString("es-AR", { minimumFractionDigits: d, maximumFractionDigits: d }) + " millones"; }
+  function fgb(bytes) { return (bytes / 1e9).toLocaleString("es-AR", { maximumFractionDigits: 1 }) + " GB"; }
+  function pct(a, b) { return (100 * a / b).toLocaleString("es-AR", { maximumFractionDigits: 1 }) + " %"; }
+  function wLabelHTML(r) {
+    return r.i < 0 ? "b<sup>" + (r.l + 1) + "</sup><sub>" + (r.j + 1) + "</sub>"
+                   : "w<sup>" + (r.l + 1) + "</sup><sub>" + (r.j + 1) + "," + (r.i + 1) + "</sub>";
+  }
+  function wLabelTxt(r) {
+    return r.i < 0 ? "b" + sup(r.l + 1) + sub(r.j + 1) : "w" + sup(r.l + 1) + sub((r.j + 1) + "," + (r.i + 1));
+  }
+
+  var reduceMQ = window.matchMedia ? window.matchMedia("(prefers-reduced-motion: reduce)") : { matches: false };
+  function reduced() { return !!reduceMQ.matches; }
+  function wait(ms) { return new Promise(function (res) { setTimeout(res, reduced() ? 0 : ms); }); }
+
+  var state = {
+    arch: [3, 4, 3, 1], net: null, sample: null, rows: [], rowIndex: null,
+    fw: null, grads: null, phase: 0, busy: false, step: 0, history: [],
+    selected: null, focusRow: null, eta: 0.1, mode: "micro", activationsStale: false
+  };
+
+  // ---------- geometry ----------
+  var GX = [70, 245, 420, 575], GTOP = 62, GBOT = 372, R = 16;
+  function nodePos(layer, k) {
+    var n = state.arch[layer];
+    var gap = (GBOT - GTOP) / n;
+    return { x: GX[layer], y: GTOP + gap * (k + 0.5) };
+  }
+  function el(tag, attrs, parent) {
+    var e = document.createElementNS(SVGNS, tag);
+    for (var a in attrs) e.setAttribute(a, attrs[a]);
+    if (parent) parent.appendChild(e);
+    return e;
+  }
+
+  // ---------- build / rebuild ----------
+  function readArch() {
+    return [+$("sIn").value, +$("sH1").value, +$("sH2").value, +$("sOut").value];
+  }
+  function rebuild() {
+    state.arch = readArch();
+    $("oIn").textContent = state.arch[0];
+    $("oH1").textContent = state.arch[1];
+    $("oH2").textContent = state.arch[2];
+    $("oOut").textContent = state.arch[3];
+    state.net = createNet(state.arch, seedFor(state.arch));
+    state.sample = sampleFor(state.arch);
+    state.rows = paramRows(state.arch);
+    state.rowIndex = {};
+    state.rows.forEach(function (r, k) { state.rowIndex[r.l + ":" + r.j + ":" + r.i] = k; });
+    resetTraining(true);
+    renderCounters();
+    renderGraph();
+    renderTable();
+    renderLlm();
+  }
+  function resetTraining(silent) {
+    state.net = createNet(state.arch, seedFor(state.arch));
+    state.fw = null; state.grads = null; state.phase = 0; state.step = 0;
+    state.selected = null; state.focusRow = null; state.activationsStale = false;
+    state.history = [lossOf(forward(state.net, state.sample.x).yhat, state.sample.y)];
+    if (!silent) { renderGraph(); renderTable(); }
+    clearSelection();
+    renderSample();
+    renderMountain(false);
+    renderHistory();
+    renderStepper();
+    $("calc").hidden = true;
+    setMsg("Pulsa <b>1. Ida</b> para medir el error de la red con sus pesos actuales.", "");
+    $("chain").innerHTML = "Regla de la cadena: aparecerá aquí después de la Vuelta. Haz clic en una fila de la tabla para elegir qué peso examinar.";
+  }
+
+  function renderCounters() {
+    var c = countParams(state.arch);
+    $("cW").textContent = fint(c.weights);
+    $("cB").textContent = fint(c.biases);
+    $("cT").textContent = fint(c.total);
+    var ul = $("shapes");
+    ul.innerHTML = "";
+    c.perLayer.forEach(function (p, l) {
+      var li = document.createElement("li");
+      li.innerHTML = "W" + sup(l + 1) + ": " + p.rows + "×" + p.cols + " = <span class='w-num'>" + p.weights +
+        " pesos</span> + " + p.biases + " sesgos <span style='color:var(--muted)'>(" + LAYER_NAMES[l] + " → " + LAYER_NAMES[l + 1] + ")</span>";
+      ul.appendChild(li);
+    });
+  }
+
+  // ---------- graph ----------
+  var svg = $("net"), wireEls = [], nodeEls = [], pulseLayer = null;
+  function wireStyle(line, w) {
+    line.style.stroke = w >= 0 ? "var(--pos)" : "var(--neg)";
+    line.style.strokeWidth = Math.min(6, 0.6 + Math.abs(w) * 3).toFixed(2) + "px";
+  }
+  function renderGraph() {
+    svg.innerHTML = "";
+    wireEls = []; nodeEls = [];
+    var A = state.arch;
+    var gw = el("g", { "class": "wires" }, svg);
+    state.rows.forEach(function (r, k) {
+      if (r.i < 0) return;
+      var p1 = nodePos(r.l, r.i), p2 = nodePos(r.l + 1, r.j);
+      var g = el("g", { "data-row": k }, gw);
+      var line = el("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, "class": "wire" }, g);
+      el("line", { x1: p1.x, y1: p1.y, x2: p2.x, y2: p2.y, "class": "wire-hit" }, g);
+      wireStyle(line, getParam(state.net, r));
+      wireEls[k] = line;
+      g.addEventListener("mouseenter", function () { hoverRow(k, true); });
+      g.addEventListener("mouseleave", function () { hoverRow(k, false); });
+      g.addEventListener("click", function (ev) { ev.stopPropagation(); setFocusRow(k); scrollToRow(k); });
+    });
+    // matrix + layer labels
+    for (var l = 0; l < 3; l++) {
+      var mx = (GX[l] + GX[l + 1]) / 2;
+      el("text", { x: mx, y: 22, "class": "mlbl" }, svg).textContent = "W" + sup(l + 1);
+      el("text", { x: mx, y: 38, "class": "mlbl-s" }, svg).textContent = A[l + 1] + "×" + A[l] + " + b" + sup(l + 1);
+    }
+    for (var L = 0; L < 4; L++) {
+      el("text", { x: GX[L], y: 404, "class": "lbl" }, svg).textContent = LAYER_NAMES[L];
+    }
+    var gn = el("g", { "class": "nodes" }, svg);
+    for (var layer = 0; layer < 4; layer++) {
+      nodeEls[layer] = [];
+      for (var k = 0; k < A[layer]; k++) {
+        var p = nodePos(layer, k);
+        var cls = "node" + (layer === 0 ? " input" : layer === 3 ? " output inspectable" : " inspectable");
+        var g = el("g", { "class": cls, transform: "translate(" + p.x + "," + p.y + ")" }, gn);
+        el("circle", { r: R }, g);
+        var t = el("text", { y: 0 }, g);
+        t.textContent = layer === 0 ? fx(state.sample.x[k], 2) : "·";
+        if (layer > 0) {
+          g.setAttribute("tabindex", "0");
+          g.setAttribute("role", "button");
+          g.setAttribute("aria-pressed", "false");
+          g.setAttribute("aria-label", LAYER_LONG[layer] + ", neurona " + (k + 1) + ": " + A[layer - 1] + " cables de entrada. Pulsa para inspeccionar.");
+          (function (layer, k, g) {
+            g.addEventListener("click", function (ev) { ev.stopPropagation(); toggleSelect(layer, k); });
+            g.addEventListener("keydown", function (ev) {
+              if (ev.key === "Enter" || ev.key === " ") { ev.preventDefault(); toggleSelect(layer, k); }
+            });
+          })(layer, k, g);
+        } else {
+          g.setAttribute("aria-label", "Entrada x" + sub(k + 1) + " = " + fx(state.sample.x[k], 2));
+        }
+        nodeEls[layer][k] = g;
+      }
+    }
+    pulseLayer = el("g", { "class": "pulses", "pointer-events": "none" }, svg);
+    if (state.fw) showActivations(3);
+  }
+  svg.addEventListener("click", function () { clearSelection(); });
+
+  function updateWires() {
+    state.rows.forEach(function (r, k) { if (wireEls[k]) wireStyle(wireEls[k], getParam(state.net, r)); });
+  }
+  function showActivations(upto) {
+    for (var layer = 1; layer <= 3; layer++) {
+      for (var k = 0; k < state.arch[layer]; k++) {
+        var t = nodeEls[layer][k].querySelector("text");
+        if (state.fw && layer <= upto) {
+          t.textContent = fx(state.fw.acts[layer][k], 2);
+          t.classList.toggle("stale", state.activationsStale);
+        } else {
+          t.textContent = "·";
+          t.classList.remove("stale");
+        }
+      }
+    }
+  }
+
+  // ---------- neuron inspection ----------
+  var tip = $("tip");
+  function toggleSelect(layer, k) {
+    if (state.selected && state.selected.layer === layer && state.selected.k === k) { clearSelection(); return; }
+    clearSelection();
+    state.selected = { layer: layer, k: k };
+    var l = layer - 1, X = state.arch[layer - 1];
+    svg.classList.add("focusing");
+    nodeEls[layer][k].classList.add("selected");
+    nodeEls[layer][k].setAttribute("aria-pressed", "true");
+    for (var i = 0; i < X; i++) {
+      var idx = state.rowIndex[l + ":" + k + ":" + i];
+      wireEls[idx].classList.add("in");
+      nodeEls[layer - 1][i].classList.add("source");
+    }
+    var first = state.rowIndex[l + ":" + k + ":0"], last = state.rowIndex[l + ":" + k + ":-1"];
+    for (var r = first; r <= last; r++) rowEls[r].classList.add("sel");
+    var hdr = neuronHeaders[l + ":" + k];
+    if (hdr) hdr.classList.add("sel");
+    var wl = "w" + sub(1) + "…w" + sub(X);
+    var html = "<strong>" + LAYER_LONG[layer] + " · Neurona " + (k + 1) + "</strong>" +
+      "Esta neurona tiene <b>" + X + "</b> cables de entrada = <b class='w-num'>" + X + " pesos</b> (" + wl + ") + <b class='w-num'>1 sesgo</b> (b). " +
+      "En el entrenamiento recibe <b class='g-num'>" + (X + 1) + " derivadas parciales</b>." +
+      "<br><span style='color:var(--muted)'>Es la fila " + (k + 1) + " de la matriz W" + sup(layer) + " → filas #" + (first + 1) + "–#" + (last + 1) + " de la tabla.</span>";
+    if (state.fw) html += "<br>z = " + fx(state.fw.zs[l][k]) + " · a = " + fx(state.fw.acts[layer][k]);
+    if (state.grads) html += "<br>δ = ∂L/∂z = <span class='g-num'>" + fx(state.grads.deltas[l][k], 4) + "</span>";
+    tip.innerHTML = html;
+    tip.hidden = false;
+    positionTip(nodeEls[layer][k]);
+    scrollToRow(first);
+  }
+  function positionTip(node) {
+    var wrap = $("graphWrap").getBoundingClientRect();
+    var nr = node.getBoundingClientRect();
+    var tw = tip.offsetWidth, th = tip.offsetHeight;
+    var x = nr.left - wrap.left + nr.width + 8;
+    if (x + tw > wrap.width) x = nr.left - wrap.left - tw - 8;
+    if (x < 0) x = Math.max(0, (wrap.width - tw) / 2);
+    var y = nr.top - wrap.top - th / 2 + nr.height / 2;
+    y = Math.max(0, Math.min(y, wrap.height - th));
+    tip.style.left = x + "px";
+    tip.style.top = y + "px";
+  }
+  function clearSelection() {
+    state.selected = null;
+    svg.classList.remove("focusing");
+    svg.querySelectorAll(".wire.in").forEach(function (e) { e.classList.remove("in"); });
+    svg.querySelectorAll(".node.selected, .node.source").forEach(function (e) {
+      e.classList.remove("selected"); e.classList.remove("source");
+      if (e.hasAttribute("aria-pressed")) e.setAttribute("aria-pressed", "false");
+    });
+    document.querySelectorAll("tr.sel").forEach(function (e) { e.classList.remove("sel"); });
+    tip.hidden = true;
+  }
+  document.addEventListener("keydown", function (ev) { if (ev.key === "Escape") clearSelection(); });
+
+  // ---------- mirror table ----------
+  var rowEls = [], neuronHeaders = {};
+  function renderTable() {
+    var tb = $("tbody");
+    tb.innerHTML = "";
+    rowEls = []; neuronHeaders = {};
+    var frag = document.createDocumentFragment();
+    var lastL = -1, lastJ = -1;
+    state.rows.forEach(function (r, k) {
+      if (r.l !== lastL) {
+        var lh = document.createElement("tr");
+        lh.className = "layer-h";
+        lh.innerHTML = "<td colspan='4'>Matriz W" + sup(r.l + 1) + " (" + state.arch[r.l + 1] + "×" + state.arch[r.l] + ") + sesgos b" + sup(r.l + 1) +
+          " · " + LAYER_NAMES[r.l] + " → " + LAYER_NAMES[r.l + 1] + "</td>";
+        frag.appendChild(lh);
+        lastL = r.l; lastJ = -1;
+      }
+      if (r.j !== lastJ) {
+        var nh = document.createElement("tr");
+        nh.className = "neuron-h";
+        nh.innerHTML = "<td colspan='4'>" + LAYER_LONG[r.l + 1] + " · Neurona " + (r.j + 1) + " — " + state.arch[r.l] + " pesos + 1 sesgo</td>";
+        neuronHeaders[r.l + ":" + r.j] = nh;
+        frag.appendChild(nh);
+        lastJ = r.j;
+      }
+      var tr = document.createElement("tr");
+      tr.className = "prow";
+      tr.tabIndex = 0;
+      tr.dataset.row = k;
+      var from = r.i < 0 ? "sesgo" : (r.l === 0 ? "x" + sub(r.i + 1) : LAYER_NAMES[r.l] + " n" + (r.i + 1)) + " → " + LAYER_NAMES[r.l + 1] + " n" + (r.j + 1);
+      tr.innerHTML = "<td class='idx'>#" + (k + 1) + "</td><td class='name' title='" + from + "'>" + wLabelHTML(r) + "</td><td class='va'></td><td class='vb empty'>—</td>";
+      rowEls[k] = tr;
+      frag.appendChild(tr);
+    });
+    tb.appendChild(frag);
+    refreshColA();
+    refreshColB(-1);
+  }
+  function refreshColA() {
+    state.rows.forEach(function (r, k) { rowEls[k].children[2].textContent = fx(getParam(state.net, r), 4); });
+  }
+  // fill column B for rows of layer `onlyLayer` (or all if -1, or clear if grads null)
+  function refreshColB(onlyLayer, flash) {
+    state.rows.forEach(function (r, k) {
+      if (onlyLayer >= 0 && r.l !== onlyLayer) return;
+      var td = rowEls[k].children[3];
+      if (state.grads && (onlyLayer >= 0 || state.phase >= 2)) {
+        td.textContent = fx(getGrad(state.grads, r), 4);
+        td.classList.remove("empty");
+        if (flash && !reduced()) { td.classList.remove("flash-b"); void td.offsetWidth; td.classList.add("flash-b"); }
+      } else {
+        td.textContent = "—";
+        td.classList.add("empty");
+      }
+    });
+  }
+  $("tbody").addEventListener("mouseover", function (ev) {
+    var tr = ev.target.closest("tr.prow");
+    if (tr) hoverRow(+tr.dataset.row, true);
+  });
+  $("tbody").addEventListener("mouseout", function (ev) {
+    var tr = ev.target.closest("tr.prow");
+    if (tr && !tr.contains(ev.relatedTarget)) hoverRow(+tr.dataset.row, false);
+  });
+  $("tbody").addEventListener("focusin", function (ev) {
+    var tr = ev.target.closest("tr.prow");
+    if (tr) hoverRow(+tr.dataset.row, true);
+  });
+  $("tbody").addEventListener("focusout", function (ev) {
+    var tr = ev.target.closest("tr.prow");
+    if (tr) hoverRow(+tr.dataset.row, false);
+  });
+  $("tbody").addEventListener("click", function (ev) {
+    var tr = ev.target.closest("tr.prow");
+    if (tr) setFocusRow(+tr.dataset.row);
+  });
+  $("tbody").addEventListener("keydown", function (ev) {
+    var tr = ev.target.closest("tr.prow");
+    if (tr && (ev.key === "Enter" || ev.key === " ")) { ev.preventDefault(); setFocusRow(+tr.dataset.row); }
+  });
+
+  function hoverRow(k, on) {
+    var r = state.rows[k];
+    if (!rowEls[k]) return;
+    rowEls[k].classList.toggle("hl", on);
+    if (r.i >= 0) {
+      wireEls[k].classList.toggle("glow", on);
+      svg.classList.toggle("hovering", on && !state.selected);
+    } else {
+      nodeEls[r.l + 1][r.j].classList.toggle("bias-glow", on);
+    }
+  }
+  function scrollToRow(k) {
+    var wrap = $("tableWrap"), tr = rowEls[k];
+    if (!tr) return;
+    var wr = wrap.getBoundingClientRect(), rr = tr.getBoundingClientRect();
+    var top = rr.top - wr.top + wrap.scrollTop - wr.height / 3;
+    wrap.scrollTo({ top: Math.max(0, top), behavior: reduced() ? "auto" : "smooth" });
+  }
+  function setFocusRow(k) {
+    document.querySelectorAll("tr.focusrow").forEach(function (e) { e.classList.remove("focusrow"); });
+    state.focusRow = k;
+    rowEls[k].classList.add("focusrow");
+    renderChain();
+  }
+
+  // ---------- chain rule panel ----------
+  function defaultFocusRow() {
+    if (!state.grads) return 0;
+    var best = 0, bv = -1;
+    state.rows.forEach(function (r, k) {
+      var g = Math.abs(getGrad(state.grads, r));
+      if (r.i >= 0 && g > bv) { bv = g; best = k; }
+    });
+    return best;
+  }
+  function renderChain() {
+    var box = $("chain");
+    if (!state.grads || !state.fw) {
+      var r0 = state.rows[state.focusRow == null ? 0 : state.focusRow];
+      box.innerHTML = "Regla de la cadena para <b>" + wLabelHTML(r0) + "</b>: se mostrará después de la <b>Vuelta</b>.";
+      return;
+    }
+    var k = state.focusRow == null ? defaultFocusRow() : state.focusRow;
+    var r = state.rows[k], L = r.l + 1, j = r.j, nL = state.arch.length - 1;
+    var d = state.grads.deltas[r.l][j];
+    var dl = "δ<sup>" + L + "</sup><sub>" + (j + 1) + "</sub>";
+    var html = "<b>Regla de la cadena</b> para la fila #" + (k + 1) + " (" + wLabelHTML(r) + ")" +
+      (state.focusRow == null ? " <span style='color:var(--muted)'>(la de mayor pendiente; haz clic en otra fila para cambiarla)</span>" : "") + ":<br>";
+    if (r.i >= 0) {
+      var a = state.fw.acts[r.l][r.i];
+      var al = r.l === 0 ? "x<sub>" + (r.i + 1) + "</sub>" : "a<sup>" + r.l + "</sup><sub>" + (r.i + 1) + "</sub>";
+      html += "∂L/∂" + wLabelHTML(r) + " = " + dl + " · " + al + " = " + fx(d, 4) + " × " + fx(a, 4) + " = <span class='g-num'>" + fx(d * a, 4) + "</span><br>";
+    } else {
+      html += "∂L/∂" + wLabelHTML(r) + " = " + dl + " · 1 = <span class='g-num'>" + fx(d, 4) + "</span><br>";
+    }
+    if (r.l === nL - 1) {
+      html += dl + " = ŷ<sub>" + (j + 1) + "</sub> − y<sub>" + (j + 1) + "</sub> = " + fx(state.fw.yhat[j], 4) + " − " + fx(state.sample.y[j], 4) + " = " + fx(d, 4) +
+        " <span style='color:var(--muted)'>(salida lineal, L = ½(ŷ − y)²)</span>";
+    } else {
+      var next = state.grads.deltas[r.l + 1], s = 0;
+      var gn = state.gradNet || state.net;
+      for (var q = 0; q < next.length; q++) s += gn.W[r.l + 1][q][j] * next[q];
+      var act = state.fw.acts[r.l + 1][j];
+      html += dl + " = (Σ<sub>k</sub> w<sup>" + (L + 1) + "</sup><sub>k," + (j + 1) + "</sub> · δ<sup>" + (L + 1) + "</sup><sub>k</sub>) · (1 − (a<sup>" + L + "</sup><sub>" + (j + 1) + "</sub>)²) = " +
+        fx(s, 4) + " × " + fx(1 - act * act, 4) + " = " + fx(d, 4) +
+        " <span style='color:var(--muted)'>(el error que vuelve desde la capa siguiente × la derivada de tanh)</span>";
+    }
+    if (state.phase === 3) html += "<br><span style='color:var(--muted)'>Nota: los pesos ya se actualizaron; esta cuenta usa los valores de la Ida anterior.</span>";
+    box.innerHTML = html;
+  }
+
+  // ---------- pulses ----------
+  function animatePulses(l, dir) {
+    var dur = reduced() ? 0 : 650;
+    if (!dur) return Promise.resolve();
+    var dots = [];
+    state.rows.forEach(function (r, k) {
+      if (r.l !== l || r.i < 0) return;
+      var p1 = nodePos(l, r.i), p2 = nodePos(l + 1, r.j);
+      if (dir < 0) { var t = p1; p1 = p2; p2 = t; }
+      var c = el("circle", { r: 4, fill: dir > 0 ? "#38bdf8" : "#fbbf24", cx: p1.x, cy: p1.y, opacity: 0.95 }, pulseLayer);
+      c.style.filter = "drop-shadow(0 0 4px " + (dir > 0 ? "#38bdf8" : "#fbbf24") + ")";
+      dots.push({ c: c, p1: p1, p2: p2 });
+    });
+    return new Promise(function (res) {
+      var t0 = performance.now();
+      function frame(now) {
+        var t = Math.min(1, (now - t0) / dur);
+        var e = t < 0.5 ? 2 * t * t : 1 - Math.pow(-2 * t + 2, 2) / 2;
+        dots.forEach(function (d) {
+          d.c.setAttribute("cx", d.p1.x + (d.p2.x - d.p1.x) * e);
+          d.c.setAttribute("cy", d.p1.y + (d.p2.y - d.p1.y) * e);
+        });
+        if (t < 1) requestAnimationFrame(frame);
+        else { dots.forEach(function (d) { d.c.remove(); }); res(); }
+      }
+      requestAnimationFrame(frame);
+    });
+  }
+  function flashLayerNodes(layer) {
+    if (reduced()) return;
+    nodeEls[layer].forEach(function (g) {
+      g.classList.add("flash");
+      setTimeout(function () { g.classList.remove("flash"); }, 350);
+    });
+  }
+
+  // ---------- trainer ----------
+  function setBusy(b) {
+    state.busy = b;
+    ["sIn", "sH1", "sH2", "sOut", "bReset"].forEach(function (id) { $(id).disabled = b; });
+    renderStepper();
+  }
+  function renderStepper() {
+    var btns = ["bFwd", "bBwd", "bStep", "bZero"];
+    btns.forEach(function (id, i) {
+      var ok = !state.busy && state.phase === i;
+      $(id).disabled = !ok;
+      $(id).classList.toggle("ready", ok);
+    });
+    var lis = $("stepper").children;
+    for (var i = 0; i < 4; i++) {
+      lis[i].className = i === state.phase ? "active" : (i < state.phase ? "done" : "");
+      if (i === state.phase) lis[i].setAttribute("aria-current", "step"); else lis[i].removeAttribute("aria-current");
+    }
+    $("stepCount").textContent = state.step;
+    $("lossNow").textContent = fx(state.history[state.history.length - 1], 5);
+  }
+  function setMsg(html, kind) {
+    var m = $("msg");
+    m.innerHTML = html;
+    m.className = "msg" + (kind ? " " + kind : "");
+  }
+  function renderSample() {
+    var s = state.sample;
+    var yh = state.fw ? state.fw.yhat.map(function (v) { return fx(v, 4); }).join("; ") : "?";
+    $("sample").innerHTML =
+      "<span class='chip'>x = (" + s.x.map(function (v) { return fx(v, 2); }).join("; ") + ")</span>" +
+      "<span class='chip'>y objetivo = (" + s.y.map(function (v) { return fx(v, 2); }).join("; ") + ")</span>" +
+      "<span class='chip c-num'>ŷ = (" + yh + ")</span>" +
+      "<span class='chip'>L = " + (state.fw ? fx(lossOf(state.fw.yhat, s.y), 5) : "?") + "</span>";
+  }
+
+  async function doForward() {
+    setBusy(true);
+    clearSelection();
+    state.activationsStale = false;
+    state.fw = forward(state.net, state.sample.x);
+    showActivations(0);
+    setMsg("<b>Ida:</b> la señal viaja de izquierda a derecha, capa por capa…", "");
+    for (var l = 0; l < 3; l++) {
+      await animatePulses(l, 1);
+      showActivations(l + 1);
+      flashLayerNodes(l + 1);
+    }
+    var L = lossOf(state.fw.yhat, state.sample.y);
+    renderSample();
+    state.phase = 1;
+    setMsg("<b>Ida terminada.</b> ŷ = (" + state.fw.yhat.map(function (v) { return fx(v, 4); }).join("; ") + "), error L = <b class='c-num'>" + fx(L, 5) +
+      "</b>.<br><b>Los pesos NO cambiaron. Solo medimos el error.</b>", "");
+    renderChain();
+    setBusy(false);
+  }
+
+  async function doBackward() {
+    setBusy(true);
+    state.grads = backward(state.net, state.fw, state.sample.y);
+    state.gradNet = state.net;
+    setMsg("<b>Vuelta:</b> el error viaja de derecha a izquierda. Al pasar por cada capa se llenan sus filas de la columna B…", "");
+    for (var l = 2; l >= 0; l--) {
+      await animatePulses(l, -1);
+      refreshColB(l, true);
+      if (rowEls.length) scrollToRow(state.rowIndex[l + ":0:0"]);
+      await wait(250);
+    }
+    state.phase = 2;
+    renderChain();
+    setMsg("<b>Vuelta terminada.</b> La columna B tiene " + state.rows.length + " derivadas parciales, una por parámetro.<br>" +
+      "<b>Calculamos la pendiente de cada peso con la regla de la cadena, pero los pesos SIGUEN sin moverse.</b>", "");
+    setBusy(false);
+  }
+
+  async function doStep() {
+    setBusy(true);
+    var eta = state.eta, oldNet = state.net;
+    var newNet = sgdStep(oldNet, state.grads, eta);
+    var k = state.focusRow == null ? defaultFocusRow() : state.focusRow;
+    var r = state.rows[k];
+    var ov = getParam(oldNet, r), g = getGrad(state.grads, r), nv = getParam(newNet, r);
+    var calc = $("calc");
+    calc.hidden = false;
+    calc.innerHTML = "Fila #" + (k + 1) + " · " + wLabelHTML(r) + ": <span class='w-num'>" + fx(ov, 4) + "</span> − " + fx(eta, 3) +
+      " × (<span class='g-num'>" + fx(g, 4) + "</span>) = <span class='w-num'>" + fx(nv, 4) + "</span><br>" +
+      "<span style='color:var(--muted)'>La misma resta se hace en las " + state.rows.length + " filas a la vez.</span>";
+    setFocusRow(k);
+    scrollToRow(k);
+    if (r.i >= 0) wireEls[k].classList.add("glow");
+    // show old → new in every row of column A
+    state.rows.forEach(function (rr, q) {
+      var td = rowEls[q].children[2];
+      td.innerHTML = "<span class='old'>" + fx(getParam(oldNet, rr), 3) + "</span> <span class='arrow'>→</span> " + fx(getParam(newNet, rr), 4);
+      td.title = fx(getParam(oldNet, rr), 4) + " − " + fx(eta, 3) + " × (" + fx(getGrad(state.grads, rr), 4) + ")";
+      if (!reduced()) { td.classList.remove("flash-a"); void td.offsetWidth; td.classList.add("flash-a"); }
+    });
+    state.net = newNet;
+    updateWires();
+    await wait(1400);
+    if (r.i >= 0) wireEls[k].classList.remove("glow");
+    refreshColA();
+    var Lold = state.history[state.history.length - 1];
+    var Lnew = lossOf(forward(state.net, state.sample.x).yhat, state.sample.y);
+    state.history.push(Lnew);
+    state.step++;
+    state.phase = 3;
+    state.activationsStale = true;
+    showActivations(3);
+    renderMountain(true);
+    renderHistory();
+    renderChain();
+    var diff = Lnew - Lold;
+    if (diff > 0) {
+      setMsg("<b>Paso dado</b> con η = " + fx(eta, 3) + ". Nueva pérdida L = <b>" + fx(Lnew, 5) + "</b> (antes " + fx(Lold, 5) + "). " +
+        "<b>La pérdida SUBIÓ:</b> η es demasiado grande y el paso se pasó del valle. Prueba con un η menor.", "warn");
+    } else {
+      setMsg("<b>Paso dado</b> con η = " + fx(eta, 3) + ": todos los valores de la columna A cambiaron a la vez. " +
+        "Nueva pérdida L = <b class='c-num'>" + fx(Lnew, 5) + "</b> (antes " + fx(Lold, 5) + ", bajó " + fx(-diff, 5) + "). El punto bajó un paso en la montaña.", "good");
+    }
+    setBusy(false);
+  }
+
+  async function doZero() {
+    setBusy(true);
+    var tds = rowEls.map(function (tr) { return tr.children[3]; });
+    if (!reduced()) {
+      tds.forEach(function (td) { td.textContent = fx(0, 4); td.classList.add("fading"); });
+      await wait(600);
+    }
+    state.grads = null;
+    state.phase = 0;
+    tds.forEach(function (td) { td.classList.remove("fading"); });
+    refreshColB(-1);
+    $("calc").hidden = true;
+    renderChain();
+    setMsg("<b>Gradiente limpio.</b> Las derivadas parciales desaparecen porque ya hicieron su trabajo: los nuevos pesos de la columna A quedan listos para el próximo paso. " +
+      "<span style='color:var(--muted)'>¿Por qué hace falta? En PyTorch, <code>loss.backward()</code> <i>suma</i> el gradiente nuevo al que ya está guardado; " +
+      "si no se llama a <code>optimizer.zero_grad()</code>, los gradientes de pasos anteriores se acumulan y el paso sale mal.</span>", "");
+    setBusy(false);
+  }
+
+  function guard(fn) {
+    return function () { if (!state.busy) fn().catch(function (e) { console.error(e); setBusy(false); }); };
+  }
+  $("bFwd").addEventListener("click", guard(doForward));
+  $("bBwd").addEventListener("click", guard(doBackward));
+  $("bStep").addEventListener("click", guard(doStep));
+  $("bZero").addEventListener("click", guard(doZero));
+  $("bReset").addEventListener("click", function () { if (!state.busy) resetTraining(false); });
+
+  // eta slider (log scale 0.001..2)
+  var ETA_MIN = Math.log10(0.001), ETA_MAX = Math.log10(2);
+  function sliderToEta(s) { return Math.pow(10, ETA_MIN + (ETA_MAX - ETA_MIN) * s / 1000); }
+  function etaToSlider(e) { return Math.round(1000 * (Math.log10(e) - ETA_MIN) / (ETA_MAX - ETA_MIN)); }
+  $("sEta").value = etaToSlider(0.1);
+  function readEta() {
+    state.eta = sliderToEta(+$("sEta").value);
+    $("oEta").textContent = fx(state.eta, 3);
+    $("sEta").setAttribute("aria-valuetext", "eta = " + fx(state.eta, 3));
+  }
+  $("sEta").addEventListener("input", readEta);
+  readEta();
+
+  // ---------- mountain chart ----------
+  var mt = $("mountain"), mDot = null;
+  function renderMountain(animate) {
+    var W = 360, H = 210, pl = 44, pr = 12, pt = 14, pb = 34;
+    var hist = state.history;
+    var n = Math.max(8, hist.length);
+    var ymax = Math.max.apply(null, hist) * 1.15 || 1;
+    var X = function (i) { return pl + (W - pl - pr) * i / (n - 1); };
+    var Y = function (v) { return pt + (H - pt - pb) * (1 - Math.min(v, ymax) / ymax); };
+    var prevPos = mDot ? { x: +mDot.getAttribute("cx"), y: +mDot.getAttribute("cy") } : null;
+    mt.innerHTML = "";
+    var defs = el("defs", {}, mt);
+    var gr = el("linearGradient", { id: "mtnG", x1: 0, y1: 0, x2: 0, y2: 1 }, defs);
+    el("stop", { offset: "0%", "stop-color": "#38bdf8", "stop-opacity": "0.18" }, gr);
+    el("stop", { offset: "100%", "stop-color": "#38bdf8", "stop-opacity": "0" }, gr);
+    // stylized silhouette (decorative)
+    var sil = "M" + pl + " " + (pt + 4);
+    for (var s = 0; s <= 40; s++) {
+      var t = s / 40, xx = pl + (W - pl - pr) * t;
+      var yy = pt + 4 + (H - pt - pb - 10) * (1 - Math.exp(-3.2 * t)) + 6 * Math.sin(t * 14) * (1 - t);
+      sil += " L" + xx.toFixed(1) + " " + yy.toFixed(1);
+    }
+    el("path", { d: sil + " L" + (W - pr) + " " + (H - pb) + " L" + pl + " " + (H - pb) + " Z", fill: "url(#mtnG)" }, mt);
+    // axes
+    el("line", { x1: pl, y1: H - pb, x2: W - pr, y2: H - pb, stroke: "#475569" }, mt);
+    el("line", { x1: pl, y1: pt, x2: pl, y2: H - pb, stroke: "#475569" }, mt);
+    var yt = [0, ymax / 2, ymax];
+    yt.forEach(function (v) {
+      el("text", { x: pl - 6, y: Y(v) + 4, fill: "#94a3b8", "font-size": 10, "text-anchor": "end", "font-family": "ui-monospace, monospace" }, mt).textContent = fx(v, 3);
+    });
+    for (var i = 0; i < n; i += Math.max(1, Math.ceil(n / 8))) {
+      el("text", { x: X(i), y: H - pb + 14, fill: "#94a3b8", "font-size": 10, "text-anchor": "middle" }, mt).textContent = i;
+    }
+    el("text", { x: (pl + W - pr) / 2, y: H - 4, fill: "#94a3b8", "font-size": 11, "text-anchor": "middle" }, mt).textContent = "Montaña del Error · paso n.º (L real medido)";
+    // history polyline
+    var pts = hist.map(function (v, i) { return X(i).toFixed(1) + "," + Y(v).toFixed(1); }).join(" ");
+    el("polyline", { points: pts, fill: "none", stroke: "#38bdf8", "stroke-width": 2 }, mt);
+    hist.forEach(function (v, i) {
+      if (i < hist.length - 1) el("circle", { cx: X(i), cy: Y(v), r: 2.5, fill: i > 0 && v > hist[i - 1] ? "#fb7185" : "#38bdf8" }, mt);
+    });
+    var last = hist.length - 1, target = { x: X(last), y: Y(hist[last]) };
+    mDot = el("circle", { cx: target.x, cy: target.y, r: 7, fill: "#fbbf24", stroke: "#0f172a", "stroke-width": 2 }, mt);
+    el("title", {}, mDot).textContent = "L = " + fx(hist[last], 5);
+    if (animate && prevPos && !reduced() && last > 0) {
+      var from = { x: X(last - 1), y: Y(hist[last - 1]) };
+      var t0 = performance.now(), dot = mDot;
+      (function frame(now) {
+        var tt = Math.min(1, (now - t0) / 650);
+        dot.setAttribute("cx", from.x + (target.x - from.x) * tt);
+        dot.setAttribute("cy", from.y + (target.y - from.y) * tt + (-18 * Math.sin(Math.PI * tt)));
+        if (tt < 1) requestAnimationFrame(frame);
+      })(t0);
+    }
+  }
+  function renderHistory() {
+    var ul = $("hist");
+    ul.innerHTML = "";
+    state.history.forEach(function (v, i) {
+      var li = document.createElement("li");
+      var prev = i > 0 ? state.history[i - 1] : null;
+      li.className = prev == null ? "" : (v > prev ? "up" : "down");
+      li.textContent = (i === 0 ? "Inicial" : "Paso " + i) + ": L = " + fx(v, 5) + (prev == null ? "" : (v > prev ? "  ▲ subió" : "  ▼ bajó"));
+      ul.appendChild(li);
+    });
+    ul.scrollTop = ul.scrollHeight;
+  }
+
+  // ---------- LLM calculator ----------
+  function renderLlm() {
+    var C = LLAMA3_8B, q = llamaCounts(C);
+    var micro = countParams(state.arch).total;
+    var cards = [
+      { lvl: "1 cable", big: "1 peso", txt: "<b>1 cable = 1 peso = 1 derivada parcial.</b> Es una fila de la tabla espejo." },
+      { lvl: "1 neurona", big: fint(q.neuronInputs) + " pesos", txt: "Una neurona típica recibe <b>" + fint(q.neuronInputs) + " cables de entrada</b> (d<sub>model</sub> = " + fint(C.dModel) + ") = " + fint(q.neuronInputs) + " pesos. Las neuronas de la proyección <i>down</i> del MLP reciben " + fint(q.downNeuronInputs) + "." },
+      { lvl: "1 capa (bloque)", big: "≈ " + fmill(q.block, 1), txt: "Miles de neuronas: atención (" + fmill(q.attn, 1) + ") + MLP (" + fmill(q.mlp, 1) + ") + normas (" + fint(q.norms) + ")." },
+      { lvl: "Red completa", big: "≈ " + fmill(q.total, 0), txt: C.nBlocks + " bloques + embeddings + cabeza de salida. <b>Vector gradiente de ≈ " + fmill(q.total, 0) + " de componentes POR PASO.</b>" }
+    ];
+    $("llmCards").innerHTML = cards.map(function (c) {
+      return "<div class='llm-card'><div class='lvl'>" + c.lvl + "</div><div class='big'>" + c.big + "</div><p>" + c.txt + "</p></div>";
+    }).join("");
+    function stack(id, legId, parts, total, label) {
+      $(id).innerHTML = parts.map(function (p) {
+        return "<div style='width:" + (100 * p.v / total) + "%;background:" + p.c + "' title='" + p.n + ": " + fint(p.v) + " (" + pct(p.v, total) + ")'></div>";
+      }).join("");
+      $(id).setAttribute("aria-label", label + ": " + parts.map(function (p) { return p.n + " " + pct(p.v, total); }).join(", "));
+      $(legId).innerHTML = parts.map(function (p) {
+        return "<span><i style='background:" + p.c + "'></i>" + p.n + ": <span class='mono'>" + fint(p.v) + "</span> (" + pct(p.v, total) + ")</span>";
+      }).join("");
+    }
+    stack("barBlock", "legBlock", [
+      { n: "Atención (q, k, v, o)", v: q.attn, c: "#38bdf8" },
+      { n: "MLP (gate, up, down)", v: q.mlp, c: "#4ade80" },
+      { n: "RMSNorm ×2", v: q.norms, c: "#fbbf24" }
+    ], q.block, "Desglose de un bloque");
+    stack("barNet", "legNet", [
+      { n: C.nBlocks + " bloques", v: q.blocks, c: "#4ade80" },
+      { n: "Embedding de entrada", v: q.embed, c: "#38bdf8" },
+      { n: "Cabeza de salida", v: q.head, c: "#a78bfa" },
+      { n: "Norma final", v: q.finalNorm, c: "#fbbf24" }
+    ], q.total, "Desglose de la red completa");
+    var rungs = [
+      { n: "1 cable", v: 1 },
+      { n: "Tu micro-red", v: micro, micro: true },
+      { n: "1 neurona", v: q.neuronInputs },
+      { n: "1 bloque", v: q.block },
+      { n: "Red completa", v: q.total }
+    ];
+    var lmax = Math.log10(q.total);
+    $("ladder").innerHTML = rungs.map(function (r) {
+      var w = r.v <= 1 ? 1.5 : Math.max(1.5, 100 * Math.log10(r.v) / lmax);
+      return "<div class='rung'><span>" + r.n + "</span><div class='track'><div class='fill" + (r.micro ? " micro" : "") + "' style='width:" + w + "%'></div><span class='val'>" + fint(r.v) + "</span></div></div>";
+    }).join("");
+    var ratio = q.total / micro;
+    $("bridge").innerHTML = "Tu micro-red tiene <b class='w-num'>" + fint(micro) + " parámetros</b> → su gradiente tiene <b class='g-num'>" + fint(micro) + " componentes</b>. " +
+      "Llama 3 8B: exactamente lo mismo, pero con <b class='w-num'>" + fint(q.total) + "</b> parámetros, es decir ×≈" +
+      (ratio / 1e6).toLocaleString("es-AR", { maximumFractionDigits: 1 }) + " millones de veces más filas en la tabla espejo.";
+    $("fineText").innerHTML =
+      "<p>Configuración pública de Llama 3 8B: d<sub>model</sub> = " + fint(C.dModel) + ", " + C.nBlocks + " bloques, MLP intermedio = " + fint(C.ffDim) +
+      ", " + C.nHeads + " cabezas de consulta y " + C.nKvHeads + " cabezas K/V (GQA: K y V proyectan " + fint(C.dModel) + "→" + fint(q.kvDim) +
+      "), vocabulario = " + fint(C.vocab) + ", embeddings de entrada y salida <b>no</b> compartidos. Las capas lineales de Llama no tienen sesgos: cada neurona tiene solo pesos.</p>" +
+      "<div class='fine-wrap'><table><tbody>" +
+      "<tr><td>Atención q</td><td>" + fint(C.dModel) + "×" + fint(C.dModel) + "</td><td class='n'>" + fint(q.q) + "</td></tr>" +
+      "<tr><td>Atención k</td><td>" + fint(C.dModel) + "×" + fint(q.kvDim) + "</td><td class='n'>" + fint(q.k) + "</td></tr>" +
+      "<tr><td>Atención v</td><td>" + fint(C.dModel) + "×" + fint(q.kvDim) + "</td><td class='n'>" + fint(q.v) + "</td></tr>" +
+      "<tr><td>Atención o</td><td>" + fint(C.dModel) + "×" + fint(C.dModel) + "</td><td class='n'>" + fint(q.o) + "</td></tr>" +
+      "<tr><td>MLP gate + up + down</td><td>3 × " + fint(C.dModel) + "×" + fint(C.ffDim) + "</td><td class='n'>" + fint(q.mlp) + "</td></tr>" +
+      "<tr><td>RMSNorm (2 por bloque)</td><td>2 × " + fint(C.dModel) + "</td><td class='n'>" + fint(q.norms) + "</td></tr>" +
+      "<tr><th>Un bloque</th><td></td><td class='n'><b>" + fint(q.block) + "</b></td></tr>" +
+      "<tr><td>" + C.nBlocks + " bloques</td><td>" + C.nBlocks + " × bloque</td><td class='n'>" + fint(q.blocks) + "</td></tr>" +
+      "<tr><td>Embedding de entrada</td><td>" + fint(C.vocab) + "×" + fint(C.dModel) + "</td><td class='n'>" + fint(q.embed) + "</td></tr>" +
+      "<tr><td>Cabeza de salida</td><td>" + fint(C.dModel) + "×" + fint(C.vocab) + "</td><td class='n'>" + fint(q.head) + "</td></tr>" +
+      "<tr><td>Norma final</td><td>" + fint(C.dModel) + "</td><td class='n'>" + fint(q.finalNorm) + "</td></tr>" +
+      "<tr><th>Total</th><td></td><td class='n'><b>" + fint(q.total) + "</b></td></tr>" +
+      "</tbody></table></div>" +
+      "<p>Por eso «8B»: los " + C.nBlocks + " bloques aportan ≈ " + fmill(q.blocks, 0) + " y las dos tablas de vocabulario otros ≈ " + fmill(q.embed + q.head, 0) + ". " +
+      "La cifra redonda «1 neurona = 4.096 pesos» vale para q, k, v, o, gate y up; las neuronas de la proyección <i>down</i> reciben " + fint(q.downNeuronInputs) + " entradas.</p>" +
+      "<p><b>Memoria (aproximada):</b> en bf16 (2 bytes por número), W ocupa ≈ " + fgb(q.bytesW) + " y, durante el entrenamiento, ∇L ocupa otros ≈ " + fgb(q.bytesG) +
+      ". El optimizador Adam guarda además 2 copias más del tamaño de W (momento y varianza, a menudo en fp32), así que entrenar necesita mucha más memoria que solo usar el modelo.</p>";
+  }
+
+  // ---------- mode tabs ----------
+  function setMode(m) {
+    state.mode = m;
+    var micro = m === "micro";
+    $("tabMicro").setAttribute("aria-selected", micro);
+    $("tabLlm").setAttribute("aria-selected", !micro);
+    $("tabMicro").tabIndex = micro ? 0 : -1;
+    $("tabLlm").tabIndex = micro ? -1 : 0;
+    $("microView").hidden = !micro;
+    $("llmView").hidden = micro;
+    if (!micro) renderLlm();
+  }
+  $("tabMicro").addEventListener("click", function () { setMode("micro"); });
+  $("tabLlm").addEventListener("click", function () { setMode("llm"); });
+  [$("tabMicro"), $("tabLlm")].forEach(function (t) {
+    t.addEventListener("keydown", function (ev) {
+      if (ev.key === "ArrowRight" || ev.key === "ArrowLeft") {
+        ev.preventDefault();
+        var next = state.mode === "micro" ? "llm" : "micro";
+        setMode(next);
+        $(next === "micro" ? "tabMicro" : "tabLlm").focus();
+      }
+    });
+  });
+
+  ["sIn", "sH1", "sH2", "sOut"].forEach(function (id) {
+    $(id).addEventListener("input", function () { if (!state.busy) rebuild(); });
+  });
+  window.addEventListener("resize", function () {
+    if (state.selected) positionTip(nodeEls[state.selected.layer][state.selected.k]);
+  });
+
+  rebuild();
+  window.__nnApp = { state: state };
+})();
+</script>
+</body>
+</html>

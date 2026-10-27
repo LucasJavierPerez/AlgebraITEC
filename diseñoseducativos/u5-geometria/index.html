@@ -1,0 +1,767 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>La clase como datos</title>
+<meta name="description" content="Unidad 5 · Geometría de los datos: conviértete en un vector, encuentra a tus vecinos y descubre qué se pierde al proyectar.">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #05040f;
+  --bg2: #120b2e;
+  --panel: rgba(18, 14, 44, 0.86);
+  --panel-solid: #140f33;
+  --line: #2c2560;
+  --text: #ecebff;
+  --muted: #a6a3d0;
+  --accent: #ffc35c;
+  --accent-ink: #1c1100;
+  --accent2: #6ff2e6;
+  --accent3: #c78bff;
+  --good: #5be3a1;
+  --warn: #ffcf6b;
+  --bad: #ff7a96;
+  --focus: #ffd27a;
+  --chip: #1d1745;
+  --radius: 16px;
+  --shadow: 0 18px 50px rgba(0, 0, 0, 0.5);
+  --font-ui: "Inter", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-display: "Space Grotesk", "Inter", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, Menlo, monospace;
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root {
+    --bg: #eeedf8;
+    --bg2: #ffffff;
+    --panel: rgba(255, 255, 255, 0.92);
+    --panel-solid: #ffffff;
+    --line: #d4d1ea;
+    --text: #17143a;
+    --muted: #4f4a78;
+    --accent: #b86a00;
+    --accent-ink: #ffffff;
+    --accent2: #00796f;
+    --accent3: #7a3fc4;
+    --good: #12805a;
+    --warn: #8a5a00;
+    --bad: #b3264a;
+    --focus: #b86a00;
+    --chip: #f1effa;
+    --shadow: 0 14px 40px rgba(40, 30, 100, 0.14);
+    color-scheme: light;
+  }
+}
+* { box-sizing: border-box; }
+html, body { margin: 0; }
+body {
+  font-family: var(--font-ui); color: var(--text); min-height: 100vh; line-height: 1.45;
+  background: radial-gradient(1000px 600px at 20% -10%, var(--bg2), var(--bg));
+}
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 3px solid var(--focus); outline-offset: 2px; border-radius: 8px; }
+.top { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; justify-content: space-between; max-width: 1280px; margin: 0 auto; padding: 14px 18px; }
+.brand { display: flex; gap: 12px; align-items: center; }
+.logo { width: 42px; height: 42px; border-radius: 12px; display: grid; place-items: center; background: linear-gradient(145deg, #2a1d63, #0c0822); box-shadow: inset 0 0 0 1px var(--line), 0 0 24px rgba(111, 242, 230, 0.25); }
+.brand h1 { font-family: var(--font-display); font-size: clamp(1.15rem, 3.4vw, 1.6rem); margin: 0; }
+.brand p { margin: 0; color: var(--muted); font-size: 0.85rem; }
+.steps { display: flex; gap: 6px; flex-wrap: wrap; }
+.steps button {
+  border: 1px solid var(--line); background: var(--chip); border-radius: 12px; padding: 7px 12px; cursor: pointer; font-weight: 600; font-size: 0.85rem;
+  display: flex; gap: 6px; align-items: center; min-height: 40px;
+}
+.steps button .n { width: 22px; height: 22px; border-radius: 50%; display: grid; place-items: center; background: var(--line); font-size: 0.75rem; }
+.steps button[aria-current="step"] { border-color: var(--accent2); box-shadow: 0 0 0 1px var(--accent2) inset; }
+.steps button[aria-current="step"] .n { background: var(--accent2); color: #05040f; }
+.steps button.done .n { background: var(--good); color: #05040f; }
+.steps button:disabled { opacity: 0.4; cursor: not-allowed; }
+.layout { display: grid; grid-template-columns: minmax(0, 1fr) 370px; gap: 16px; max-width: 1280px; margin: 0 auto; padding: 0 18px 18px; }
+@media (max-width: 940px) { .layout { grid-template-columns: minmax(0, 1fr); } }
+.stage { position: relative; width: 100%; aspect-ratio: 4 / 3; max-height: 76vh; border-radius: var(--radius); overflow: hidden; border: 1px solid var(--line); box-shadow: var(--shadow); background: #07051a; }
+.stage canvas { position: absolute; inset: 0; width: 100%; height: 100%; display: block; touch-action: manipulation; }
+.stage.grid-mode { aspect-ratio: auto; max-height: none; overflow: visible; background: transparent; border: none; box-shadow: none; }
+.stage.grid-mode canvas { display: none; }
+.grid { display: none; }
+.stage.grid-mode .grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 10px; }
+.pcard {
+  position: relative; border: 1px solid var(--line); background: var(--panel); border-radius: 14px; padding: 10px; text-align: left; cursor: pointer;
+  transition: transform .2s, border-color .2s, box-shadow .2s, opacity .3s; min-height: 44px;
+  display: flex; flex-direction: column; justify-content: flex-start; width: 100%;
+}
+.pcard > * { width: 100%; }
+.pcard .badge { width: auto; }
+.pcard:hover { transform: translateY(-2px); border-color: var(--accent2); }
+.pcard[aria-pressed="true"] { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent) inset, 0 0 22px rgba(255, 195, 92, 0.25); }
+.pcard.me { cursor: default; border-color: var(--accent2); background: linear-gradient(160deg, rgba(111, 242, 230, 0.16), var(--panel)); }
+.pcard.top { box-shadow: 0 0 0 2px var(--good) inset, 0 0 24px rgba(91, 227, 161, 0.25); }
+.pcard.dim { opacity: 0.55; }
+.pcard .nm { font-weight: 700; font-size: 0.92rem; display: flex; justify-content: space-between; gap: 6px; }
+.pcard .vec { font-family: var(--font-mono); font-size: 0.68rem; color: var(--muted); margin-top: 4px; overflow-wrap: anywhere; }
+.pcard .dist { font-family: var(--font-mono); font-size: 0.8rem; color: var(--accent2); }
+.pcard .badge { position: absolute; top: -8px; right: -6px; background: var(--good); color: #05040f; font-weight: 700; font-size: 0.7rem; border-radius: 999px; padding: 2px 7px; }
+.pcard .badge.guess { background: var(--accent); right: auto; left: -6px; }
+.bars { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; align-items: end; height: 46px; margin-top: 6px; }
+.bars i { display: block; border-radius: 4px 4px 2px 2px; background: linear-gradient(180deg, var(--accent2), var(--accent3)); min-height: 2px; }
+.bars-lbl { display: grid; grid-template-columns: repeat(5, 1fr); gap: 4px; font-size: 0.6rem; color: var(--muted); text-align: center; margin-top: 2px; }
+.tip { position: absolute; pointer-events: none; background: rgba(5, 4, 15, 0.86); color: #ecebff; border: 1px solid rgba(255, 255, 255, 0.16); border-radius: 10px; padding: 6px 10px; font-size: 0.8rem; transform: translate(-50%, calc(-100% - 14px)); white-space: nowrap; opacity: 0; transition: opacity .15s; }
+.tip.show { opacity: 1; }
+.panel { background: var(--panel); border: 1px solid var(--line); border-radius: var(--radius); padding: 16px; box-shadow: var(--shadow); backdrop-filter: blur(10px); align-self: start; min-width: 0; }
+.panel h2 { font-family: var(--font-display); margin: 0 0 4px; font-size: 1.3rem; }
+.story { color: var(--muted); margin: 0 0 12px; font-size: 0.93rem; }
+.q { margin: 12px 0; }
+.q label { display: flex; justify-content: space-between; gap: 8px; font-weight: 600; font-size: 0.9rem; }
+.q output { font-family: var(--font-mono); color: var(--accent); }
+.q .ends { display: flex; justify-content: space-between; font-size: 0.72rem; color: var(--muted); }
+input[type=range] { width: 100%; accent-color: var(--accent2); height: 28px; }
+.vecbox { font-family: var(--font-mono); background: var(--chip); border: 1px dashed var(--accent2); border-radius: 10px; padding: 8px 10px; font-size: 0.9rem; overflow-wrap: anywhere; margin: 10px 0; }
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.btn { border: 1px solid var(--line); background: var(--chip); border-radius: 12px; padding: 10px 14px; cursor: pointer; font-weight: 600; flex: 1 1 auto; min-height: 44px; transition: transform .12s; }
+.btn:hover:not(:disabled) { transform: translateY(-1px); }
+.btn:disabled { opacity: 0.45; cursor: not-allowed; }
+.btn.primary { background: var(--accent); color: var(--accent-ink); border-color: transparent; }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; margin: 6px 0 10px; }
+.chips button { border: 1px solid var(--line); background: var(--chip); border-radius: 999px; padding: 7px 12px; cursor: pointer; min-height: 36px; font-size: 0.85rem; }
+.chips button[aria-pressed="true"] { background: var(--accent2); color: #05040f; border-color: transparent; }
+.chips button:disabled { opacity: 0.35; cursor: not-allowed; }
+.lbl { font-weight: 700; font-size: 0.85rem; }
+.metric { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin: 10px 0; }
+.metric div { background: var(--chip); border: 1px solid var(--line); border-radius: 12px; padding: 8px; min-width: 0; }
+.metric small { display: block; color: var(--muted); font-size: 0.72rem; }
+.metric b { font-family: var(--font-mono); font-size: 1.05rem; }
+.card { border: 1px solid var(--line); background: var(--panel-solid); border-radius: 14px; padding: 14px; margin-top: 12px; animation: pop .35s ease; }
+@keyframes pop { from { transform: translateY(8px); opacity: 0; } to { transform: none; opacity: 1; } }
+.card h3 { margin: 0 0 6px; font-family: var(--font-display); font-size: 1.1rem; }
+.formula { font-family: var(--font-mono); background: var(--chip); border: 1px dashed var(--accent); border-radius: 10px; padding: 8px; text-align: center; margin: 8px 0; overflow-wrap: anywhere; }
+.ok { color: var(--good); } .ko { color: var(--bad); } .meh { color: var(--warn); }
+table.t { width: 100%; border-collapse: collapse; font-size: 0.8rem; font-family: var(--font-mono); margin-top: 6px; }
+table.t th, table.t td { border-bottom: 1px solid var(--line); padding: 4px; text-align: left; }
+table.t tr.hl td { color: var(--accent); }
+.evbars { display: grid; gap: 4px; margin: 8px 0; }
+.evbars div { display: grid; grid-template-columns: 44px 1fr 52px; gap: 6px; align-items: center; font-family: var(--font-mono); font-size: 0.78rem; }
+.evbars span.b { height: 12px; border-radius: 6px; background: var(--chip); overflow: hidden; }
+.evbars span.b i { display: block; height: 100%; background: linear-gradient(90deg, var(--accent2), var(--accent3)); width: 0; transition: width 1s ease; }
+.hint { color: var(--muted); font-size: 0.8rem; margin: 6px 0 0; }
+.concepts { padding-left: 18px; }
+.concepts li { margin: 6px 0; }
+.switch { display: flex; align-items: center; gap: 8px; font-size: 0.88rem; margin: 8px 0; cursor: pointer; }
+.switch input { width: 18px; height: 18px; accent-color: var(--accent2); }
+footer { max-width: 1280px; margin: 0 auto; padding: 4px 18px 24px; color: var(--muted); font-size: 0.8rem; }
+@media (max-width: 420px) {
+  .top, .layout, footer { padding-left: 16px; padding-right: 16px; }
+  .steps button { padding: 6px 8px; font-size: 0.78rem; }
+  .steps button .t { display: none; }
+  .stage.grid-mode .grid { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+@media (max-width: 520px) { .stage { aspect-ratio: 1 / 1; } }
+@media (prefers-reduced-motion: reduce) { * { animation: none !important; transition: none !important; } }
+</style>
+</head>
+<body>
+<a href="../../index.html" id="volver-al-indice">&larr;&nbsp; Volver al inicio</a>
+<style>
+#volver-al-indice{
+  position:fixed; top:16px; left:16px; z-index:99999;
+  font-family:'JetBrains Mono',ui-monospace,SFMono-Regular,Menlo,monospace;
+  font-size:13px; line-height:1; text-decoration:none;
+  color:#161A22; background:rgba(237,234,228,0.92);
+  border:1px solid rgba(22,26,34,0.28); border-radius:100px;
+  padding:9px 15px; backdrop-filter:blur(6px);
+  box-shadow:0 2px 10px rgba(22,26,34,0.10);
+  transition:background .15s ease,border-color .15s ease;
+}
+#volver-al-indice:hover{ background:#fff; border-color:#4740E0; color:#4740E0; }
+@media print{ #volver-al-indice{ display:none; } }
+</style>
+<header class="top">
+  <div class="brand">
+    <div class="logo" aria-hidden="true">
+      <svg width="26" height="26" viewBox="0 0 26 26"><g stroke="#6ff2e6" stroke-width="1.2" opacity=".7"><line x1="5" y1="19" x2="12" y2="8"/><line x1="12" y1="8" x2="21" y2="14"/><line x1="5" y1="19" x2="21" y2="14"/></g><circle cx="5" cy="19" r="2.6" fill="#c78bff"/><circle cx="12" cy="8" r="3.2" fill="#ffc35c"/><circle cx="21" cy="14" r="2.4" fill="#6ff2e6"/></svg>
+    </div>
+    <div><h1>La clase como datos</h1><p>Unidad 5 · Geometría de los datos y dimensionalidad</p></div>
+  </div>
+  <nav class="steps" id="steps" aria-label="Etapas"></nav>
+</header>
+
+<main class="layout">
+  <section aria-label="Escenario">
+    <div class="stage" id="stage">
+      <canvas id="cv" tabindex="0" aria-label="Constelación de estudiantes como puntos en el plano"></canvas>
+      <div class="grid" id="grid" role="group" aria-label="Compañeros"></div>
+      <div class="tip" id="tip" aria-hidden="true"></div>
+    </div>
+  </section>
+  <aside class="panel" id="panel" aria-live="polite"></aside>
+</main>
+
+<footer>
+  Prototipo educativo · Álgebra · Tecnicatura en Ciencia de Datos e IA · iTec Río Cuarto.
+  <b>Los 24 compañeros son simulados</b> (generados con una semilla fija); usar los datos reales del curso es el próximo paso. Tus respuestas se guardan solo en este navegador.
+</footer>
+
+<script>
+'use strict';
+
+/* ================= Utilities ================= */
+const $ = (s, r = document) => r.querySelector(s);
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+const lerp = (a, b, t) => a + (b - a) * t;
+const ease = t => (t < 0.5 ? 4 * t * t * t : 1 - Math.pow(-2 * t + 2, 3) / 2);
+const f2 = v => v.toFixed(2);
+const pct = v => Math.round(v * 100) + '%';
+const esc = s => String(s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+function mulberry32(a) {
+  return function () {
+    a |= 0; a = (a + 0x6d2b79f5) | 0;
+    let t = Math.imul(a ^ (a >>> 15), 1 | a);
+    t = (t + Math.imul(t ^ (t >>> 7), 61 | t)) ^ t;
+    return ((t ^ (t >>> 14)) >>> 0) / 4294967296;
+  };
+}
+function gaussian(rng) { let u = 0; while (u === 0) u = rng(); return Math.sqrt(-2 * Math.log(u)) * Math.cos(2 * Math.PI * rng()); }
+const store = {
+  get(k, d) { try { const v = localStorage.getItem('u5geo:' + k); return v == null ? d : JSON.parse(v); } catch (e) { return d; } },
+  set(k, v) { try { localStorage.setItem('u5geo:' + k, JSON.stringify(v)); } catch (e) { /* storage unavailable */ } }
+};
+
+/* ================= Math (pure) ================= */
+function euclid(a, b) { let s = 0; for (let i = 0; i < a.length; i++) s += (a[i] - b[i]) ** 2; return Math.sqrt(s); }
+function cosineSim(a, b) {
+  let d = 0, na = 0, nb = 0;
+  for (let i = 0; i < a.length; i++) { d += a[i] * b[i]; na += a[i] * a[i]; nb += b[i] * b[i]; }
+  return na && nb ? d / Math.sqrt(na * nb) : 0;
+}
+/** Indices of the k nearest points to points[i] (excluding i), using distance fn. */
+function knn(points, i, k, dist = euclid) {
+  const out = [];
+  for (let j = 0; j < points.length; j++) if (j !== i) out.push([j, dist(points[i], points[j])]);
+  out.sort((a, b) => a[1] - b[1]);
+  return out.slice(0, k).map(p => p[0]);
+}
+/** Mean fraction of each point's k nearest neighbors (high-dim) that survive in the low-dim layout. */
+function preservation(high, low, k = 3) {
+  let s = 0;
+  for (let i = 0; i < high.length; i++) {
+    const a = new Set(knn(high, i, k)), b = knn(low, i, k);
+    s += b.filter(j => a.has(j)).length / k;
+  }
+  return s / high.length;
+}
+function overlapFor(high, low, i, k = 3) { const a = new Set(knn(high, i, k)); return knn(low, i, k).filter(j => a.has(j)).length; }
+function mean(X) { const d = X[0].length, m = new Array(d).fill(0); for (const x of X) for (let j = 0; j < d; j++) m[j] += x[j] / X.length; return m; }
+function covariance(X) {
+  const m = mean(X), d = m.length, C = Array.from({ length: d }, () => new Array(d).fill(0));
+  for (const x of X) for (let i = 0; i < d; i++) for (let j = 0; j < d; j++) C[i][j] += (x[i] - m[i]) * (x[j] - m[j]);
+  for (let i = 0; i < d; i++) for (let j = 0; j < d; j++) C[i][j] /= X.length - 1;
+  return C;
+}
+/** Cyclic Jacobi eigendecomposition of a symmetric matrix. Returns eigenpairs sorted by eigenvalue (desc). */
+function jacobiEigen(S) {
+  const n = S.length, a = S.map(r => r.slice());
+  const V = Array.from({ length: n }, (_, i) => Array.from({ length: n }, (_, j) => (i === j ? 1 : 0)));
+  for (let sweep = 0; sweep < 100; sweep++) {
+    let off = 0;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) off += a[p][q] ** 2;
+    if (off < 1e-20) break;
+    for (let p = 0; p < n; p++) for (let q = p + 1; q < n; q++) {
+      if (Math.abs(a[p][q]) < 1e-18) continue;
+      const theta = (a[q][q] - a[p][p]) / (2 * a[p][q]);
+      const t = (theta >= 0 ? 1 : -1) / (Math.abs(theta) + Math.sqrt(theta * theta + 1));
+      const c = 1 / Math.sqrt(t * t + 1), s = t * c;
+      for (let k = 0; k < n; k++) { const akp = a[k][p], akq = a[k][q]; a[k][p] = c * akp - s * akq; a[k][q] = s * akp + c * akq; }
+      for (let k = 0; k < n; k++) { const apk = a[p][k], aqk = a[q][k]; a[p][k] = c * apk - s * aqk; a[q][k] = s * apk + c * aqk; }
+      for (let k = 0; k < n; k++) { const vkp = V[k][p], vkq = V[k][q]; V[k][p] = c * vkp - s * vkq; V[k][q] = s * vkp + c * vkq; }
+    }
+  }
+  const pairs = [];
+  for (let i = 0; i < n; i++) pairs.push({ value: a[i][i], vector: V.map(r => r[i]) });
+  pairs.sort((x, y) => y.value - x.value);
+  return pairs;
+}
+function pca(X, k = 2) {
+  const m = mean(X), eig = jacobiEigen(covariance(X));
+  const total = eig.reduce((s, e) => s + Math.max(0, e.value), 0);
+  const explained = eig.map(e => Math.max(0, e.value) / total);
+  const comps = eig.slice(0, k).map(e => {
+    // Sign convention: make the largest-magnitude loading positive for stable display.
+    let big = 0; e.vector.forEach((v, i) => { if (Math.abs(v) > Math.abs(e.vector[big])) big = i; });
+    return e.vector[big] < 0 ? e.vector.map(v => -v) : e.vector.slice();
+  });
+  const proj = X.map(x => comps.map(c => c.reduce((s, cj, j) => s + cj * (x[j] - m[j]), 0)));
+  return { proj, explained, comps, eig };
+}
+
+/* ================= Data ================= */
+const DIMS = [
+  { key: 'sleep', label: 'Horas de sueño', short: 'Sueño', q: '¿Cuánto duermes por noche?', lo: '0 · muy poco (≤ 4 h)', hi: '10 · mucho (≥ 10 h)', def: 6 },
+  { key: 'math', label: 'Gusto por la matemática', short: 'Mate', q: '¿Cuánto te gusta la matemática?', lo: '0 · nada', hi: '10 · me encanta', def: 6 },
+  { key: 'games', label: 'Videojuegos por semana', short: 'Juegos', q: '¿Cuántas horas juegas videojuegos por semana?', lo: '0 · nunca', hi: '10 · más de 20 h', def: 4 },
+  { key: 'coffee', label: 'Café por día', short: 'Café', q: '¿Cuánto café tomas por día?', lo: '0 · nada', hi: '10 · 5 tazas o más', def: 3 },
+  { key: 'group', label: 'Solo vs en grupo', short: 'Grupo', q: '¿Prefieres trabajar solo o en grupo?', lo: '0 · solo', hi: '10 · en grupo', def: 5 }
+];
+const NAMES = ['Valentina', 'Mateo', 'Sofía', 'Benjamín', 'Camila', 'Joaquín', 'Lucía', 'Tomás', 'Martina', 'Santiago', 'Julieta', 'Facundo',
+  'Agustina', 'Lautaro', 'Florencia', 'Nicolás', 'Micaela', 'Franco', 'Abril', 'Ignacio', 'Carolina', 'Gonzalo', 'Milagros', 'Ezequiel'];
+// Latent groups used to simulate classmates (hidden from the student until the PCA step).
+const GROUPS = [
+  { name: 'Noctámbulos gamers', c: [0.35, 0.5, 0.82, 0.75, 0.35], color: '#ff7a96' },
+  { name: 'Madrugadores de los números', c: [0.8, 0.88, 0.2, 0.35, 0.25], color: '#6ff2e6' },
+  { name: 'Sociables', c: [0.62, 0.38, 0.38, 0.3, 0.88], color: '#c78bff' }
+];
+function makeClassmates(seed = 2024) {
+  const rng = mulberry32(seed), out = [];
+  NAMES.forEach((name, i) => {
+    const g = i % 3;
+    const v = GROUPS[g].c.map(c => Math.round(clamp(c + gaussian(rng) * 0.11, 0, 1) * 10) / 10);
+    out.push({ name, v, g, hue: 190 + rng() * 110 });
+  });
+  return out;
+}
+const mates = makeClassmates();
+
+/* ================= State ================= */
+const state = {
+  answers: store.get('answers', DIMS.map(d => d.def)),
+  surveyed: store.get('surveyed', false),
+  step: 1,
+  guess: null, revealed: false, metric: 'euclid',
+  ax: [1, 2], tried: store.get('tried', {}),
+  pcaPred: 60, pcaBeat: null, pcaShown: false, view: 'axes', showGroups: false,
+  predScore: store.get('predScore', null)
+};
+const me = () => state.answers.map(a => a / 10);
+const allPoints = () => [me(), ...mates.map(m => m.v)]; // index 0 = the student
+const nameOf = i => (i === 0 ? 'Tú' : mates[i - 1].name);
+
+/* ================= Canvas ================= */
+const cv = $('#cv'), ctx = cv.getContext('2d'), stage = $('#stage'), panel = $('#panel'), grid = $('#grid'), tip = $('#tip');
+let W = 400, H = 300, DPR = 1;
+const mqLight = window.matchMedia('(prefers-color-scheme: light)');
+const pal = {};
+function readPalette() {
+  Object.assign(pal, mqLight.matches ? {
+    dark: false, bg0: '#f7f6ff', bg1: '#e6e3f6', star: 'rgba(60,40,140,0.25)', text: '#17143a', muted: 'rgba(23,20,58,0.6)',
+    axis: 'rgba(23,20,58,0.35)', me: '#b86a00', nn: '#00796f', line: 'rgba(0,121,111,0.75)', bubbleL: 45
+  } : {
+    dark: true, bg0: '#0b0724', bg1: '#030210', star: 'rgba(220,215,255,0.7)', text: '#ecebff', muted: 'rgba(236,235,255,0.6)',
+    axis: 'rgba(200,195,255,0.3)', me: '#ffc35c', nn: '#6ff2e6', line: 'rgba(111,242,230,0.8)', bubbleL: 70
+  });
+}
+readPalette();
+const onTheme = () => readPalette();
+if (mqLight.addEventListener) mqLight.addEventListener('change', onTheme); else if (mqLight.addListener) mqLight.addListener(onTheme);
+function resize() {
+  const r = cv.getBoundingClientRect();
+  if (r.width < 10) return;
+  DPR = Math.min(2, window.devicePixelRatio || 1); W = r.width; H = r.height;
+  cv.width = Math.round(W * DPR); cv.height = Math.round(H * DPR); ctx.setTransform(DPR, 0, 0, DPR, 0, 0);
+}
+if (window.ResizeObserver) new ResizeObserver(resize).observe(cv); else window.addEventListener('resize', resize);
+
+const bgStars = (() => { const r = mulberry32(5); return Array.from({ length: 140 }, () => ({ x: r(), y: r(), s: r() * 1.4 + 0.2, p: r() * 6.28 })); })();
+function drawBackground(t) {
+  const g = ctx.createRadialGradient(W * 0.3, H * 0.2, 0, W * 0.5, H * 0.5, Math.max(W, H));
+  g.addColorStop(0, pal.bg0); g.addColorStop(1, pal.bg1);
+  ctx.fillStyle = g; ctx.fillRect(0, 0, W, H);
+  ctx.fillStyle = pal.star;
+  for (const s of bgStars) { ctx.globalAlpha = 0.35 + 0.35 * Math.sin(t * 0.001 + s.p); ctx.fillRect(s.x * W, s.y * H, s.s, s.s); }
+  ctx.globalAlpha = 1;
+}
+function bubble(x, y, r, color, t, phase = 0, alpha = 1) {
+  const rr = r * (1 + 0.06 * Math.sin(t * 0.002 + phase));
+  ctx.save(); ctx.globalAlpha = alpha;
+  const g = ctx.createRadialGradient(x, y, 0, x, y, rr * 2.6);
+  g.addColorStop(0, color); g.addColorStop(0.35, color.replace(/[\d.]+\)$/, '0.35)')); g.addColorStop(1, color.replace(/[\d.]+\)$/, '0)'));
+  ctx.fillStyle = g; ctx.beginPath(); ctx.arc(x, y, rr * 2.6, 0, 6.283); ctx.fill();
+  ctx.fillStyle = color; ctx.beginPath(); ctx.arc(x, y, rr, 0, 6.283); ctx.fill();
+  ctx.fillStyle = 'rgba(255,255,255,0.55)'; ctx.beginPath(); ctx.arc(x - rr * 0.35, y - rr * 0.35, rr * 0.3, 0, 6.283); ctx.fill();
+  ctx.restore();
+}
+const hexToRgba = (hex, a = 1) => { const n = parseInt(hex.slice(1), 16); return `rgba(${n >> 16 & 255},${n >> 8 & 255},${n & 255},${a})`; };
+function textTag(text, x, y, color, size = 11, align = 'center') {
+  ctx.save(); ctx.font = `600 ${size}px Inter, sans-serif`; ctx.textAlign = align; ctx.textBaseline = 'middle';
+  const w = ctx.measureText(text).width, bx = align === 'center' ? x - w / 2 : align === 'right' ? x - w : x;
+  ctx.fillStyle = pal.dark ? 'rgba(5,4,15,0.7)' : 'rgba(255,255,255,0.85)';
+  ctx.beginPath(); if (ctx.roundRect) ctx.roundRect(bx - 5, y - 9, w + 10, 18, 7); else ctx.rect(bx - 5, y - 9, w + 10, 18); ctx.fill();
+  ctx.fillStyle = color; ctx.fillText(text, x, y); ctx.restore();
+}
+
+/* ---------- Scatter layout & animation ---------- */
+// Positions are stored in normalized coordinates [-1, 1]^2 and mapped to the screen at draw time.
+const scatter = { cur: null, from: null, to: null, t0: 0, dur: 1300, labels: ['', ''] };
+function axesLayout(i, j) { return allPoints().map(p => [p[i] * 2 - 1, p[j] * 2 - 1]); }
+function pcaLayout() {
+  const res = pca(allPoints());
+  const m = Math.max(...res.proj.map(p => Math.max(Math.abs(p[0]), Math.abs(p[1])))) || 1;
+  return { pts: res.proj.map(p => [p[0] / m, p[1] / m]), res };
+}
+function setLayout(pts, labels, animate = true) {
+  scatter.labels = labels;
+  if (!scatter.cur || !animate) { scatter.cur = pts.map(p => p.slice()); scatter.from = null; scatter.to = null; return; }
+  scatter.from = scatter.cur.map(p => p.slice()); scatter.to = pts; scatter.t0 = performance.now();
+}
+function updateScatter(t) {
+  if (!scatter.to) return;
+  let doneAll = true;
+  scatter.cur = scatter.to.map((p, i) => {
+    const k = clamp((t - scatter.t0 - i * 18) / scatter.dur, 0, 1); if (k < 1) doneAll = false;
+    const e = ease(k); return [lerp(scatter.from[i][0], p[0], e), lerp(scatter.from[i][1], p[1], e)];
+  });
+  if (doneAll) { scatter.cur = scatter.to; scatter.to = null; }
+}
+function plotBox() { const pad = 44, S = Math.min(W, H) - pad * 2; return { S, ox: (W - S) / 2, oy: (H - S) / 2 }; }
+function toScreen(p) { const b = plotBox(); return [b.ox + (p[0] + 1) / 2 * b.S, b.oy + (1 - (p[1] + 1) / 2) * b.S]; }
+let hoverIdx = -1;
+function drawScatter(t) {
+  updateScatter(t);
+  const b = plotBox(), P = scatter.cur.map(toScreen);
+  // Frame & axis labels.
+  ctx.save(); ctx.strokeStyle = pal.axis; ctx.lineWidth = 1; ctx.setLineDash([2, 6]);
+  ctx.strokeRect(b.ox, b.oy, b.S, b.S);
+  ctx.beginPath(); ctx.moveTo(b.ox + b.S / 2, b.oy); ctx.lineTo(b.ox + b.S / 2, b.oy + b.S); ctx.moveTo(b.ox, b.oy + b.S / 2); ctx.lineTo(b.ox + b.S, b.oy + b.S / 2); ctx.stroke();
+  ctx.restore();
+  textTag(scatter.labels[0] + ' →', b.ox + b.S, b.oy + b.S + 18, pal.muted, 11, 'right');
+  ctx.save(); ctx.translate(b.ox - 18, b.oy); ctx.rotate(-Math.PI / 2); textTag(scatter.labels[1] + ' →', 0, 0, pal.muted, 11, 'right'); ctx.restore();
+
+  const high = allPoints();
+  const nn5 = knn(high, 0, 3);
+  const nn2 = knn(scatter.cur, 0, 3);
+  // Lines from the student to their true 5D neighbors.
+  ctx.save(); ctx.strokeStyle = pal.line; ctx.lineWidth = 1.6;
+  for (const j of nn5) {
+    const [x, y] = P[j];
+    ctx.setLineDash([6, 5]); ctx.lineDashOffset = -t * 0.02;
+    ctx.beginPath(); ctx.moveTo(P[0][0], P[0][1]); ctx.lineTo(x, y); ctx.stroke();
+  }
+  ctx.restore();
+  // Bubbles.
+  for (let i = 1; i < P.length; i++) {
+    const m = mates[i - 1];
+    const col = state.showGroups ? hexToRgba(GROUPS[m.g].color, 0.95) : `hsla(${m.hue},80%,${pal.bubbleL}%,0.9)`;
+    const isNN = nn5.includes(i);
+    bubble(P[i][0], P[i][1], isNN ? 7 : 5.5, col, t, i);
+    if (nn2.includes(i)) { ctx.save(); ctx.strokeStyle = pal.me; ctx.lineWidth = 1.5; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.arc(P[i][0], P[i][1], 12, 0, 6.283); ctx.stroke(); ctx.restore(); }
+    if (isNN) textTag(m.name, P[i][0], P[i][1] - 18, pal.nn, 10);
+  }
+  bubble(P[0][0], P[0][1], 9, hexToRgba(pal.me.length === 7 ? pal.me : '#ffc35c', 1), t, 0);
+  textTag('Tú', P[0][0], P[0][1] + 20, pal.me, 11);
+  if (hoverIdx > 0 && P[hoverIdx]) {
+    ctx.save(); ctx.strokeStyle = pal.text; ctx.lineWidth = 1.5; ctx.beginPath(); ctx.arc(P[hoverIdx][0], P[hoverIdx][1], 14, 0, 6.283); ctx.stroke(); ctx.restore();
+  }
+  // Legend.
+  ctx.save(); ctx.font = '11px Inter, sans-serif'; ctx.textAlign = 'left'; ctx.fillStyle = pal.muted;
+  ctx.strokeStyle = pal.line; ctx.setLineDash([6, 5]); ctx.beginPath(); ctx.moveTo(12, 16); ctx.lineTo(34, 16); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillText('vecinos reales (5D)', 40, 20);
+  ctx.strokeStyle = pal.me; ctx.setLineDash([2, 3]); ctx.beginPath(); ctx.arc(23, 34, 6, 0, 6.283); ctx.stroke(); ctx.setLineDash([]);
+  ctx.fillText('vecinos en este plano (2D)', 40, 38);
+  ctx.restore();
+}
+function drawRadar(t) {
+  const v = me(), cx = W / 2, cy = H / 2 + 6, R = Math.min(W, H) * 0.33, n = DIMS.length;
+  const ang = i => -Math.PI / 2 + i * 2 * Math.PI / n;
+  ctx.save(); ctx.strokeStyle = pal.axis; ctx.lineWidth = 1;
+  for (let ring = 1; ring <= 4; ring++) {
+    ctx.beginPath();
+    for (let i = 0; i <= n; i++) { const a = ang(i % n), r = R * ring / 4; i ? ctx.lineTo(cx + r * Math.cos(a), cy + r * Math.sin(a)) : ctx.moveTo(cx + r * Math.cos(a), cy + r * Math.sin(a)); }
+    ctx.stroke();
+  }
+  for (let i = 0; i < n; i++) { ctx.beginPath(); ctx.moveTo(cx, cy); ctx.lineTo(cx + R * Math.cos(ang(i)), cy + R * Math.sin(ang(i))); ctx.stroke(); }
+  ctx.restore();
+  // Polygon of the student's vector.
+  const pts = v.map((x, i) => [cx + R * Math.max(0.03, x) * Math.cos(ang(i)), cy + R * Math.max(0.03, x) * Math.sin(ang(i))]);
+  ctx.save();
+  const g = ctx.createRadialGradient(cx, cy, 0, cx, cy, R);
+  g.addColorStop(0, hexToRgba('#6ff2e6', 0.05)); g.addColorStop(1, hexToRgba('#c78bff', 0.4));
+  ctx.fillStyle = g; ctx.strokeStyle = pal.nn; ctx.lineWidth = 2; ctx.shadowColor = pal.nn; ctx.shadowBlur = 14;
+  ctx.beginPath(); pts.forEach(([x, y], i) => (i ? ctx.lineTo(x, y) : ctx.moveTo(x, y))); ctx.closePath(); ctx.fill(); ctx.stroke(); ctx.restore();
+  pts.forEach(([x, y], i) => {
+    bubble(x, y, 5, hexToRgba('#ffc35c', 1), t, i);
+    const a = ang(i), lx = cx + (R + 26) * Math.cos(a), ly = cy + (R + 22) * Math.sin(a);
+    textTag(`${DIMS[i].short} ${f2(v[i])}`, lx, ly, pal.text, 11);
+  });
+  bubble(cx, cy, 8, hexToRgba('#ffc35c', 1), t, 0);
+  textTag('Tú = [' + v.map(f2).join(', ') + ']', cx, 22, pal.me, 12);
+}
+
+/* ================= Steps ================= */
+const STEPS = [
+  { n: 1, t: 'Encuesta' }, { n: 2, t: '¿Quién se te parece?' }, { n: 3, t: 'Vista 2D' }, { n: 4, t: 'PCA' }, { n: 5, t: 'Cierre' }
+];
+function renderSteps() {
+  $('#steps').innerHTML = STEPS.map(s => `<button type="button" data-s="${s.n}" ${s.n === state.step ? 'aria-current="step"' : ''} class="${s.n < state.step ? 'done' : ''}" ${s.n > 1 && !state.surveyed ? 'disabled' : ''}>
+    <span class="n">${s.n}</span><span class="t">${s.t}</span></button>`).join('');
+  $('#steps').querySelectorAll('[data-s]').forEach(b => b.addEventListener('click', () => go(+b.dataset.s)));
+}
+function go(n) {
+  state.step = n; renderSteps(); hideTip();
+  stage.classList.toggle('grid-mode', n === 2);
+  if (n === 2) { renderGrid(); }
+  if (n === 3) { state.view = 'axes'; setLayout(axesLayout(...state.ax), [DIMS[state.ax[0]].label, DIMS[state.ax[1]].label], !!scatter.cur); }
+  if (n === 4) { state.view = 'axes'; setLayout(axesLayout(...state.ax), [DIMS[state.ax[0]].label, DIMS[state.ax[1]].label], !!scatter.cur); }
+  ({ 1: panelSurvey, 2: panelGuess, 3: panelAxes, 4: panelPCA, 5: panelClose })[n]();
+  if (n !== 2) requestAnimationFrame(resize);
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+/* ---------- Step 1: survey ---------- */
+function panelSurvey() {
+  panel.innerHTML = `
+    <h2>1 · Conviértete en un vector</h2>
+    <p class="story">Cada estudiante de la clase es un punto en el espacio. Responde 5 preguntas rápidas: cada respuesta es una <b>coordenada</b>.</p>
+    ${DIMS.map((d, i) => `
+      <div class="q"><label for="q${i}">${d.q} <output id="o${i}">${state.answers[i]}</output></label>
+      <input type="range" id="q${i}" min="0" max="10" step="1" value="${state.answers[i]}">
+      <div class="ends"><span>${d.lo}</span><span>${d.hi}</span></div></div>`).join('')}
+    <div class="vecbox" id="vec"></div>
+    <p class="hint">Cada respuesta se divide por 10 para que todas las coordenadas estén entre 0 y 1.</p>
+    <div class="row"><button class="btn primary" id="toPoint" type="button">Convertirme en un punto</button></div>`;
+  const upd = () => { $('#vec').textContent = 'Tú = [' + me().map(f2).join(', ') + '] ∈ ℝ⁵'; };
+  DIMS.forEach((d, i) => $('#q' + i).addEventListener('input', e => {
+    state.answers[i] = +e.target.value; $('#o' + i).textContent = state.answers[i]; store.set('answers', state.answers); upd();
+    state.revealed = false; state.guess = null; scatter.cur = null; state.pcaShown = false;
+    state.tried = {}; store.set('tried', {}); state.predScore = null; store.set('predScore', null);
+  }));
+  upd();
+  $('#toPoint').addEventListener('click', () => { state.surveyed = true; store.set('surveyed', true); go(2); });
+}
+
+/* ---------- Step 2: guess your nearest neighbor ---------- */
+function ranking() {
+  const v = me();
+  const rows = mates.map((m, i) => ({ i, d: euclid(v, m.v), c: cosineSim(v, m.v) }));
+  const byE = rows.slice().sort((a, b) => a.d - b.d), byC = rows.slice().sort((a, b) => b.c - a.c);
+  return { rows, byE, byC };
+}
+function cardHTML(m, i, extra = '') {
+  return `<div class="bars" aria-hidden="true">${m.v.map(x => `<i style="height:${Math.max(4, x * 100)}%"></i>`).join('')}</div>
+    <div class="bars-lbl" aria-hidden="true">${DIMS.map(d => `<span>${d.short}</span>`).join('')}</div>
+    <div class="vec">[${m.v.map(f2).join(', ')}]</div>${extra}`;
+}
+function renderGrid() {
+  const R = ranking();
+  const order = state.revealed ? (state.metric === 'euclid' ? R.byE : R.byC).map(r => r.i) : mates.map((_, i) => i);
+  const top = new Set(order.slice(0, 3));
+  const meCard = `<div class="pcard me"><div class="nm"><span>Tú</span></div>${cardHTML({ v: me() })}</div>`;
+  grid.innerHTML = meCard + order.map((i, rank) => {
+    const m = mates[i], r = R.rows[i];
+    const val = state.metric === 'euclid' ? `d = ${f2(r.d)}` : `cos = ${f2(r.c)}`;
+    const cls = state.revealed ? (top.has(i) ? 'top' : 'dim') : '';
+    const badges = (state.revealed && top.has(i) ? `<span class="badge">#${rank + 1}</span>` : '') + (state.guess === i ? '<span class="badge guess">tu apuesta</span>' : '');
+    return `<button type="button" class="pcard ${cls}" data-i="${i}" aria-pressed="${state.guess === i}" aria-label="${esc(m.name)}, vector ${m.v.map(f2).join(', ')}${state.revealed ? ', ' + val : ''}">
+      ${badges}<div class="nm"><span>${esc(m.name)}</span>${state.revealed ? `<span class="dist">${val}</span>` : ''}</div>${cardHTML(m, i)}</button>`;
+  }).join('');
+  grid.querySelectorAll('[data-i]').forEach(b => b.addEventListener('click', () => {
+    if (state.revealed) return;
+    state.guess = +b.dataset.i; renderGrid(); panelGuess();
+  }));
+}
+function panelGuess() {
+  const R = ranking();
+  if (!state.revealed) {
+    panel.innerHTML = `
+      <h2>2 · ¿Quién se te parece?</h2>
+      <p class="story">Aquí están tus 24 compañeros, cada uno con su vector de 5 respuestas. <b>Antes de calcular nada:</b> toca la tarjeta de la persona que crees que está <b>más cerca</b> de ti en el espacio de 5 dimensiones.</p>
+      <div class="vecbox">Tú = [${me().map(f2).join(', ')}]</div>
+      <p>${state.guess != null ? `Tu apuesta: <b>${esc(mates[state.guess].name)}</b>` : '<span class="meh">Todavía no elegiste a nadie.</span>'}</p>
+      <div class="row"><button class="btn primary" id="reveal" type="button" ${state.guess == null ? 'disabled' : ''}>Revelar distancias</button></div>
+      <p class="hint">Compara las barras: ¿quién tiene alturas parecidas a las tuyas en las cinco columnas?</p>`;
+    $('#reveal').addEventListener('click', () => { state.revealed = true; state.metric = 'euclid'; renderGrid(); panelGuess(); });
+    return;
+  }
+  const rankE = R.byE.findIndex(r => r.i === state.guess) + 1;
+  const score = rankE === 1 ? 3 : rankE <= 3 ? 2 : rankE <= 6 ? 1 : 0;
+  if (state.predScore == null) { state.predScore = score; store.set('predScore', score); }
+  const g = R.rows[state.guess], best = R.byE[0];
+  const rankC = R.byC.findIndex(r => r.i === state.guess) + 1;
+  const sameTop = R.byE.slice(0, 3).map(r => r.i).join() === R.byC.slice(0, 3).map(r => r.i).join();
+  panel.innerHTML = `
+    <h2>2 · ¿Quién se te parece?</h2>
+    <h3 class="${score >= 2 ? 'ok' : score === 1 ? 'meh' : 'ko'}" style="margin:4px 0 8px">${rankE === 1 ? '¡Acertaste! Es tu vecino más cercano.' : rankE <= 3 ? `¡Casi! Está entre tus 3 más cercanos (puesto ${rankE}).` : `Tu apuesta quedó en el puesto ${rankE} de 24.`}</h3>
+    <p>Tu vecino más cercano es <b>${esc(mates[best.i].name)}</b> (d = ${f2(best.d)}). ${esc(mates[state.guess].name)} está a d = ${f2(g.d)}.</p>
+    <div class="formula">d(a, b) = √( Σᵢ (aᵢ − bᵢ)² )</div>
+    <p style="font-size:.9rem">Lo que hiciste a ojo fue comparar diferencias coordenada a coordenada. La <b>distancia euclidiana</b> eleva cada diferencia al cuadrado, las suma en las 5 dimensiones y saca la raíz: es el teorema de Pitágoras en ℝ⁵. Una diferencia grande en una sola columna pesa mucho.</p>
+    <div class="lbl">Medir parecido de otra forma</div>
+    <div class="chips" role="group" aria-label="Métrica">
+      <button type="button" data-m="euclid" aria-pressed="${state.metric === 'euclid'}">Distancia euclidiana</button>
+      <button type="button" data-m="cos" aria-pressed="${state.metric === 'cos'}">Similitud coseno</button>
+    </div>
+    ${state.metric === 'cos' ? `<p style="font-size:.9rem">La <b>similitud coseno</b> mide el ángulo entre vectores: compara la <i>forma</i> del perfil, no su tamaño. Con coseno, tu apuesta queda en el puesto ${rankC}. ${sameTop ? 'Tus 3 más cercanos coinciden con ambas métricas.' : '<b>El top 3 cambia</b>: elegir la métrica es una decisión de modelado.'}</p>` : ''}
+    <p class="hint">Los 3 resaltados en verde son tus <b>3 vecinos más cercanos</b>: con k = 3, eso es lo que usa el algoritmo k-NN.</p>
+    <div class="row" style="margin-top:8px"><button class="btn" id="retry" type="button">Elegir de nuevo</button><button class="btn primary" id="next" type="button">Ver la clase en 2D</button></div>`;
+  panel.querySelectorAll('[data-m]').forEach(b => b.addEventListener('click', () => { state.metric = b.dataset.m; renderGrid(); panelGuess(); }));
+  $('#retry').addEventListener('click', () => { state.revealed = false; state.guess = null; renderGrid(); panelGuess(); });
+  $('#next').addEventListener('click', () => go(3));
+}
+
+/* ---------- Step 3: choose 2 of 5 axes ---------- */
+function pairKey(i, j) { return [i, j].sort().join('-'); }
+function evalLayout(low) {
+  const high = allPoints();
+  return { mine: overlapFor(high, low, 0), global: preservation(high, low) };
+}
+function panelAxes() {
+  const [i, j] = state.ax, low = axesLayout(i, j), ev = evalLayout(low), high = allPoints();
+  state.tried[pairKey(i, j)] = ev; store.set('tried', state.tried);
+  const nn5 = knn(high, 0, 3).map(nameOf), nn2 = knn(low, 0, 3).map(nameOf);
+  const triedRows = Object.entries(state.tried).sort((a, b) => b[1].global - a[1].global);
+  const chips = axis => DIMS.map((d, k) => `<button type="button" data-a="${axis}" data-k="${k}" aria-pressed="${state.ax[axis] === k}" ${state.ax[1 - axis] === k ? 'disabled' : ''}>${d.short}</button>`).join('');
+  panel.innerHTML = `
+    <h2>3 · Elige tu propia vista 2D</h2>
+    <p class="story">La pantalla solo tiene 2 dimensiones. Elige cuáles 2 de las 5 preguntas usar como ejes. Las líneas punteadas te unen con tus <b>vecinos reales en 5D</b>; los anillos marcan a quienes <b>parecen</b> tus vecinos en este plano.</p>
+    <div class="lbl">Eje horizontal</div><div class="chips" role="group" aria-label="Eje horizontal">${chips(0)}</div>
+    <div class="lbl">Eje vertical</div><div class="chips" role="group" aria-label="Eje vertical">${chips(1)}</div>
+    <div class="metric">
+      <div><small>Tus vecinos conservados</small><b>${ev.mine} de 3</b></div>
+      <div><small>Vecinos conservados (toda la clase)</small><b>${pct(ev.global)}</b></div>
+    </div>
+    <p style="font-size:.88rem">Reales (5D): <b>${nn5.map(esc).join(', ')}</b><br>Aparentes (2D): <b>${nn2.map(esc).join(', ')}</b></p>
+    <p class="hint">Distorsión: quien se ve cerca en el plano puede estar lejos en 5D, porque las 3 dimensiones ocultas también cuentan en la distancia.</p>
+    <div class="lbl" style="margin-top:10px">Pares probados (${triedRows.length} de 10)</div>
+    <table class="t"><thead><tr><th>ejes</th><th>tuyos</th><th>clase</th></tr></thead><tbody>
+      ${triedRows.map(([k, e]) => { const [a, b] = k.split('-').map(Number); return `<tr class="${k === pairKey(i, j) ? 'hl' : ''}"><td>${DIMS[a].short} · ${DIMS[b].short}</td><td>${e.mine}/3</td><td>${pct(e.global)}</td></tr>`; }).join('')}
+    </tbody></table>
+    <p class="hint"><b>Reto:</b> encuentra el par de ejes que mejor conserva a los vecinos de toda la clase. Después, compáralo con PCA.</p>
+    <div class="row" style="margin-top:8px"><button class="btn primary" id="next" type="button">Desafiar a PCA</button></div>`;
+  panel.querySelectorAll('[data-a]').forEach(b => b.addEventListener('click', () => {
+    const axis = +b.dataset.a, k = +b.dataset.k;
+    if (state.ax[1 - axis] === k) return;
+    state.ax[axis] = k; setLayout(axesLayout(...state.ax), [DIMS[state.ax[0]].label, DIMS[state.ax[1]].label]); panelAxes();
+  }));
+  $('#next').addEventListener('click', () => go(4));
+}
+
+/* ---------- Step 4: PCA ---------- */
+function bestTried() {
+  const e = Object.entries(state.tried).sort((a, b) => b[1].global - a[1].global)[0];
+  return e ? { key: e[0], ...e[1] } : null;
+}
+function bestPossible() {
+  let best = null;
+  for (let i = 0; i < 5; i++) for (let j = i + 1; j < 5; j++) {
+    const e = evalLayout(axesLayout(i, j));
+    if (!best || e.global > best.global) best = { key: pairKey(i, j), ...e };
+  }
+  return best;
+}
+const pairName = key => key.split('-').map(Number).map(k => DIMS[k].short).join(' · ');
+function panelPCA() {
+  if (!state.pcaShown) {
+    panel.innerHTML = `
+      <h2>4 · El duelo contra PCA</h2>
+      <p class="story">El <b>Análisis de Componentes Principales (PCA)</b> no elige 2 preguntas: <b>combina las 5</b> para crear 2 ejes nuevos, las direcciones donde los datos más se esparcen (mayor varianza).</p>
+      <div class="q"><label for="pp">Predice: ¿qué porcentaje de la varianza total conservarán los 2 primeros componentes? <output id="ppo">${state.pcaPred}%</output></label>
+      <input type="range" id="pp" min="0" max="100" step="5" value="${state.pcaPred}"></div>
+      <div class="lbl">¿Tu mejor par de ejes (${bestTried() ? pairName(bestTried().key) : '—'}) le ganará a PCA conservando vecinos?</div>
+      <div class="chips" role="group" aria-label="Predicción del duelo">
+        <button type="button" data-b="yes" aria-pressed="${state.pcaBeat === 'yes'}">Sí, gana mi par</button>
+        <button type="button" data-b="no" aria-pressed="${state.pcaBeat === 'no'}">No, gana PCA</button>
+      </div>
+      <div class="row"><button class="btn primary" id="doPCA" type="button" ${state.pcaBeat ? '' : 'disabled'}>Proyectar con PCA</button></div>
+      <p class="hint">Necesitas responder ambas predicciones para continuar.</p>`;
+    $('#pp').addEventListener('input', e => { state.pcaPred = +e.target.value; $('#ppo').textContent = state.pcaPred + '%'; });
+    panel.querySelectorAll('[data-b]').forEach(b => b.addEventListener('click', () => { state.pcaBeat = b.dataset.b; panelPCA(); }));
+    $('#doPCA').addEventListener('click', () => { state.pcaShown = true; showPCA(); panelPCA(); });
+    return;
+  }
+  const { pts, res } = pcaLayout();
+  const evP = evalLayout(pts), mine = bestTried(), best = bestPossible();
+  const ev2 = res.explained[0] + res.explained[1];
+  const predErr = Math.abs(state.pcaPred / 100 - ev2);
+  const pairWins = mine && mine.global > evP.global;
+  const duelOk = (state.pcaBeat === 'yes') === !!pairWins;
+  const loadings = c => c.map((w, k) => `${DIMS[k].short} ${w >= 0 ? '+' : '−'}${f2(Math.abs(w))}`).join(' · ');
+  panel.innerHTML = `
+    <h2>4 · El duelo contra PCA</h2>
+    <div class="evbars" aria-label="Varianza explicada por componente">
+      ${res.explained.map((e, k) => `<div><span>CP${k + 1}</span><span class="b"><i data-w="${e * 100}"></i></span><span>${(e * 100).toFixed(1)}%</span></div>`).join('')}
+    </div>
+    <p>Los 2 primeros componentes explican <b>${(ev2 * 100).toFixed(1)}%</b> de la varianza. Predijiste ${state.pcaPred}%: ${predErr <= 0.1 ? '<span class="ok">¡muy cerca!</span>' : predErr <= 0.2 ? '<span class="meh">no tan lejos.</span>' : '<span class="ko">bastante lejos.</span>'}</p>
+    <table class="t"><thead><tr><th>vista</th><th>tuyos</th><th>clase</th></tr></thead><tbody>
+      <tr><td>Tu mejor par${mine ? ` (${pairName(mine.key)})` : ''}</td><td>${mine ? mine.mine + '/3' : '—'}</td><td>${mine ? pct(mine.global) : '—'}</td></tr>
+      <tr class="hl"><td>PCA (CP1 · CP2)</td><td>${evP.mine}/3</td><td>${pct(evP.global)}</td></tr>
+      <tr><td>Mejor par posible (${pairName(best.key)})</td><td>${best.mine}/3</td><td>${pct(best.global)}</td></tr>
+    </tbody></table>
+    <p class="${duelOk ? 'ok' : 'meh'}" style="font-weight:600">${pairWins ? '¡Tu par le ganó a PCA!' : 'PCA conservó más vecinos que tu mejor par.'} ${duelOk ? 'Tu predicción fue correcta.' : 'Tu predicción no se cumplió.'}</p>
+    <p style="font-size:.88rem">${pairWins ? 'Ocurre: PCA maximiza la <b>varianza</b> proyectada, que no es exactamente lo mismo que conservar vecinos.' : 'PCA usa información de las 5 preguntas a la vez; un par de ejes descarta 3 por completo.'}</p>
+    <p style="font-size:.82rem"><b>CP1</b> = ${loadings(res.comps[0])}<br><b>CP2</b> = ${loadings(res.comps[1])}</p>
+    <p class="hint">Cada componente es un vector unitario en ℝ⁵: una receta que mezcla las preguntas. Proyectar es hacer el producto escalar con esa receta.</p>
+    <div class="row" style="margin:8px 0">
+      <button class="btn" id="vAxes" type="button" aria-pressed="${state.view === 'axes'}">Ver mis ejes</button>
+      <button class="btn" id="vPCA" type="button" aria-pressed="${state.view === 'pca'}">Ver PCA</button>
+    </div>
+    <label class="switch"><input type="checkbox" id="grp" ${state.showGroups ? 'checked' : ''}> Mostrar los grupos ocultos con que se simuló la clase</label>
+    <div class="row"><button class="btn primary" id="next" type="button">Cierre: ¿qué aprendiste?</button></div>`;
+  requestAnimationFrame(() => panel.querySelectorAll('.evbars i').forEach(i => { i.style.width = i.dataset.w + '%'; }));
+  $('#vAxes').addEventListener('click', () => { state.view = 'axes'; setLayout(axesLayout(...state.ax), [DIMS[state.ax[0]].label, DIMS[state.ax[1]].label]); });
+  $('#vPCA').addEventListener('click', () => showPCA());
+  $('#grp').addEventListener('change', e => { state.showGroups = e.target.checked; });
+  $('#next').addEventListener('click', () => go(5));
+}
+function showPCA() {
+  const { pts, res } = pcaLayout();
+  state.view = 'pca';
+  setLayout(pts, [`CP1 (${(res.explained[0] * 100).toFixed(0)}%)`, `CP2 (${(res.explained[1] * 100).toFixed(0)}%)`]);
+}
+
+/* ---------- Step 5: closing ---------- */
+function panelClose() {
+  const v = me(), R = ranking(), nn = R.byE.slice(0, 3);
+  // k-NN demo: predict the student's coffee answer from the 3 nearest neighbors measured on the other 4 dims.
+  const hide = 3, others = x => x.filter((_, k) => k !== hide);
+  const near = mates.map((m, i) => ({ i, d: euclid(others(v), others(m.v)) })).sort((a, b) => a.d - b.d).slice(0, 3);
+  const predCoffee = near.reduce((s, r) => s + mates[r.i].v[hide], 0) / 3;
+  const { res } = pcaLayout();
+  const ev2 = res.explained[0] + res.explained[1];
+  panel.innerHTML = `
+    <h2>5 · Lo que acabas de hacer</h2>
+    <ul class="concepts">
+      <li><b>Vector</b>: te convertiste en <span style="font-family:var(--font-mono)">[${v.map(f2).join(', ')}]</span>, un punto de ℝ⁵.</li>
+      <li><b>Distancia euclidiana</b>: tu compañero más cercano es ${esc(mates[nn[0].i].name)}, a d = ${f2(nn[0].d)}.</li>
+      <li><b>Vecinos más cercanos (k-NN)</b>: con k = 3 son ${nn.map(r => esc(mates[r.i].name)).join(', ')}. Si ocultáramos tu respuesta sobre el café, k-NN la estimaría promediando la de tus 3 vecinos (medidos con las otras 4 preguntas): <b>${f2(predCoffee)}</b>, y tu respuesta real es <b>${f2(v[hide])}</b>.</li>
+      <li><b>Reducción de dimensionalidad</b>: al pasar de 5D a 2D, algunos vecinos se pierden y aparecen vecinos falsos.</li>
+      <li><b>Varianza explicada</b>: PCA conservó ${(ev2 * 100).toFixed(1)}% de la varianza con solo 2 ejes nuevos.</li>
+    </ul>
+    <div class="card">
+      <h3>Tu desempeño</h3>
+      <p>Predicción del vecino: <b>${state.predScore != null ? state.predScore + ' / 3' : '—'}</b> · Pares de ejes explorados: <b>${Object.keys(state.tried).length} / 10</b></p>
+      <p class="hint">Próximo paso: reemplazar a los compañeros simulados por las respuestas reales del curso.</p>
+    </div>
+    <div class="row" style="margin-top:10px"><button class="btn" id="redo" type="button">Cambiar mis respuestas</button><button class="btn primary" id="again" type="button">Volver al duelo</button></div>`;
+  $('#redo').addEventListener('click', () => go(1));
+  $('#again').addEventListener('click', () => { state.pcaShown = false; go(4); });
+  if (!scatter.cur || state.view !== 'pca') showPCA();
+}
+
+/* ================= Loop & pointer ================= */
+function loop(t) {
+  if (state.step !== 2) {
+    ctx.save(); drawBackground(t);
+    if (state.step === 1) drawRadar(t); else if (scatter.cur) drawScatter(t);
+    ctx.restore();
+  }
+  requestAnimationFrame(loop);
+}
+function hideTip() { tip.classList.remove('show'); hoverIdx = -1; }
+function pick(e) {
+  if (state.step < 3 || !scatter.cur) return;
+  const r = cv.getBoundingClientRect(), x = e.clientX - r.left, y = e.clientY - r.top;
+  let best = -1, bd = 22;
+  scatter.cur.forEach((p, i) => { const [sx, sy] = toScreen(p); const d = Math.hypot(sx - x, sy - y); if (d < bd) { bd = d; best = i; } });
+  if (best < 0) { hideTip(); return; }
+  hoverIdx = best;
+  const high = allPoints(), d5 = euclid(high[0], high[best]), d2 = euclid(scatter.cur[0], scatter.cur[best]) / 2;
+  const [sx, sy] = toScreen(scatter.cur[best]);
+  tip.innerHTML = best === 0 ? '<b>Tú</b>' : `<b>${esc(nameOf(best))}</b> · distancia real 5D: ${f2(d5)}${state.view === 'axes' ? ` · en el plano: ${f2(d2)}` : ''}`;
+  tip.style.left = clamp(sx, 90, W - 90) + 'px'; tip.style.top = sy + 'px'; tip.classList.add('show');
+}
+cv.addEventListener('pointermove', pick);
+cv.addEventListener('pointerdown', pick);
+cv.addEventListener('pointerleave', hideTip);
+
+renderSteps();
+go(state.surveyed ? 2 : 1);
+requestAnimationFrame(loop);
+</script>
+</body>
+</html>
